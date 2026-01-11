@@ -627,7 +627,12 @@ function LearningHub() {
                 </div>
               ) : (activeTab === 'courses' || activeTab === 'continue-learning') ? (
                 filteredCourses.map(course => (
-                  <div key={course.id || course._id} className="course-card">
+                  <div 
+                    key={course.id || course._id} 
+                    className="course-card"
+                    onClick={() => navigate(`/academy/courses/${course._id || course.id}`)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <div className="course-image">
                       {course.thumbnail ? (
                         <img src={course.thumbnail} alt={course.title} />
@@ -659,7 +664,15 @@ function LearningHub() {
                       </div>
                       <div className="course-footer">
                         <div className="course-price">{getCoursePrice(course)}</div>
-                        <button className="view-details-btn">View Details →</button>
+                        <button 
+                          className="view-details-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/academy/courses/${course._id || course.id}`);
+                          }}
+                        >
+                          View Details →
+                        </button>
                       </div>
                     </div>
                   </div>

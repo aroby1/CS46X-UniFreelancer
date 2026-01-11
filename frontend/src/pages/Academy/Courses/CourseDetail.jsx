@@ -1,0 +1,246 @@
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import './CourseDetail.css';
+
+function CourseDetail() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [course, setCourse] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchCourse = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`http://localhost:5000/api/academy/courses/${id}`);
+        
+        if (!response.ok) {
+          throw new Error('Course not found');
+        }
+        
+        const data = await response.json();
+        setCourse(data);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching course:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchCourse();
+    }
+  }, [id]);
+
+  const handleBack = () => {
+    navigate('/academy/courses');
+  };
+
+  const getCoursePrice = (course) => {
+    if (!course) return 'Free';
+    if (course.isLiteVersion) return 'Free (Lite)';
+    if (course.priceAmount && course.priceAmount > 0) {
+      return `$${course.priceAmount}`;
+    }
+    return 'Free';
+  };
+
+  const formatDuration = (duration) => {
+    if (!duration) return 'N/A';
+    return duration;
+  };
+
+  if (loading) {
+    return (
+      <div className="course-detail-page">
+        <div className="course-detail-container">
+          <div className="loading-message">Loading course...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !course) {
+    return (
+      <div className="course-detail-page">
+        <div className="course-detail-container">
+          <button className="back-button" onClick={handleBack}>
+            ← Back to Courses
+          </button>
+          <div className="error-message">
+            <h2>Course Not Found</h2>
+            <p>{error || 'The course you are looking for does not exist.'}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="course-detail-page">
+      <div className="course-detail-container">
+        <button className="back-button" onClick={handleBack}>
+          ← Back to Courses
+        </button>
+
+        {/* Course Header */}
+        <div className="course-header-section">
+          <div className="course-hero">
+            <div className="course-hero-image">
+              {course.thumbnail ? (
+                <img src={course.thumbnail} alt={course.title} />
+              ) : (
+                <div className="placeholder-hero-image">📚</div>
+              )}
+            </div>
+            <div className="course-hero-content">
+              <div className="course-badges">
+                {course.isLiteVersion && <span className="lite-badge">Lite Version</span>}
+                <span className="difficulty-badge">{course.difficulty || 'Beginner'}</span>
+                <span className="category-badge">{course.category || 'General'}</span>
+              </div>
+              <h1 className="course-title">{course.title}</h1>
+              <div className="course-meta">
+                <div className="meta-item">
+                  <span className="meta-icon">🕐</span>
+                  <span>{formatDuration(course.duration)}</span>
+                </div>
+                <div className="meta-item">
+                  <span className="meta-icon">💰</span>
+                  <span>{getCoursePrice(course)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Course Overview */}
+        <div className="course-section">
+          <h2 className="section-title">Course Overview</h2>
+          <div className="course-description">
+            {course.description ? (
+              <p>{course.description}</p>
+            ) : (
+              <p>No description available for this course.</p>
+            )}
+          </div>
+        </div>
+
+        {/* Instructor Information */}
+        {course.instructor && (
+          <div className="course-section">
+            <h2 className="section-title">Instructor</h2>
+            <div className="instructor-info">
+              {course.instructor.avatar && (
+                <div className="instructor-avatar">
+                  <img src={course.instructor.avatar} alt={course.instructor.name} />
+                </div>
+              )}
+              <div className="instructor-details">
+                <h3 className="instructor-name">{course.instructor.name}</h3>
+                {course.instructor.title && (
+                  <p className="instructor-title">{course.instructor.title}</p>
+                )}
+                {course.instructor.bio && (
+                  <p className="instructor-bio">{course.instructor.bio}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Learning Points */}
+        {course.learningPoints && course.learningPoints.length > 0 && (
+          <div className="course-section">
+            <h2 className="section-title">What You'll Learn</h2>
+            <ul className="learning-points-list">
+              {course.learningPoints.map((point, index) => (
+                <li key={index} className="learning-point">
+                  <span className="point-icon">✓</span>
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Course Modules */}
+        {course.modules && course.modules.length > 0 && (
+          <div className="course-section">
+            <h2 className="section-title">Course Modules</h2>
+            <div className="modules-list">
+              {course.modules
+                .sort((a, b) => (a.order || 0) - (b.order || 0))
+                .map((module, index) => (
+                  <div key={module._id || index} className="module-card">
+                    <div className="module-header">
+                      <div className="module-number">Module {index + 1}</div>
+                      <h3 className="module-title">{module.title}</h3>
+                    </div>
+                    {module.description && (
+                      <div className="module-description">
+                        <h4 className="module-subtitle">Overview</h4>
+                        <p>{module.description}</p>
+                      </div>
+                    )}
+                    {module.learningPoints && module.learningPoints.length > 0 && (
+                      <div className="module-learning-points">
+                        <h4 className="module-subtitle">Learning Outcomes</h4>
+                        <ul className="module-points-list">
+                          {module.learningPoints.map((point, pointIndex) => (
+                            <li key={pointIndex}>{point}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    <div className="module-content">
+                      {module.videoUrl && (
+                        <div className="content-item">
+                          <span className="content-icon">🎥</span>
+                          <a href={module.videoUrl} target="_blank" rel="noopener noreferrer" className="content-link">
+                            Video Content
+                          </a>
+                        </div>
+                      )}
+                      {module.articleContent && (
+                        <div className="content-item">
+                          <span className="content-icon">📄</span>
+                          <span className="content-text">Article Content Available</span>
+                        </div>
+                      )}
+                      {module.pdfUrl && (
+                        <div className="content-item">
+                          <span className="content-icon">📕</span>
+                          <a href={module.pdfUrl} target="_blank" rel="noopener noreferrer" className="content-link">
+                            PDF Resource
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                    {(module.duration || module.estimatedMinutes) && (
+                      <div className="module-meta">
+                        <span className="module-duration">
+                          {module.duration || `${module.estimatedMinutes} minutes`}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+
+        {/* Course Actions */}
+        <div className="course-actions">
+          <button className="enroll-button">Enroll in Course</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default CourseDetail;
+

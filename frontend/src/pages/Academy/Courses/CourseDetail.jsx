@@ -8,17 +8,25 @@ function CourseDetail() {
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [expandedModules, setExpandedModules] = useState({});
+
+  const toggleModule = (moduleId) => {
+    setExpandedModules(prev => ({
+      ...prev,
+      [moduleId]: !prev[moduleId]
+    }));
+  };
 
   useEffect(() => {
     const fetchCourse = async () => {
       try {
         setLoading(true);
         const response = await fetch(`http://localhost:5000/api/academy/courses/${id}`);
-        
+
         if (!response.ok) {
           throw new Error('Course not found');
         }
-        
+
         const data = await response.json();
         setCourse(data);
         setError(null);
@@ -174,61 +182,95 @@ function CourseDetail() {
             <div className="modules-list">
               {course.modules
                 .sort((a, b) => (a.order || 0) - (b.order || 0))
-                .map((module, index) => (
-                  <div key={module._id || index} className="module-card">
-                    <div className="module-header">
-                      <div className="module-number">Module {index + 1}</div>
-                      <h3 className="module-title">{module.title}</h3>
+                .map((module, index) => {
+                  const isExpanded = expandedModules[module._id || index];
+                  return (
+                    <div key={module._id || index} className={`module-card ${isExpanded ? 'expanded' : ''}`}>
+                      <div className="module-card-header" onClick={() => toggleModule(module._id || index)}>
+                        {/* Thumbnail Section */}
+                        <div className="module-thumbnail">
+                          {module.thumbnail ? (
+                            <img src={module.thumbnail} alt={`Module ${index + 1}`} />
+                          ) : (
+                            <div className="module-placeholder-thumbnail">
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Info Section */}
+                        <div className="module-info-compact">
+                          <div className="module-number">Module {index + 1}</div>
+                          <h3 className="module-title-compact">{module.title}</h3>
+                          <div className="module-meta-compact">
+                            {(module.duration || module.estimatedMinutes) && (
+                              <span className="module-duration-compact">
+                                {module.duration || `${module.estimatedMinutes} min`}
+                              </span>
+                            )}
+                          </div>
+                          {module.description && (
+                            <p className="module-description-preview">
+                              {module.description.length > 100
+                                ? `${module.description.substring(0, 100)}...`
+                                : module.description}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Toggle Icon */}
+                        <div className="module-toggle-icon">
+                          {isExpanded ? '−' : '+'}
+                        </div>
+                      </div>
+
+                      {/* Expanded Details */}
+                      <div className={`module-details-expanded ${isExpanded ? 'expanded' : ''}`}>
+                        {module.description && (
+                          <div className="module-full-description">
+                            <h4 className="module-subtitle">Overview</h4>
+                            <p>{module.description}</p>
+                          </div>
+                        )}
+
+                        {module.learningPoints && module.learningPoints.length > 0 && (
+                          <div className="module-learning-points">
+                            <h4 className="module-subtitle">Learning Outcomes</h4>
+                            <ul className="module-points-list">
+                              {module.learningPoints.map((point, pointIndex) => (
+                                <li key={pointIndex}>{point}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        <div className="module-content">
+                          {module.videoUrl && (
+                            <div className="content-item">
+                              <span className="content-icon">🎥</span>
+                              <a href={module.videoUrl} target="_blank" rel="noopener noreferrer" className="content-link">
+                                Video Content
+                              </a>
+                            </div>
+                          )}
+                          {module.articleContent && (
+                            <div className="content-item">
+                              <span className="content-icon">📄</span>
+                              <span className="content-text">Article Content Available</span>
+                            </div>
+                          )}
+                          {module.pdfUrl && (
+                            <div className="content-item">
+                              <span className="content-icon">📕</span>
+                              <a href={module.pdfUrl} target="_blank" rel="noopener noreferrer" className="content-link">
+                                PDF Resource
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    {module.description && (
-                      <div className="module-description">
-                        <h4 className="module-subtitle">Overview</h4>
-                        <p>{module.description}</p>
-                      </div>
-                    )}
-                    {module.learningPoints && module.learningPoints.length > 0 && (
-                      <div className="module-learning-points">
-                        <h4 className="module-subtitle">Learning Outcomes</h4>
-                        <ul className="module-points-list">
-                          {module.learningPoints.map((point, pointIndex) => (
-                            <li key={pointIndex}>{point}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    <div className="module-content">
-                      {module.videoUrl && (
-                        <div className="content-item">
-                          <span className="content-icon">🎥</span>
-                          <a href={module.videoUrl} target="_blank" rel="noopener noreferrer" className="content-link">
-                            Video Content
-                          </a>
-                        </div>
-                      )}
-                      {module.articleContent && (
-                        <div className="content-item">
-                          <span className="content-icon">📄</span>
-                          <span className="content-text">Article Content Available</span>
-                        </div>
-                      )}
-                      {module.pdfUrl && (
-                        <div className="content-item">
-                          <span className="content-icon">📕</span>
-                          <a href={module.pdfUrl} target="_blank" rel="noopener noreferrer" className="content-link">
-                            PDF Resource
-                          </a>
-                        </div>
-                      )}
-                    </div>
-                    {(module.duration || module.estimatedMinutes) && (
-                      <div className="module-meta">
-                        <span className="module-duration">
-                          {module.duration || `${module.estimatedMinutes} minutes`}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
             </div>
           </div>
         )}

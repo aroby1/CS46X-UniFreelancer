@@ -224,6 +224,9 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 15px;
+  background-color: transparent !important;
+  border-radius: 0 !important;
+  margin-top: 0 !important;
 }
 
 .learning-point {

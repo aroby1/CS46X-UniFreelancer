@@ -1,13 +1,24 @@
-1. cd server
-2. node server.js
-3. new terminal
-4. cd public
-5. npx serve .
+## How to Run
 
-Current Bugs:
-1. SDK not loading (Zoom Web SDK is incorrectly connecting due to unknown errors (messed up secret? key? No connection)
-2. Join Meeting Button not working.
-3. Zoom tries to render meeting over entire screen, not allowing for other components to appear.
+1. **Install Dependencies** (First time only)
+   Open a terminal in the `ZoomSDKTest/server` directory:
+   ```bash
+   cd server
+   npm install
+   ```
 
+2. **Start the Server**
+   ```bash
+   node server.js
+   ```
 
-REQUIRED: .env file
+3. **Open the App**
+   Open your browser and visit:
+   [http://localhost:4000](http://localhost:4000)
+
+## Current Bugs:
+1. Camera was not working. (Not sure if it was a bug or camera was in use?)
+2. Used Vanilla JavaScript for the testing.
+
+### Required
+A `.env` file in the `server` directory with your Zoom SDK credentials.

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Zoom Web SDK Test</title>
+
+  <!-- Zoom SDK dependencies -->
+  <script src="https://source.zoom.us/2.17.0/lib/vendor/react.min.js"></script>
+  <script src="https://source.zoom.us/2.17.0/lib/vendor/react-dom.min.js"></script>
+  <script src="https://source.zoom.us/2.17.0/lib/vendor/redux.min.js"></script>
+  <script src="https://source.zoom.us/2.17.0/lib/vendor/redux-thunk.min.js"></script>
+  <script src="https://source.zoom.us/2.17.0/lib/vendor/lodash.min.js"></script>
+
+  <link rel="stylesheet" href="https://source.zoom.us/2.17.0/css/bootstrap.css" />
+  <link rel="stylesheet" href="https://source.zoom.us/2.17.0/css/react-select.css" />
+
+  <style>
+    body { padding: 20px; font-family: Arial, sans-serif; }
+
+    #joinBtn {
+      font-size: 16px;
+      padding: 10px 20px;
+      color: white;
+      background-color: #0070ff;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+
+    /* Zoom container */
+    #zoom-container {
+      width: 100%;
+      max-width: 900px;
+      height: 600px;
+      border: 1px solid #ccc;
+      position: relative;
+    }
+
+    /* Zoom renders here */
+    #zmmtg-root {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Zoom Web SDK Test</h1>
+
+  <button id="joinBtn">Join Meeting</button>
+
+  <!-- Zoom container -->
+  <div id="zoom-container">
+    <div id="zmmtg-root"></div>
+  </div>
+
+  <script>
+    window.addEventListener("load", () => {
+      console.log("ZoomMtg =", window.ZoomMtg);
+
+      if (!window.ZoomMtg) {
+        document.body.innerHTML += "<p style='color:red'>Zoom SDK NOT loaded</p>";
+      } else {
+        document.body.innerHTML += "<p style='color:green'>Zoom SDK loaded</p>";
+      }
+    });
+
+    // Meeting info
+    const meetingNumber = "PASTE MEETING ID";
+    const passWord = "PASTE PASSCODE";
+    const userName = "Web SDK Tester";
+    const role = 0;
+    const sdkKey = process.env.ZOOM_MEETING_SDK_KEY;
+
+    // Prepare Zoom SDK
+    ZoomMtg.setZoomJSLib("https://source.zoom.us/2.17.0/lib", "/av");
+    ZoomMtg.preLoadWasm();
+    ZoomMtg.prepareWebSDK();
+
+    document.getElementById("joinBtn").addEventListener("click", async () => {
+      try {
+        const res = await fetch(`/signature?meetingNumber=${meetingNumber}&role=${role}`);
+        const { signature } = await res.json();
+
+        ZoomMtg.init({
+          leaveUrl: "http://localhost:4000",
+          success: () => {
+            ZoomMtg.join({
+              sdkKey,
+              signature,
+              meetingNumber,
+              passWord,
+              userName,
+              success: () => console.log("Joined meeting"),
+              error: (err) => console.error("Join error", err),
+            });
+          },
+          error: (err) => console.error("Init error", err),
+        });
+      } catch (e) {
+        console.error("Fatal error", e);
+      }
+    });
+  </script>
+</body>
+</html>

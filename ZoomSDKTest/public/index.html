@@ -1,106 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <title>Zoom Web SDK Test</title>
-
-  <!-- Zoom SDK dependencies -->
-  <script src="https://source.zoom.us/2.17.0/lib/vendor/react.min.js"></script>
-  <script src="https://source.zoom.us/2.17.0/lib/vendor/react-dom.min.js"></script>
-  <script src="https://source.zoom.us/2.17.0/lib/vendor/redux.min.js"></script>
-  <script src="https://source.zoom.us/2.17.0/lib/vendor/redux-thunk.min.js"></script>
-  <script src="https://source.zoom.us/2.17.0/lib/vendor/lodash.min.js"></script>
-
-  <link rel="stylesheet" href="https://source.zoom.us/2.17.0/css/bootstrap.css" />
-  <link rel="stylesheet" href="https://source.zoom.us/2.17.0/css/react-select.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zoom Local SDK Test (5.1.0)</title>
+  <!-- CSS Dependencies -->
+  <link rel="stylesheet" href="/sdk/css/bootstrap.css" />
+  <link rel="stylesheet" href="/sdk/css/react-select.css" />
 
   <style>
-    body { padding: 20px; font-family: Arial, sans-serif; }
-
-    #joinBtn {
-      font-size: 16px;
-      padding: 10px 20px;
-      color: white;
-      background-color: #0070ff;
-      border: none;
-      cursor: pointer;
-      margin-bottom: 20px;
+    body {
+      margin: 20px;
+      font-family: sans-serif;
     }
 
-    /* Zoom container */
-    #zoom-container {
-      width: 100%;
-      max-width: 900px;
-      height: 600px;
-      border: 1px solid #ccc;
-      position: relative;
-    }
-
-    /* Zoom renders here */
     #zmmtg-root {
-      width: 100%;
-      height: 100%;
+      display: none;
     }
   </style>
 </head>
 
 <body>
-  <h1>Zoom Web SDK Test</h1>
+  <h1>Zoom Local SDK (5.1.0) Stability Test</h1>
+  <p>Status: <span id="status">Loading resources...</span></p>
+  <button id="joinBtn" disabled style="padding: 10px 20px; font-size: 16px; cursor: pointer;">Join Meeting</button>
 
-  <button id="joinBtn">Join Meeting</button>
-
-  <!-- Zoom container -->
-  <div id="zoom-container">
-    <div id="zmmtg-root"></div>
-  </div>
+  <!-- JS Dependencies -->
+  <script src="/sdk/lib/vendor/react.min.js"></script>
+  <script src="/sdk/lib/vendor/react-dom.min.js"></script>
+  <script src="/sdk/lib/vendor/redux.min.js"></script>
+  <script src="/sdk/lib/vendor/redux-thunk.min.js"></script>
+  <script src="/sdk/lib/vendor/lodash.min.js"></script>
+  <script src="/sdk/zoom-meeting-5.1.0.min.js"></script>
 
   <script>
-    window.addEventListener("load", () => {
-      console.log("ZoomMtg =", window.ZoomMtg);
-
-      if (!window.ZoomMtg) {
-        document.body.innerHTML += "<p style='color:red'>Zoom SDK NOT loaded</p>";
-      } else {
-        document.body.innerHTML += "<p style='color:green'>Zoom SDK loaded</p>";
-      }
-    });
-
-    // Meeting info
-    const meetingNumber = "PASTE MEETING ID";
-    const passWord = "PASTE PASSCODE";
-    const userName = "Web SDK Tester";
-    const role = 0;
-    const sdkKey = process.env.ZOOM_MEETING_SDK_KEY;
-
-    // Prepare Zoom SDK
-    ZoomMtg.setZoomJSLib("https://source.zoom.us/2.17.0/lib", "/av");
+    // Setup for Local Assets
+    ZoomMtg.setZoomJSLib(window.location.origin + "/sdk/lib", "/av");
     ZoomMtg.preLoadWasm();
     ZoomMtg.prepareWebSDK();
 
-    document.getElementById("joinBtn").addEventListener("click", async () => {
-      try {
-        const res = await fetch(`/signature?meetingNumber=${meetingNumber}&role=${role}`);
-        const { signature } = await res.json();
+    // Sample Code Configuration
+    // Note: In real app, these shouldn't be hardcoded client-side, 
+    // but for this test we match the sample structure using our server values.
+    var authEndpoint = "/signature";
+    var meetingNumber = "PASTE MEETING NUMBER";
+    var passWord = "PASTE PASSWORD";
+    var role = 0;
+    var userName = "Test User";
+    var userEmail = "";
+    var registrantToken = "";
+    var zakToken = "";
+    var leaveUrl = "http://localhost:4000/index.html";
 
-        ZoomMtg.init({
-          leaveUrl: "http://localhost:4000",
-          success: () => {
-            ZoomMtg.join({
-              sdkKey,
-              signature,
-              meetingNumber,
-              passWord,
-              userName,
-              success: () => console.log("Joined meeting"),
-              error: (err) => console.error("Join error", err),
-            });
-          },
-          error: (err) => console.error("Init error", err),
+    function getSignature() {
+      console.log("Fetching signature...");
+      // We use GET here because our server is set up for GET
+      // The sample uses POST, but we adapt to our working server.
+      fetch(`${authEndpoint}?meetingNumber=${meetingNumber}&role=${role}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" }
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Signature received", data);
+          // Our server returns { signature, sdkKey }, the sample expects just signature or we pass both.
+          // We need to pass the SDK Key to the join function if it's not in the signature (it is in sig, but join() likes it too)
+          startMeeting(data.signature, data.sdkKey);
+        })
+        .catch((error) => {
+          console.error("Signature Error:", error);
         });
-      } catch (e) {
-        console.error("Fatal error", e);
-      }
-    });
+    }
+
+    function startMeeting(signature, sdkKey) {
+      document.getElementById("zmmtg-root").style.display = "block";
+      document.getElementById("status").innerText = "Initializing...";
+
+      ZoomMtg.init({
+        leaveUrl: leaveUrl,
+        patchJsMedia: false, 
+        leaveOnPageUnload: true,
+        debug: false, 
+        success: (success) => {
+          console.log("Init Success", success);
+          document.getElementById("status").innerText = "Joining...";
+
+          ZoomMtg.join({
+            signature: signature,
+            meetingNumber: meetingNumber,
+            passWord: passWord,
+            userName: userName,
+            userEmail: userEmail,
+            sdkKey: sdkKey,
+            tk: registrantToken,
+            zak: zakToken,
+            success: (success) => {
+              console.log("Join Success", success);
+              document.getElementById("status").innerText = "Joined!";
+            },
+            error: (error) => {
+              console.error("Join Error", error);
+              document.getElementById("status").innerText = "Join Error: " + JSON.stringify(error);
+            },
+          });
+        },
+        error: (error) => {
+          console.error("Init Error", error);
+          document.getElementById("status").innerText = "Init Error: " + JSON.stringify(error);
+        },
+      });
+    }
+
+    document.getElementById("joinBtn").addEventListener("click", getSignature);
+
+    document.getElementById("joinBtn").disabled = false;
+    document.getElementById("status").innerText = "Ready to Join";
   </script>
 </body>
+
 </html>

@@ -2,6 +2,7 @@
   "name": "zoom-signature-server",
   "type": "module",
   "dependencies": {
+    "@zoom/meetingsdk": "^5.1.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^4.18.2",

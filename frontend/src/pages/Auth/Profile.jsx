@@ -11,7 +11,7 @@ const Profile = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const apiUrl = process.env.REACT_APP_API_URL;
+                const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
                 // Fetch authenticated user's profile directly
                 const response = await fetch(`${apiUrl}/api/users/profile`, {
                     credentials: 'include' // Send cookies
@@ -38,7 +38,7 @@ const Profile = () => {
 
     const handleSignOut = async () => {
         try {
-            const apiUrl = process.env.REACT_APP_API_URL;
+            const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
             await fetch(`${apiUrl}/api/users/logout`, {
                 method: 'POST',
                 credentials: 'include',

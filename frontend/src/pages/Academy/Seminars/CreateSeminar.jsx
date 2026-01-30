@@ -36,29 +36,29 @@ function CreateSeminar() {
 
   const handleCreateSeminar = async () => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL;
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
       const response = await fetch(`${apiUrl}/api/academy/seminars`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            title: seminarData.title,
-            description: seminarData.description,
-            duration: seminarData.duration,
-            type: seminarData.type,
-            thumbnail: seminarData.thumbnail,
-          
-            speaker: {
-              name: seminarData.speakerName,
-              bio: seminarData.speakerBio,
-              avatar: seminarData.speakerAvatar
-            },
-          
-            schedule: {
-              date: seminarData.date,
-              time: seminarData.time,
-              joinUrl: seminarData.joinUrl
-            }
-          }),
+          title: seminarData.title,
+          description: seminarData.description,
+          duration: seminarData.duration,
+          type: seminarData.type,
+          thumbnail: seminarData.thumbnail,
+
+          speaker: {
+            name: seminarData.speakerName,
+            bio: seminarData.speakerBio,
+            avatar: seminarData.speakerAvatar
+          },
+
+          schedule: {
+            date: seminarData.date,
+            time: seminarData.time,
+            joinUrl: seminarData.joinUrl
+          }
+        }),
       });
 
       if (response.ok) {
@@ -110,73 +110,73 @@ function CreateSeminar() {
 
         {currentStep === 'basic-info' && (
           <div className="form-section">
-          <h2 className="section-title">Seminar Information</h2>
-          <p className="section-subtitle">Basic details about your seminar</p>
+            <h2 className="section-title">Seminar Information</h2>
+            <p className="section-subtitle">Basic details about your seminar</p>
 
-          <div className="form-group">
-            <label className="form-label">Seminar Title *</label>
-            <input
-              type="text"
-              name="title"
-              className="form-input"
-              placeholder="e.g., Building Your Freelance Brand"
-              value={seminarData.title}
-              onChange={handleInputChange}
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Description *</label>
-            <textarea
-              name="description"
-              rows="5"
-              className="form-textarea"
-              placeholder="Describe what attendees will learn in this seminar..."
-              value={seminarData.description}
-              onChange={handleInputChange}
-            />
-          </div>
-
-          <div className="form-row">
             <div className="form-group">
-              <label className="form-label">Duration</label>
+              <label className="form-label">Seminar Title *</label>
               <input
                 type="text"
-                name="duration"
+                name="title"
                 className="form-input"
-                placeholder="e.g., 1.5 hours"
-                value={seminarData.duration}
+                placeholder="e.g., Building Your Freelance Brand"
+                value={seminarData.title}
                 onChange={handleInputChange}
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Seminar Type</label>
-              <select
-                name="type"
-                className="form-select"
-                value={seminarData.type}
+              <label className="form-label">Description *</label>
+              <textarea
+                name="description"
+                rows="5"
+                className="form-textarea"
+                placeholder="Describe what attendees will learn in this seminar..."
+                value={seminarData.description}
                 onChange={handleInputChange}
-              >
-                <option value="Live Now">Live Now</option>
-                <option value="Recorded">Recorded</option>
-                <option value="Hybrid">Hybrid</option>
-              </select>
+              />
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Duration</label>
+                <input
+                  type="text"
+                  name="duration"
+                  className="form-input"
+                  placeholder="e.g., 1.5 hours"
+                  value={seminarData.duration}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Seminar Type</label>
+                <select
+                  name="type"
+                  className="form-select"
+                  value={seminarData.type}
+                  onChange={handleInputChange}
+                >
+                  <option value="Live Now">Live Now</option>
+                  <option value="Recorded">Recorded</option>
+                  <option value="Hybrid">Hybrid</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Thumbnail URL</label>
+              <input
+                type="text"
+                name="thumbnail"
+                className="form-input"
+                placeholder="https://example.com/image.jpg"
+                value={seminarData.thumbnail}
+                onChange={handleInputChange}
+              />
             </div>
           </div>
-
-          <div className="form-group">
-            <label className="form-label">Thumbnail URL</label>
-            <input
-              type="text"
-              name="thumbnail"
-              className="form-input"
-              placeholder="https://example.com/image.jpg"
-              value={seminarData.thumbnail}
-              onChange={handleInputChange}
-            />
-          </div>
-        </div>
         )}
 
         {currentStep === 'speaker' && (
@@ -184,42 +184,42 @@ function CreateSeminar() {
             <h2 className="section-title">Speaker Information</h2>
             <p className="section-subtitle">Details about the seminar speaker</p>
 
-          <div className="form-group">
-            <label className="form-label">Speaker Name *</label>
-            <input
-              type="text"
-              name="speakerName"
-              className="form-input"
-              placeholder="e.g., John Smith"
-              value={seminarData.speakerName}
-              onChange={handleInputChange}
-            />
-          </div>
+            <div className="form-group">
+              <label className="form-label">Speaker Name *</label>
+              <input
+                type="text"
+                name="speakerName"
+                className="form-input"
+                placeholder="e.g., John Smith"
+                value={seminarData.speakerName}
+                onChange={handleInputChange}
+              />
+            </div>
 
-          <div className="form-group">
-            <label className="form-label">Speaker Bio</label>
-            <textarea
-              name="speakerBio"
-              rows="4"
-              className="form-textarea"
-              placeholder="Brief biography of the speaker..."
-              value={seminarData.speakerBio}
-              onChange={handleInputChange}
-            />
-          </div>
+            <div className="form-group">
+              <label className="form-label">Speaker Bio</label>
+              <textarea
+                name="speakerBio"
+                rows="4"
+                className="form-textarea"
+                placeholder="Brief biography of the speaker..."
+                value={seminarData.speakerBio}
+                onChange={handleInputChange}
+              />
+            </div>
 
-          <div className="form-group">
-            <label className="form-label">Speaker Avatar URL</label>
-            <input
-              type="text"
-              name="speakerAvatar"
-              className="form-input"
-              placeholder="https://example.com/avatar.jpg"
-              value={seminarData.speakerAvatar}
-              onChange={handleInputChange}
-            />
+            <div className="form-group">
+              <label className="form-label">Speaker Avatar URL</label>
+              <input
+                type="text"
+                name="speakerAvatar"
+                className="form-input"
+                placeholder="https://example.com/avatar.jpg"
+                value={seminarData.speakerAvatar}
+                onChange={handleInputChange}
+              />
+            </div>
           </div>
-        </div>
         )}
 
         {currentStep === 'schedule' && (
@@ -227,42 +227,42 @@ function CreateSeminar() {
             <h2 className="section-title">Schedule</h2>
             <p className="section-subtitle">When will this seminar take place?</p>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label className="form-label">Date</label>
-              <input
-                type="date"
-                name="date"
-                className="form-input"
-                value={seminarData.date}
-                onChange={handleInputChange}
-              />
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Date</label>
+                <input
+                  type="date"
+                  name="date"
+                  className="form-input"
+                  value={seminarData.date}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Time</label>
+                <input
+                  type="time"
+                  name="time"
+                  className="form-input"
+                  value={seminarData.time}
+                  onChange={handleInputChange}
+                />
+              </div>
             </div>
 
             <div className="form-group">
-              <label className="form-label">Time</label>
+              <label className="form-label">Join URL</label>
               <input
-                type="time"
-                name="time"
+                type="text"
+                name="joinUrl"
                 className="form-input"
-                value={seminarData.time}
+                placeholder="https://zoom.us/..."
+                value={seminarData.joinUrl}
                 onChange={handleInputChange}
               />
             </div>
           </div>
-
-          <div className="form-group">
-            <label className="form-label">Join URL</label>
-            <input
-              type="text"
-              name="joinUrl"
-              className="form-input"
-              placeholder="https://zoom.us/..."
-              value={seminarData.joinUrl}
-              onChange={handleInputChange}
-            />
-          </div>
-        </div>
         )}
 
         {/* Buttons */}

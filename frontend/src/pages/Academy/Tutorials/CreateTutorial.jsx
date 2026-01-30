@@ -46,7 +46,7 @@ function CreateTutorial() {
     try {
       console.log("Submitting Tutorial:", formData);
 
-      const apiUrl = process.env.REACT_APP_API_URL;
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
       const response = await fetch(`${apiUrl}/api/academy/tutorials`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -101,76 +101,76 @@ function CreateTutorial() {
 
         {currentStep === 'basic-info' && (
           <div className="form-section">
-          <h2 className="section-title">Tutorial Information</h2>
-          <p className="section-subtitle">Basic details about your tutorial</p>
+            <h2 className="section-title">Tutorial Information</h2>
+            <p className="section-subtitle">Basic details about your tutorial</p>
 
-          <div className="form-group">
-            <label className="form-label">
-              Tutorial Title <span className="required">*</span>
-            </label>
-            <input
-              type="text"
-              name="title"
-              className="form-input"
-              placeholder="e.g., How to Create a Portfolio Website"
-              value={formData.title}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">
-              Description <span className="required">*</span>
-            </label>
-            <textarea
-              name="description"
-              className="form-textarea"
-              placeholder="Describe what students will learn..."
-              value={formData.description}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="form-row">
             <div className="form-group">
-              <label className="form-label">Duration</label>
+              <label className="form-label">
+                Tutorial Title <span className="required">*</span>
+              </label>
               <input
                 type="text"
-                name="duration"
+                name="title"
                 className="form-input"
-                placeholder="e.g., 15 min"
-                value={formData.duration}
+                placeholder="e.g., How to Create a Portfolio Website"
+                value={formData.title}
                 onChange={handleChange}
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Category *</label>
-              <input
-                type="text"
-                name="category"
-                className="form-input"
-                placeholder="e.g., Web Development"
-                value={formData.category}
+              <label className="form-label">
+                Description <span className="required">*</span>
+              </label>
+              <textarea
+                name="description"
+                className="form-textarea"
+                placeholder="Describe what students will learn..."
+                value={formData.description}
                 onChange={handleChange}
               />
             </div>
-          </div>
 
-          {/* Thumbnail */}
-          <div className="form-group input-with-icon">
-            <label className="form-label">Thumbnail URL</label>
-            <input
-              type="text"
-              name="thumbnailUrl"
-              className="form-input"
-              placeholder="https://example.com/thumbnail.jpg"
-              value={formData.thumbnailUrl}
-              onChange={handleChange}
-            />
-            <FiUpload className="upload-icon" />
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Duration</label>
+                <input
+                  type="text"
+                  name="duration"
+                  className="form-input"
+                  placeholder="e.g., 15 min"
+                  value={formData.duration}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Category *</label>
+                <input
+                  type="text"
+                  name="category"
+                  className="form-input"
+                  placeholder="e.g., Web Development"
+                  value={formData.category}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            {/* Thumbnail */}
+            <div className="form-group input-with-icon">
+              <label className="form-label">Thumbnail URL</label>
+              <input
+                type="text"
+                name="thumbnailUrl"
+                className="form-input"
+                placeholder="https://example.com/thumbnail.jpg"
+                value={formData.thumbnailUrl}
+                onChange={handleChange}
+              />
+              <FiUpload className="upload-icon" />
+            </div>
           </div>
-        </div>
         )}
 
         {currentStep === 'content' && (
@@ -178,29 +178,29 @@ function CreateTutorial() {
             <h2 className="section-title">Tutorial Content</h2>
             <p className="section-subtitle">Video and written content</p>
 
-          <div className="form-group">
-            <label className="form-label">Video URL</label>
-            <input
-              type="text"
-              name="videoUrl"
-              className="form-input"
-              placeholder="https://youtube.com/watch?v=..."
-              value={formData.videoUrl}
-              onChange={handleChange}
-            />
-          </div>
+            <div className="form-group">
+              <label className="form-label">Video URL</label>
+              <input
+                type="text"
+                name="videoUrl"
+                className="form-input"
+                placeholder="https://youtube.com/watch?v=..."
+                value={formData.videoUrl}
+                onChange={handleChange}
+              />
+            </div>
 
-          <div className="form-group">
-            <label className="form-label">Written Content</label>
-            <textarea
-              name="writtenContent"
-              className="form-textarea"
-              placeholder="Step-by-step instructions..."
-              value={formData.writtenContent}
-              onChange={handleChange}
-            />
+            <div className="form-group">
+              <label className="form-label">Written Content</label>
+              <textarea
+                name="writtenContent"
+                className="form-textarea"
+                placeholder="Step-by-step instructions..."
+                value={formData.writtenContent}
+                onChange={handleChange}
+              />
+            </div>
           </div>
-        </div>
         )}
 
         {currentStep === 'resources' && (
@@ -208,29 +208,29 @@ function CreateTutorial() {
             <h2 className="section-title">Downloadable Resources</h2>
             <p className="section-subtitle">Optional supporting materials</p>
 
-          <div className="resource-list">
-            {formData.resources.length === 0 && (
-              <p className="coming-soon">No downloadable resources added yet.</p>
-            )}
+            <div className="resource-list">
+              {formData.resources.length === 0 && (
+                <p className="coming-soon">No downloadable resources added yet.</p>
+              )}
 
-            {formData.resources.map((res, index) => (
-              <input
-                key={index}
-                className="form-input"
-                placeholder="Resource URL..."
-                value={res}
-                onChange={(e) =>
-                  handleResourceChange(index, e.target.value)
-                }
-                style={{ marginBottom: "15px" }}
-              />
-            ))}
+              {formData.resources.map((res, index) => (
+                <input
+                  key={index}
+                  className="form-input"
+                  placeholder="Resource URL..."
+                  value={res}
+                  onChange={(e) =>
+                    handleResourceChange(index, e.target.value)
+                  }
+                  style={{ marginBottom: "15px" }}
+                />
+              ))}
+            </div>
+
+            <button className="add-resource-btn" onClick={addResource}>
+              + Add Downloadable Resource
+            </button>
           </div>
-
-          <button className="add-resource-btn" onClick={addResource}>
-            + Add Downloadable Resource
-          </button>
-        </div>
         )}
 
         {/* ===================== ACTION BUTTONS ===================== */}

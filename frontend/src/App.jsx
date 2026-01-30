@@ -19,16 +19,33 @@ function App() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem('user'));
-    if (storedUser) {
-      setUser(storedUser);
+    const fetchUser = async () => {
+      try {
+        const apiUrl = process.env.REACT_APP_API_URL;
+        const response = await fetch(`${apiUrl}/api/users/me`, {
+          credentials: 'include',
+        });
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData);
+        }
+      } catch (error) {
+        console.error('Failed to fetch user', error);
+      }
+    };
+
+    // Clear legacy localStorage item if it exists
+    if (localStorage.getItem('user')) {
+      localStorage.removeItem('user');
     }
+
+    fetchUser();
   }, []);
 
   return (
     <Router>
       <div className="App">
-        <Header user={user} />
+        <Header user={user} setUser={setUser} />
         <Routes>
           <Route path="/" element={<Academy />} />
           <Route path="/academy" element={<Academy />} />
@@ -49,12 +66,26 @@ function App() {
   );
 }
 
-function Header({ user }) {
+function Header({ user, setUser }) {
   const location = useLocation();
 
   // Function to check if link is active
   const isActive = (path) => {
     return location.pathname === path ? 'active' : '';
+  };
+
+  const handleLogout = async () => {
+    try {
+      const apiUrl = process.env.REACT_APP_API_URL;
+      await fetch(`${apiUrl}/api/users/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      setUser(null);
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Logout failed', error);
+    }
   };
 
   return (
@@ -77,11 +108,13 @@ function Header({ user }) {
           <Link to="/inbox" className={isActive('/inbox')}>Inbox</Link>
 
           {user ? (
-            <Link to="/profile" className={`user-profile-link ${isActive('/profile')}`}>
-              <div className="nav-profile-avatar">
-                {user.firstName && user.firstName.charAt(0).toUpperCase()}
-              </div>
-            </Link>
+            <div className="user-menu" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <Link to="/profile" className={`user-profile-link ${isActive('/profile')}`}>
+                <div className="nav-profile-avatar">
+                  {user.firstName && user.firstName.charAt(0).toUpperCase()}
+                </div>
+              </Link>
+            </div>
           ) : (
             <>
               <Link to="/login" className={isActive('/login')}>Login</Link>
@@ -101,7 +134,8 @@ Header.propTypes = {
     username: PropTypes.string,
     email: PropTypes.string,
     _id: PropTypes.string
-  })
+  }),
+  setUser: PropTypes.func
 };
 
 export default App;

@@ -59,15 +59,15 @@ const Signup = () => {
                     email: formData.email,
                     password: formData.password
                 }),
+                credentials: 'include', // Important for cookies
             });
 
             const data = await response.json();
 
             if (response.ok) {
                 console.log('Signup successful:', data);
-                alert('Signup successful! Please log in.');
-                // Redirect to login page
-                navigate('/login');
+                // Redirect to home and reload to update App state (Auto-login)
+                window.location.href = '/';
             } else {
                 alert(data.message || 'Signup failed');
             }

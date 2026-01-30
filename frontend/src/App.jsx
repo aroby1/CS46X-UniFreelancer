@@ -4,8 +4,6 @@ import PropTypes from 'prop-types';
 import './App.css';
 import Academy from './pages/Academy/Academy';
 import LearningHub from './pages/Academy/LearningHub/LearningHub';
-import Seminars from './pages/Academy/Seminars/Seminars';
-import Tutorials from './pages/Academy/Tutorials/Tutorials';
 import CreateContent from './pages/Academy/CreateContent/CreateContent';
 import CreateCourse from './pages/Academy/Courses/CreateCourse';
 import CourseDetail from './pages/Academy/Courses/CourseDetail';
@@ -21,6 +19,7 @@ function App() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
+        // eslint-disable-next-line no-undef
         const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
         const response = await fetch(`${apiUrl}/api/users/me`, {
           credentials: 'include',
@@ -66,7 +65,7 @@ function App() {
   );
 }
 
-function Header({ user, setUser }) {
+function Header({ user }) {
   const location = useLocation();
 
   // Function to check if link is active
@@ -74,19 +73,6 @@ function Header({ user, setUser }) {
     return location.pathname === path ? 'active' : '';
   };
 
-  const handleLogout = async () => {
-    try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-      await fetch(`${apiUrl}/api/users/logout`, {
-        method: 'POST',
-        credentials: 'include',
-      });
-      setUser(null);
-      window.location.href = '/login';
-    } catch (error) {
-      console.error('Logout failed', error);
-    }
-  };
 
   return (
     <header className="header">
@@ -134,8 +120,7 @@ Header.propTypes = {
     username: PropTypes.string,
     email: PropTypes.string,
     _id: PropTypes.string
-  }),
-  setUser: PropTypes.func
+  })
 };
 
 export default App;

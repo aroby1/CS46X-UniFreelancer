@@ -1,10 +1,8 @@
-/* global process */
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import './Signup.css';
 
 const Signup = () => {
-    const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [formData, setFormData] = useState({
@@ -46,6 +44,7 @@ const Signup = () => {
         }
 
         try {
+            // eslint-disable-next-line no-undef
             const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
             const response = await fetch(`${apiUrl}/api/users/register`, {
                 method: 'POST',

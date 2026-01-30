@@ -1,8 +1,17 @@
 const express = require("express");
-const bcrypt = require("bcrypt")
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const User = require("../models/UserModel");
+const { protect } = require("../middleware/authMiddleware");
 
 const router = express.Router();
+
+// Helper to generate JWT
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET || 'defaultSecret', {
+    expiresIn: '30d',
+  });
+};
 
 // -------------------------------
 // Create new user
@@ -42,6 +51,17 @@ router.post("/register", async (req, res) => {
     });
     await user.save();
 
+    // Generate token
+    const token = generateToken(user._id);
+
+    // Set cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+      sameSite: 'strict', // Prevent CSRF
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+
     // Strip password before sending back
     const userSafe = user.toObject();
     delete userSafe.password;
@@ -78,6 +98,17 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
+    // Generate token
+    const token = generateToken(user._id);
+
+    // Set cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+    });
+
     // NEW: strip password before sending back
     const userSafe = user.toObject();
     delete userSafe.password;
@@ -92,11 +123,30 @@ router.post("/login", async (req, res) => {
 });
 
 // -------------------------------
-// Get user + populate learning info
+// Logout user
 // -------------------------------
-router.get("/:id", async (req, res) => {
+router.post("/logout", (req, res) => {
+  res.cookie('token', '', {
+    httpOnly: true,
+    expires: new Date(0),
+  });
+  res.status(200).json({ message: "Logged out" });
+});
+
+// -------------------------------
+// Get current user (Me)
+// -------------------------------
+router.get("/me", protect, async (req, res) => {
+  const user = req.user;
+  res.status(200).json(user);
+});
+
+// -------------------------------
+// Get full profile (Populated)
+// -------------------------------
+router.get("/profile", protect, async (req, res) => {
   try {
-    const user = await User.findById(req.params.id)
+    const user = await User.findById(req.user._id)
       .populate("enrolledCourses")
       .populate("completedCourses")
       .populate("registeredSeminars")
@@ -113,6 +163,11 @@ router.get("/:id", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// -------------------------------
+// Get user + populate learning info
+// -------------------------------
+
 
 // -------------------------------
 // Enroll in a course

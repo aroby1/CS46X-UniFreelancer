@@ -4,8 +4,6 @@ import PropTypes from 'prop-types';
 import './App.css';
 import Academy from './pages/Academy/Academy';
 import LearningHub from './pages/Academy/LearningHub/LearningHub';
-import Seminars from './pages/Academy/Seminars/Seminars';
-import Tutorials from './pages/Academy/Tutorials/Tutorials';
 import CreateContent from './pages/Academy/CreateContent/CreateContent';
 import CreateCourse from './pages/Academy/Courses/CreateCourse';
 import CourseDetail from './pages/Academy/Courses/CourseDetail';
@@ -19,16 +17,34 @@ function App() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem('user'));
-    if (storedUser) {
-      setUser(storedUser);
+    const fetchUser = async () => {
+      try {
+        // eslint-disable-next-line no-undef
+        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+        const response = await fetch(`${apiUrl}/api/users/me`, {
+          credentials: 'include',
+        });
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData);
+        }
+      } catch (error) {
+        console.error('Failed to fetch user', error);
+      }
+    };
+
+    // Clear legacy localStorage item if it exists
+    if (localStorage.getItem('user')) {
+      localStorage.removeItem('user');
     }
+
+    fetchUser();
   }, []);
 
   return (
     <Router>
       <div className="App">
-        <Header user={user} />
+        <Header user={user} setUser={setUser} />
         <Routes>
           <Route path="/" element={<Academy />} />
           <Route path="/academy" element={<Academy />} />
@@ -57,6 +73,7 @@ function Header({ user }) {
     return location.pathname === path ? 'active' : '';
   };
 
+
   return (
     <header className="header">
       <div className="header-content">
@@ -77,11 +94,13 @@ function Header({ user }) {
           <Link to="/inbox" className={isActive('/inbox')}>Inbox</Link>
 
           {user ? (
-            <Link to="/profile" className={`user-profile-link ${isActive('/profile')}`}>
-              <div className="nav-profile-avatar">
-                {user.firstName && user.firstName.charAt(0).toUpperCase()}
-              </div>
-            </Link>
+            <div className="user-menu" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <Link to="/profile" className={`user-profile-link ${isActive('/profile')}`}>
+                <div className="nav-profile-avatar">
+                  {user.firstName && user.firstName.charAt(0).toUpperCase()}
+                </div>
+              </Link>
+            </div>
           ) : (
             <>
               <Link to="/login" className={isActive('/login')}>Login</Link>

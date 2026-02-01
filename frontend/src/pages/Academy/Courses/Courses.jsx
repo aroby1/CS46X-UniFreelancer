@@ -42,7 +42,7 @@ function Courses() {
       if (!user._id) return;
 
       // Fetch user details including enrolled courses
-      const apiUrl = process.env.REACT_APP_API_URL;
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
       const response = await fetch(`${apiUrl}/api/academy/courses`);
       if (response.ok) {
         const userData = await response.json();
@@ -67,7 +67,7 @@ function Courses() {
 
   const fetchCourses = async () => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL;
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
       const response = await fetch(`${apiUrl}/api/academy/seminars`);
       if (response.ok) {
         const data = await response.json();

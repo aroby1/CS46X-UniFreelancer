@@ -52,8 +52,8 @@ function LearningHub() {
   // Update tab when URL changes
   useEffect(() => {
     const newTab = location.pathname === '/academy/seminars' ? 'seminars' :
-                   location.pathname === '/academy/tutorials' ? 'tutorials' :
-                   'courses';
+      location.pathname === '/academy/tutorials' ? 'tutorials' :
+        'courses';
     setActiveTab(newTab);
   }, [location.pathname]);
 
@@ -67,13 +67,13 @@ function LearningHub() {
 
   const fetchStats = async () => {
     try {
-      const userStr = localStorage.getItem('user');
-      if (!userStr) return;
+      // Use configured API URL and new profile endpoint
+      // eslint-disable-next-line no-undef
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${apiUrl}/api/users/profile`, {
+        credentials: 'include' // Use cookies!
+      });
 
-      const user = JSON.parse(userStr);
-      if (!user._id) return;
-
-      const response = await fetch(`http://localhost:5000/api/users/${user._id}`);
       if (response.ok) {
         const userData = await response.json();
         const enrolledCount = userData.enrolledCourses ? userData.enrolledCourses.length : 0;
@@ -312,12 +312,12 @@ function LearningHub() {
         <button className="back-link" onClick={handleBackToAcademy}>
           ← Back to Academy
         </button>
-        
+
         {/* My Learning Section */}
         <div className="my-learning-section">
           <h2 className="section-title">My Learning</h2>
           <p className="section-subtitle">Track your progress and continue your learning journey</p>
-          
+
           <div className="stats-grid">
             <div className="stat-card">
               <span className="stat-icon">📖</span>
@@ -390,15 +390,15 @@ function LearningHub() {
         <div className="content-section">
           <h2 className="section-title">
             {activeTab === 'continue-learning' ? 'Continue Learning' :
-             activeTab === 'courses' ? 'Courses' :
-             activeTab === 'seminars' ? 'Seminars & Events' :
-             'Tutorials'}
+              activeTab === 'courses' ? 'Courses' :
+                activeTab === 'seminars' ? 'Seminars & Events' :
+                  'Tutorials'}
           </h2>
           <p className="section-subtitle">
             {activeTab === 'continue-learning' ? 'Continue your learning journey with enrolled courses' :
-             activeTab === 'courses' ? 'Structured learning programs to master freelancing disciplines' :
-             activeTab === 'seminars' ? 'Interactive live sessions and expert workshops' :
-             'Quick, focused lessons to learn specific skills'}
+              activeTab === 'courses' ? 'Structured learning programs to master freelancing disciplines' :
+                activeTab === 'seminars' ? 'Interactive live sessions and expert workshops' :
+                  'Quick, focused lessons to learn specific skills'}
           </p>
 
           <div className="search-bar-container">
@@ -408,8 +408,8 @@ function LearningHub() {
                 type="text"
                 placeholder={
                   activeTab === 'continue-learning' || activeTab === 'courses' ? 'Search courses...' :
-                  activeTab === 'seminars' ? 'Search seminars...' :
-                  'Search tutorials...'
+                    activeTab === 'seminars' ? 'Search seminars...' :
+                      'Search tutorials...'
                 }
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -627,8 +627,8 @@ function LearningHub() {
                 </div>
               ) : (activeTab === 'courses' || activeTab === 'continue-learning') ? (
                 filteredCourses.map(course => (
-                  <div 
-                    key={course.id || course._id} 
+                  <div
+                    key={course.id || course._id}
                     className="course-card"
                     onClick={() => navigate(`/academy/courses/${course._id || course.id}`)}
                     style={{ cursor: 'pointer' }}
@@ -664,7 +664,7 @@ function LearningHub() {
                       </div>
                       <div className="course-footer">
                         <div className="course-price">{getCoursePrice(course)}</div>
-                        <button 
+                        <button
                           className="view-details-btn"
                           onClick={(e) => {
                             e.stopPropagation();

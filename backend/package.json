@@ -21,6 +21,7 @@
     "content-disposition": "^1.0.0",
     "content-type": "^1.0.5",
     "cookie": "^0.7.2",
+    "cookie-parser": "^1.4.7",
     "cookie-signature": "^1.2.2",
     "cors": "^2.8.5",
     "debug": "^4.4.3",

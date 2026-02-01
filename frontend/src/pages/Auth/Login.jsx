@@ -22,21 +22,20 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const apiUrl = process.env.REACT_APP_API_URL;
+            const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
             const response = await fetch(`${apiUrl}/api/users/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(formData),
+                credentials: 'include', // Important for cookies
             });
 
             const data = await response.json();
 
             if (response.ok) {
                 console.log('Login successful:', data);
-                // Save user data/token
-                localStorage.setItem('user', JSON.stringify(data.user));
                 // Redirect to home and reload to update App state
                 window.location.href = '/';
             } else {

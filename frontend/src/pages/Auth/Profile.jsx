@@ -9,19 +9,20 @@ const Profile = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const storedUser = JSON.parse(localStorage.getItem('user'));
-        if (!storedUser) {
-            navigate('/login');
-            return;
-        }
-
         const fetchUserData = async () => {
             try {
-                const apiUrl = process.env.REACT_APP_API_URL;
-                const response = await fetch(`${apiUrl}/api/users/${storedUser._id}`);
+                const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+                // Fetch authenticated user's profile directly
+                const response = await fetch(`${apiUrl}/api/users/profile`, {
+                    credentials: 'include' // Send cookies
+                });
+
                 if (response.ok) {
                     const data = await response.json();
                     setUser(data);
+                } else if (response.status === 401) {
+                    // Not authenticated
+                    navigate('/login');
                 } else {
                     console.error('Failed to fetch user data');
                 }
@@ -35,10 +36,18 @@ const Profile = () => {
         fetchUserData();
     }, [navigate]);
 
-    const handleSignOut = () => {
-        localStorage.removeItem('user');
-        navigate('/');
-        window.location.reload(); // Force reload to update App state
+    const handleSignOut = async () => {
+        try {
+            const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+            await fetch(`${apiUrl}/api/users/logout`, {
+                method: 'POST',
+                credentials: 'include',
+            });
+            navigate('/login');
+            window.location.reload();
+        } catch (error) {
+            console.error('Logout failed', error);
+        }
     };
 
     if (loading) {

@@ -1,5 +1,6 @@
 /* global process */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import './Profile.css';
 
@@ -100,6 +101,23 @@ function CollapsibleListSection({
         </div>
     );
 }
+
+CollapsibleListSection.propTypes = {
+    title: PropTypes.string.isRequired,
+    items: PropTypes.arrayOf(PropTypes.object),
+    emptyText: PropTypes.string,
+    itemToLabel: PropTypes.func,
+    itemToKey: PropTypes.func,
+    onItemClick: PropTypes.func,
+};
+
+CollapsibleListSection.defaultProps = {
+    items: [],
+    emptyText: "No items yet.",
+    itemToLabel: (item) => item.label || item.title || String(item),
+    itemToKey: (item) => item.id || item._id || String(item),
+    onItemClick: null,
+};
 
 const Profile = () => {
     const navigate = useNavigate();

@@ -130,7 +130,7 @@ function TutorialDetail() {
 
         setIsBookmarked(includesId(data.bookmarkedTutorials, id));
         setIsCompleted(includesId(data.completedTutorials, id));
-      } catch (err) {
+      } catch {
         setIsAuthenticated(false);
         setIsBookmarked(false);
         setIsCompleted(false);
@@ -271,7 +271,6 @@ function TutorialDetail() {
     };
 
     run();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authChecked, isAuthenticated, isBookmarked, isCompleted, location.search]);
 
   const thumbnail = tutorial?.thumbnail || tutorial?.thumbnailUrl;
@@ -387,7 +386,7 @@ function TutorialDetail() {
                     <div className="tutorial-video-fallback">
                       <FiVideo />
                       <p>
-                        We couldn&apos;t embed this video, but you can watch it in a new
+                        We couldn't embed this video, but you can watch it in a new
                         tab.
                       </p>
                       <a

@@ -240,6 +240,10 @@
 }
 
 .tutorial-detail-page .tutorial-video-wrapper {
+  position: relative;
+  padding-bottom: 56.25%;
+  /* 16:9 Aspect Ratio */
+  height: 0;
   border: 1px solid #e0e0e0;
   border-radius: 14px;
   overflow: hidden;
@@ -247,10 +251,12 @@
 }
 
 .tutorial-detail-page .tutorial-video-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 420px;
+  height: 100%;
   border: none;
-  display: block;
 }
 
 .tutorial-detail-page .tutorial-video-fallback {
@@ -464,9 +470,5 @@
 
   .tutorial-detail-page .section-title {
     font-size: 22px;
-  }
-
-  .tutorial-detail-page .tutorial-video-frame {
-    height: 260px;
   }
 }

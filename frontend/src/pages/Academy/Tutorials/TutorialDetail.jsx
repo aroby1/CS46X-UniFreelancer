@@ -362,9 +362,6 @@ function TutorialDetail() {
 
             <div className="tutorial-section">
               <h2 className="section-title">Overview</h2>
-              <p className="section-subtitle">
-                Everything you need to follow along with this lesson.
-              </p>
               <div className="tutorial-overview-copy">
                 <p>{tutorial.description}</p>
               </div>

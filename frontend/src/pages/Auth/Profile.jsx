@@ -11,11 +11,11 @@ const COLLAPSED_LIST_MAX_HEIGHT = COLLAPSED_VISIBLE_ITEMS * COLLAPSED_ROW_HEIGHT
 
 function CollapsibleListSection({
     title,
-    items,
-    emptyText,
-    itemToLabel,
-    itemToKey,
-    onItemClick,
+    items = [],
+    emptyText = "No items yet.",
+    itemToLabel = (item) => item.label || item.title || String(item),
+    itemToKey = (item) => item.id || item._id || String(item),
+    onItemClick = null,
 }) {
     const [expanded, setExpanded] = useState(false);
     const [contentHeight, setContentHeight] = useState(0);
@@ -109,14 +109,6 @@ CollapsibleListSection.propTypes = {
     itemToLabel: PropTypes.func,
     itemToKey: PropTypes.func,
     onItemClick: PropTypes.func,
-};
-
-CollapsibleListSection.defaultProps = {
-    items: [],
-    emptyText: "No items yet.",
-    itemToLabel: (item) => item.label || item.title || String(item),
-    itemToKey: (item) => item.id || item._id || String(item),
-    onItemClick: null,
 };
 
 const Profile = () => {

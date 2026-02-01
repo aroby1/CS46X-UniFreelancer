@@ -1,0 +1,256 @@
+/* global process */
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { FiArrowLeft, FiClock, FiVideo, FiLink } from "react-icons/fi";
+import "./TutorialDetail.css";
+
+const getEmbedUrl = (url) => {
+  if (!url) return null;
+
+  const youtubeMatch = url.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/))([\w-]+)/i
+  );
+  if (youtubeMatch) {
+    return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
+  }
+
+  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/i);
+  if (vimeoMatch) {
+    return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+  }
+
+  return null;
+};
+
+const normalizeResources = (resources = []) => {
+  if (!Array.isArray(resources)) return [];
+  return resources
+    .map((resource, index) => {
+      if (!resource) return null;
+      if (typeof resource === "string") {
+        const trimmed = resource.trim();
+        if (!trimmed) return null;
+        return { label: `Resource ${index + 1}`, url: trimmed };
+      }
+
+      const label = resource.label || resource.name || `Resource ${index + 1}`;
+      const url = resource.url || resource.link || "";
+      if (!url) return null;
+
+      return { label, url };
+    })
+    .filter(Boolean);
+};
+
+const formatWrittenContent = (content) => {
+  if (typeof content !== "string") return [];
+  return content
+    .split(/\n+/)
+    .map((segment) => segment.trim())
+    .filter(Boolean);
+};
+
+function TutorialDetail() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [tutorial, setTutorial] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchTutorial = async () => {
+      if (!id) {
+        setError("Missing tutorial id");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
+        const response = await fetch(`${apiUrl}/api/academy/tutorials/${id}`);
+
+        if (!response.ok) {
+          throw new Error("Tutorial not found");
+        }
+
+        const data = await response.json();
+        setTutorial(data);
+      } catch (err) {
+        console.error("Error fetching tutorial:", err);
+        setError(err.message || "Unable to load tutorial");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTutorial();
+  }, [id]);
+
+  const handleBack = () => {
+    navigate(-1);
+  };
+
+  const thumbnail = tutorial?.thumbnail || tutorial?.thumbnailUrl;
+  const resources = normalizeResources(tutorial?.resources);
+  const paragraphs = formatWrittenContent(tutorial?.writtenContent);
+  const embedUrl = getEmbedUrl(tutorial?.videoUrl);
+  const category = tutorial?.category || tutorial?.topic || "General";
+  const hasVideo = Boolean(tutorial?.videoUrl);
+  const hasArticle = paragraphs.length > 0;
+  const publishedDate = tutorial?.createdAt
+    ? new Date(tutorial.createdAt).toLocaleDateString()
+    : null;
+
+  return (
+    <div className="tutorial-detail-page">
+      <div className="tutorial-detail-container">
+        <button className="back-button" onClick={handleBack}>
+          <FiArrowLeft size={18} /> Back to Tutorials
+        </button>
+
+        {loading ? (
+          <div className="loading-message">Loading tutorial...</div>
+        ) : error || !tutorial ? (
+          <div className="tutorial-section tutorial-error">
+            <h2 className="section-title">Unable to load this tutorial</h2>
+            <p className="section-subtitle">{error || "Please try again."}</p>
+          </div>
+        ) : (
+          <>
+            <div className="tutorial-hero">
+              <div className="tutorial-hero-image">
+                {thumbnail ? (
+                  <img src={thumbnail} alt={tutorial.title} />
+                ) : (
+                  <div className="placeholder-hero-image">📘</div>
+                )}
+              </div>
+
+              <div className="tutorial-hero-content">
+                <div className="tutorial-badges">
+                  <span className="tutorial-badge tutorial-badge-category">{category}</span>
+                  {hasVideo && (
+                    <span className="tutorial-badge tutorial-badge-video">Video</span>
+                  )}
+                  {hasArticle && (
+                    <span className="tutorial-badge tutorial-badge-article">Article</span>
+                  )}
+                </div>
+
+                <h1 className="tutorial-title">{tutorial.title}</h1>
+                <p className="tutorial-description">{tutorial.description}</p>
+
+                <div className="tutorial-hero-bottom">
+                  <div className="tutorial-meta">
+                    <div className="tutorial-meta-item">
+                      <FiClock className="tutorial-meta-icon" />
+                      <div>
+                        <span className="tutorial-meta-label">Duration</span>
+                        <span className="tutorial-meta-value">
+                          {tutorial.duration || "Self-paced"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {publishedDate && (
+                    <p className="published-date">Published {publishedDate}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="tutorial-section">
+              <h2 className="section-title">Overview</h2>
+              <p className="section-subtitle">
+                Everything you need to follow along with this lesson.
+              </p>
+              <div className="tutorial-overview-copy">
+                <p>{tutorial.description}</p>
+              </div>
+            </div>
+
+            {tutorial.videoUrl && (
+              <div className="tutorial-section">
+                <h2 className="section-title">Watch the Tutorial</h2>
+                <div className="tutorial-video-wrapper">
+                  {embedUrl ? (
+                    <iframe
+                      src={embedUrl}
+                      title={tutorial.title}
+                      className="tutorial-video-frame"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <div className="tutorial-video-fallback">
+                      <FiVideo />
+                      <p>
+                        We couldn&apos;t embed this video, but you can watch it in a new
+                        tab.
+                      </p>
+                      <a
+                        className="resource-link"
+                        href={tutorial.videoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Open Video
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {paragraphs.length > 0 && (
+              <div className="tutorial-section">
+                <h2 className="section-title">Written Guide</h2>
+                <div className="tutorial-written-content">
+                  {paragraphs.map((paragraph, index) => (
+                    <p key={`paragraph-${index}`}>{paragraph}</p>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="tutorial-section">
+              <h2 className="section-title">Resources</h2>
+              {resources.length > 0 ? (
+                <ul className="tutorial-resources-list">
+                  {resources.map((resource, index) => (
+                    <li
+                      key={`${resource.label}-${index}`}
+                      className="tutorial-resource-item"
+                    >
+                      <div className="tutorial-resource-info">
+                        <FiLink />
+                        <span>{resource.label}</span>
+                      </div>
+                      <a
+                        className="resource-link"
+                        href={resource.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Download
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="tutorial-empty-state">
+                  No downloadable resources have been added yet.
+                </p>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default TutorialDetail;

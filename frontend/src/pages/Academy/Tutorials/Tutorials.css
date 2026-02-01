@@ -268,10 +268,11 @@
     .tutorials-content {
       flex-direction: column;
     }
-  
+
     .filters-sidebar {
       width: 100%;
     }
+
   }
   
   @media (max-width: 768px) {
@@ -290,5 +291,6 @@
     .tutorials-grid {
       grid-template-columns: 1fr;
     }
+
   }
   

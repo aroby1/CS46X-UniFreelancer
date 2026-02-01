@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import './Signup.css';
 
 const Signup = () => {
+    const location = useLocation();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [formData, setFormData] = useState({
@@ -65,8 +66,12 @@ const Signup = () => {
 
             if (response.ok) {
                 console.log('Signup successful:', data);
-                // Redirect to home and reload to update App state (Auto-login)
-                window.location.href = '/';
+                const params = new URLSearchParams(location.search);
+                const returnTo = params.get('returnTo');
+                const safeReturnTo = returnTo && returnTo.startsWith('/') ? returnTo : null;
+
+                // Redirect and reload to update App state (Auto-login)
+                window.location.href = safeReturnTo || '/';
             } else {
                 alert(data.message || 'Signup failed');
             }
@@ -206,7 +211,7 @@ const Signup = () => {
 
                 <div className="auth-footer">
                     Already have an account?
-                    <Link to="/login" className="auth-link">Sign in</Link>
+                    <Link to={`/login${location.search || ''}`} className="auth-link">Sign in</Link>
                 </div>
             </div>
         </div>

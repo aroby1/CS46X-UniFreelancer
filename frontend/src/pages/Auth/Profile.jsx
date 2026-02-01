@@ -1,7 +1,105 @@
 /* global process */
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Profile.css';
+
+const COLLAPSED_VISIBLE_ITEMS = 2;
+// Keep this in sync with `.item-list li { height: ... }` in Profile.css
+const COLLAPSED_ROW_HEIGHT = 44;
+const COLLAPSED_LIST_MAX_HEIGHT = COLLAPSED_VISIBLE_ITEMS * COLLAPSED_ROW_HEIGHT;
+
+function CollapsibleListSection({
+    title,
+    items,
+    emptyText,
+    itemToLabel,
+    itemToKey,
+    onItemClick,
+}) {
+    const [expanded, setExpanded] = useState(false);
+    const [contentHeight, setContentHeight] = useState(0);
+    const listRef = useRef(null);
+
+    const safeItems = useMemo(() => (Array.isArray(items) ? items : []), [items]);
+
+    const measure = useCallback(() => {
+        if (!listRef.current) return;
+        setContentHeight(listRef.current.scrollHeight || 0);
+    }, []);
+
+    useEffect(() => {
+        // Measure after paint so scrollHeight is accurate.
+        const raf = window.requestAnimationFrame(measure);
+        const onResize = () => measure();
+        window.addEventListener('resize', onResize);
+        return () => {
+            window.cancelAnimationFrame(raf);
+            window.removeEventListener('resize', onResize);
+        };
+    }, [measure, safeItems.length]);
+
+    const maxHeightPx = safeItems.length === 0
+        ? 0
+        : (expanded ? (contentHeight || COLLAPSED_LIST_MAX_HEIGHT) : COLLAPSED_LIST_MAX_HEIGHT);
+
+    const minHeightPx = safeItems.length > 0 && !expanded ? COLLAPSED_LIST_MAX_HEIGHT : 0;
+    const bodyMinHeightPx = !expanded ? COLLAPSED_LIST_MAX_HEIGHT : 0;
+
+    const showToggle = safeItems.length > COLLAPSED_VISIBLE_ITEMS;
+
+    return (
+        <div className="profile-section">
+            <div className="profile-section-header">
+                <h3>{title}</h3>
+                {showToggle && (
+                    <button
+                        type="button"
+                        className="profile-section-toggle"
+                        onClick={() => setExpanded(prev => !prev)}
+                        aria-expanded={expanded}
+                        aria-label={expanded ? `Collapse ${title}` : `Expand ${title}`}
+                    >
+                        <span className={`profile-chevron ${expanded ? 'is-expanded' : ''}`} />
+                    </button>
+                )}
+            </div>
+
+            {safeItems.length > 0 ? (
+                <div
+                    className="profile-collapsible"
+                    style={{ maxHeight: `${maxHeightPx}px`, minHeight: `${minHeightPx}px` }}
+                >
+                    <ul ref={listRef} className="item-list">
+                        {safeItems.map((item) => {
+                            const key = itemToKey(item);
+                            const label = itemToLabel(item);
+                            const clickable = typeof onItemClick === 'function';
+                            return (
+                                <li key={key}>
+                                    {clickable ? (
+                                        <button
+                                            type="button"
+                                            className="profile-item-link"
+                                            onClick={() => onItemClick(item)}
+                                        >
+                                            {label}
+                                        </button>
+                                    ) : (
+                                        <span className="profile-item-text">{label}</span>
+                                    )}
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </div>
+            ) : (
+                <div className="profile-empty" style={{ height: `${bodyMinHeightPx}px` }}>
+                    <p className="empty-state">{emptyText}</p>
+                </div>
+            )}
+        </div>
+    );
+}
 
 const Profile = () => {
     const navigate = useNavigate();
@@ -71,57 +169,45 @@ const Profile = () => {
             </div>
 
             <div className="profile-content">
-                <div className="profile-section">
-                    <h3>Enrolled Courses</h3>
-                    {user.enrolledCourses && user.enrolledCourses.length > 0 ? (
-                        <ul className="item-list">
-                            {user.enrolledCourses.map(course => (
-                                <li key={course._id}>{course.title}</li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p className="empty-state">No enrolled courses yet.</p>
-                    )}
-                </div>
+                <CollapsibleListSection
+                    title="Enrolled Courses"
+                    items={user.enrolledCourses}
+                    emptyText="No enrolled courses yet."
+                    itemToKey={(course) => course?._id || course?.id || course?.title}
+                    itemToLabel={(course) => course?.title || 'Untitled course'}
+                    onItemClick={(course) => {
+                        const id = course?._id || course?.id;
+                        if (id) navigate(`/academy/courses/${id}`);
+                    }}
+                />
 
-                <div className="profile-section">
-                    <h3>Registered Seminars</h3>
-                    {user.registeredSeminars && user.registeredSeminars.length > 0 ? (
-                        <ul className="item-list">
-                            {user.registeredSeminars.map(seminar => (
-                                <li key={seminar._id}>{seminar.title}</li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p className="empty-state">No registered seminars yet.</p>
-                    )}
-                </div>
+                <CollapsibleListSection
+                    title="Registered Seminars"
+                    items={user.registeredSeminars}
+                    emptyText="No registered seminars yet."
+                    itemToKey={(seminar) => seminar?._id || seminar?.id || seminar?.title}
+                    itemToLabel={(seminar) => seminar?.title || 'Untitled seminar'}
+                />
 
-                <div className="profile-section">
-                    <h3>Completed Tutorials</h3>
-                    {user.completedTutorials && user.completedTutorials.length > 0 ? (
-                        <ul className="item-list">
-                            {user.enrolledCourses.map(tutorial => (
-                                <li key={tutorial._id}>{tutorial.title}</li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p className="empty-state">No completed tutorials yet.</p>
-                    )}
-                </div>
+                <CollapsibleListSection
+                    title="Completed Tutorials"
+                    items={user.completedTutorials}
+                    emptyText="No completed tutorials yet."
+                    itemToKey={(tutorial) => tutorial?._id || tutorial?.id || tutorial?.title}
+                    itemToLabel={(tutorial) => tutorial?.title || 'Untitled tutorial'}
+                    onItemClick={(tutorial) => {
+                        const id = tutorial?._id || tutorial?.id;
+                        if (id) navigate(`/academy/tutorials/${id}`);
+                    }}
+                />
 
-                <div className="profile-section">
-                    <h3>Saved Podcasts</h3>
-                    {user.savedPodcasts && user.savedPodcasts.length > 0 ? (
-                        <ul className="item-list">
-                            {user.savedPodcasts.map(podcast => (
-                                <li key={podcast._id}>{podcast.title}</li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p className="empty-state">No saved podcasts yet.</p>
-                    )}
-                </div>
+                <CollapsibleListSection
+                    title="Saved Podcasts"
+                    items={user.savedPodcasts}
+                    emptyText="No saved podcasts yet."
+                    itemToKey={(podcast) => podcast?._id || podcast?.id || podcast?.title}
+                    itemToLabel={(podcast) => podcast?.title || 'Untitled podcast'}
+                />
             </div>
         </div>
     );

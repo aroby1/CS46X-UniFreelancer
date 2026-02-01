@@ -1,7 +1,8 @@
 /* global process */
-import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { FiArrowLeft, FiClock, FiVideo, FiLink } from "react-icons/fi";
+import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import "./TutorialDetail.css";
 
 const getEmbedUrl = (url) => {
@@ -53,9 +54,20 @@ const formatWrittenContent = (content) => {
 function TutorialDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [tutorial, setTutorial] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [authChecked, setAuthChecked] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [modal, setModal] = useState({ open: false, title: "", message: "" });
+  const modalTimerRef = useRef(null);
+  const intentHandledRef = useRef(false);
 
   useEffect(() => {
     const fetchTutorial = async () => {
@@ -88,9 +100,179 @@ function TutorialDetail() {
     fetchTutorial();
   }, [id]);
 
+  useEffect(() => {
+    const fetchProfileForStatus = async () => {
+      try {
+        setAuthChecked(false);
+        const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
+        const response = await fetch(`${apiUrl}/api/users/profile`, {
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          setIsAuthenticated(false);
+          setIsBookmarked(false);
+          setIsCompleted(false);
+          return;
+        }
+
+        const data = await response.json();
+        setIsAuthenticated(true);
+
+        const includesId = (collection, targetId) => {
+          if (!Array.isArray(collection) || !targetId) return false;
+          return collection.some((item) => {
+            if (!item) return false;
+            if (typeof item === "string") return item === targetId;
+            return item._id === targetId;
+          });
+        };
+
+        setIsBookmarked(includesId(data.bookmarkedTutorials, id));
+        setIsCompleted(includesId(data.completedTutorials, id));
+      } catch (err) {
+        setIsAuthenticated(false);
+        setIsBookmarked(false);
+        setIsCompleted(false);
+      } finally {
+        setAuthChecked(true);
+      }
+    };
+
+    if (id) {
+      fetchProfileForStatus();
+    }
+  }, [id]);
+
   const handleBack = () => {
-    navigate(-1);
+    navigate("/academy/tutorials");
   };
+
+  const closeModal = () => {
+    setModal({ open: false, title: "", message: "" });
+    if (modalTimerRef.current) {
+      clearTimeout(modalTimerRef.current);
+      modalTimerRef.current = null;
+    }
+  };
+
+  const openModal = (title, message) => {
+    setModal({ open: true, title, message });
+    if (modalTimerRef.current) clearTimeout(modalTimerRef.current);
+    modalTimerRef.current = setTimeout(() => {
+      closeModal();
+    }, 1600);
+  };
+
+  const goToLoginForIntent = (intent) => {
+    const returnTo = `/academy/tutorials/${id}?intent=${encodeURIComponent(intent)}`;
+    navigate(`/login?returnTo=${encodeURIComponent(returnTo)}`);
+  };
+
+  const clearIntentFromUrl = () => {
+    const params = new URLSearchParams(location.search);
+    params.delete("intent");
+    const next = params.toString();
+    navigate(`${location.pathname}${next ? `?${next}` : ""}`, { replace: true });
+  };
+
+  const setBookmark = async (next) => {
+    if (!id) return;
+
+    try {
+      setIsSaving(true);
+      const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
+      const response = await fetch(`${apiUrl}/api/users/tutorials/${id}/bookmark`, {
+        method: next ? "POST" : "DELETE",
+        credentials: "include",
+      });
+
+      if (response.status === 401) {
+        setIsAuthenticated(false);
+        goToLoginForIntent("bookmark");
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error("Unable to update bookmark");
+      }
+
+      setIsBookmarked(next);
+      setIsAuthenticated(true);
+      openModal(next ? "Saved" : "Removed", next ? "Tutorial bookmarked." : "Bookmark removed.");
+    } catch (err) {
+      console.error(err);
+      openModal("Error", "Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const setCompleted = async (next) => {
+    if (!id) return;
+
+    try {
+      setIsSaving(true);
+      const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
+      const response = await fetch(`${apiUrl}/api/users/tutorials/${id}/complete`, {
+        method: next ? "POST" : "DELETE",
+        credentials: "include",
+      });
+
+      if (response.status === 401) {
+        setIsAuthenticated(false);
+        goToLoginForIntent("complete");
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error("Unable to update completion");
+      }
+
+      setIsCompleted(next);
+      setIsAuthenticated(true);
+      openModal(
+        next ? "Completed" : "Updated",
+        next ? "Marked as completed." : "Completion removed."
+      );
+    } catch (err) {
+      console.error(err);
+      openModal("Error", "Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  useEffect(() => {
+    const run = async () => {
+      if (intentHandledRef.current) return;
+      if (!authChecked) return;
+
+      const intent = new URLSearchParams(location.search).get("intent");
+      if (!intent) {
+        intentHandledRef.current = true;
+        return;
+      }
+
+      if (!isAuthenticated) return;
+
+      if (intent === "bookmark") {
+        if (!isBookmarked) await setBookmark(true);
+        clearIntentFromUrl();
+        intentHandledRef.current = true;
+        return;
+      }
+
+      if (intent === "complete") {
+        if (!isCompleted) await setCompleted(true);
+        clearIntentFromUrl();
+        intentHandledRef.current = true;
+      }
+    };
+
+    run();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authChecked, isAuthenticated, isBookmarked, isCompleted, location.search]);
 
   const thumbnail = tutorial?.thumbnail || tutorial?.thumbnailUrl;
   const resources = normalizeResources(tutorial?.resources);
@@ -120,6 +302,23 @@ function TutorialDetail() {
         ) : (
           <>
             <div className="tutorial-hero">
+              <button
+                type="button"
+                className={`bookmark-button ${isBookmarked ? "is-active" : ""}`}
+                onClick={() => setBookmark(!isBookmarked)}
+                disabled={isSaving}
+                title={
+                  isAuthenticated
+                    ? isBookmarked
+                      ? "Remove bookmark"
+                      : "Save to profile"
+                    : "Sign in to bookmark"
+                }
+                aria-label={isBookmarked ? "Remove bookmark" : "Bookmark tutorial"}
+              >
+                {isBookmarked ? <BsBookmarkFill /> : <BsBookmark />}
+              </button>
+
               <div className="tutorial-hero-image">
                 {thumbnail ? (
                   <img src={thumbnail} alt={tutorial.title} />
@@ -246,6 +445,48 @@ function TutorialDetail() {
                 </p>
               )}
             </div>
+
+            <div className="tutorial-actions">
+              <button
+                type="button"
+                className={`complete-button ${isCompleted ? "is-completed" : ""}`}
+                onClick={() => setCompleted(!isCompleted)}
+                disabled={isSaving}
+                title={
+                  isAuthenticated
+                    ? isCompleted
+                      ? "Mark as not completed"
+                      : "Mark as completed"
+                    : "Sign in to track completion"
+                }
+              >
+                {isCompleted ? "Completed" : "Mark as Completed"}
+              </button>
+            </div>
+
+            {modal.open && (
+              <div
+                className="tutorial-modal-overlay"
+                role="dialog"
+                aria-modal="true"
+                onClick={closeModal}
+              >
+                <div
+                  className="tutorial-modal"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <h3 className="tutorial-modal-title">{modal.title}</h3>
+                  <p className="tutorial-modal-message">{modal.message}</p>
+                  <button
+                    type="button"
+                    className="tutorial-modal-close"
+                    onClick={closeModal}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>

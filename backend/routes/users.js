@@ -151,6 +151,7 @@ router.get("/profile", protect, async (req, res) => {
       .populate("completedCourses")
       .populate("registeredSeminars")
       .populate("completedTutorials")
+      .populate("bookmarkedTutorials")
       .populate("savedPodcasts");
 
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -159,6 +160,100 @@ router.get("/profile", protect, async (req, res) => {
     delete userSafe.password;
 
     res.json(userSafe);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// -------------------------------
+// Bookmark a tutorial
+// -------------------------------
+router.post("/tutorials/:tutorialId/bookmark", protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const { tutorialId } = req.params;
+
+    if (!user.bookmarkedTutorials.includes(tutorialId)) {
+      user.bookmarkedTutorials.push(tutorialId);
+      await user.save();
+    }
+
+    res.json({
+      message: "Tutorial bookmarked",
+      bookmarkedTutorials: user.bookmarkedTutorials,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// -------------------------------
+// Remove tutorial bookmark
+// -------------------------------
+router.delete("/tutorials/:tutorialId/bookmark", protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const { tutorialId } = req.params;
+    user.bookmarkedTutorials = user.bookmarkedTutorials.filter(
+      (id) => id.toString() !== tutorialId
+    );
+    await user.save();
+
+    res.json({
+      message: "Tutorial unbookmarked",
+      bookmarkedTutorials: user.bookmarkedTutorials,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// -------------------------------
+// Mark tutorial as completed
+// -------------------------------
+router.post("/tutorials/:tutorialId/complete", protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const { tutorialId } = req.params;
+
+    if (!user.completedTutorials.includes(tutorialId)) {
+      user.completedTutorials.push(tutorialId);
+      await user.save();
+    }
+
+    res.json({
+      message: "Tutorial completed",
+      completedTutorials: user.completedTutorials,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// -------------------------------
+// Unmark tutorial as completed
+// -------------------------------
+router.delete("/tutorials/:tutorialId/complete", protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const { tutorialId } = req.params;
+    user.completedTutorials = user.completedTutorials.filter(
+      (id) => id.toString() !== tutorialId
+    );
+    await user.save();
+
+    res.json({
+      message: "Tutorial completion removed",
+      completedTutorials: user.completedTutorials,
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

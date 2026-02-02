@@ -22,6 +22,7 @@ function LearningHub() {
   const [filteredTutorials, setFilteredTutorials] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [bookmarkedTutorialIds, setBookmarkedTutorialIds] = useState([]);
 
   const [stats, setStats] = useState({
     enrolledCount: 0,
@@ -45,9 +46,9 @@ function LearningHub() {
   });
 
   const [tutorialFilters, setTutorialFilters] = useState({
-    topic: [],
-    difficulty: [],
-    length: []
+    duration: [],
+    format: [],
+    savedOnly: false,
   });
 
   // Update tab when URL changes
@@ -86,11 +87,52 @@ function LearningHub() {
         setStats({ enrolledCount, completedCount, learningHours });
         const enrolledIds = userData.enrolledCourses ? userData.enrolledCourses.map(c => c._id) : [];
         setEnrolledCourseIds(enrolledIds);
+
+        const bookmarkedIds = Array.isArray(userData.bookmarkedTutorials)
+          ? userData.bookmarkedTutorials
+            .map(t => (t && (t._id || t.id)) ? String(t._id || t.id) : null)
+            .filter(Boolean)
+          : [];
+        setBookmarkedTutorialIds(bookmarkedIds);
+      } else {
+        setBookmarkedTutorialIds([]);
       }
     } catch (error) {
       console.error('Error fetching stats:', error);
+      setBookmarkedTutorialIds([]);
     }
   };
+
+  const getTutorialCategory = useCallback((tutorial) => {
+    return tutorial?.category || tutorial?.topic || 'General';
+  }, []);
+
+  const getTutorialMinutes = useCallback((tutorial) => {
+    const raw = (tutorial?.duration || tutorial?.lengthCategory || '').toString().trim().toLowerCase();
+    if (!raw) return null;
+    if (raw.includes('self')) return null;
+
+    // Common forms: "15 min", "15mins", "10 minutes", "1 hour", "1.5 hours"
+    const numMatch = raw.match(/(\d+(?:\.\d+)?)/);
+    if (!numMatch) return null;
+    const value = Number(numMatch[1]);
+    if (!Number.isFinite(value) || value <= 0) return null;
+
+    if (raw.includes('hour')) return Math.round(value * 60);
+    if (raw.includes('min')) return Math.round(value);
+
+    // If it's just a number, assume minutes.
+    return Math.round(value);
+  }, []);
+
+  const getTutorialFormat = useCallback((tutorial) => {
+    const hasVideo = Boolean(tutorial?.videoUrl);
+    const hasArticle = Boolean((tutorial?.writtenContent || '').toString().trim());
+    if (hasVideo && hasArticle) return 'Video + Article';
+    if (hasVideo) return 'Video';
+    if (hasArticle) return 'Article';
+    return 'Self-paced';
+  }, []);
 
   const fetchCourses = async () => {
     try {
@@ -228,24 +270,46 @@ function LearningHub() {
     if (searchTerm && activeTab === 'tutorials') {
       filtered = filtered.filter(t =>
         t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        t.description?.toLowerCase().includes(searchTerm.toLowerCase())
+        t.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        getTutorialCategory(t).toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
-    if (tutorialFilters.topic.length > 0) {
-      filtered = filtered.filter(t => tutorialFilters.topic.includes(t.topic));
+    if (tutorialFilters.savedOnly) {
+      filtered = filtered.filter(t => {
+        const tutorialId = t?._id || t?.id;
+        return tutorialId ? bookmarkedTutorialIds.includes(String(tutorialId)) : false;
+      });
     }
 
-    if (tutorialFilters.difficulty.length > 0) {
-      filtered = filtered.filter(t => tutorialFilters.difficulty.includes(t.difficulty));
+    if (tutorialFilters.duration.length > 0) {
+      filtered = filtered.filter(t => {
+        const minutes = getTutorialMinutes(t);
+        if (minutes == null) return false;
+        return tutorialFilters.duration.some(bucket => {
+          if (bucket === 'lt-10') return minutes < 10;
+          if (bucket === '10-20') return minutes >= 10 && minutes <= 20;
+          if (bucket === '20-40') return minutes > 20 && minutes <= 40;
+          if (bucket === 'gt-40') return minutes > 40;
+          return false;
+        });
+      });
     }
 
-    if (tutorialFilters.length.length > 0) {
-      filtered = filtered.filter(t => tutorialFilters.length.includes(t.lengthCategory));
+    if (tutorialFilters.format.length > 0) {
+      filtered = filtered.filter(t => {
+        const hasVideo = Boolean(t?.videoUrl);
+        const hasArticle = Boolean((t?.writtenContent || '').toString().trim());
+        return tutorialFilters.format.some(f => {
+          if (f === 'video') return hasVideo;
+          if (f === 'article') return hasArticle;
+          return false;
+        });
+      });
     }
 
     setFilteredTutorials(filtered);
-  }, [tutorials, searchTerm, tutorialFilters, activeTab]);
+  }, [tutorials, searchTerm, tutorialFilters, activeTab, bookmarkedTutorialIds, getTutorialCategory, getTutorialMinutes]);
 
   useEffect(() => {
     if (activeTab === 'courses' || activeTab === 'continue-learning') {
@@ -280,12 +344,26 @@ function LearningHub() {
   const handleTutorialFilterChange = (category, value) => {
     setTutorialFilters(prev => {
       const current = prev[category];
-      const updated = current.includes(value)
-        ? current.filter(v => v !== value)
-        : [...current, value];
+      const next = Array.isArray(current) ? current : [];
+      const updated = next.includes(value)
+        ? next.filter(v => v !== value)
+        : [...next, value];
       return { ...prev, [category]: updated };
     });
   };
+
+  const toggleTutorialSavedOnly = () => {
+    setTutorialFilters(prev => ({
+      ...prev,
+      savedOnly: !prev.savedOnly,
+    }));
+  };
+
+  useEffect(() => {
+    if (bookmarkedTutorialIds.length === 0 && tutorialFilters.savedOnly) {
+      setTutorialFilters(prev => ({ ...prev, savedOnly: false }));
+    }
+  }, [bookmarkedTutorialIds.length, tutorialFilters.savedOnly]);
 
   const getCourseDuration = (duration) => {
     if (!duration) return 'Self-paced';
@@ -532,7 +610,7 @@ function LearningHub() {
                         />
                         <span>
                           {range === 'less-60' ? 'Less than 60 min' :
-                            range === '60-90' ? '60–90 min' :
+                            range === '60-90' ? '60-90 min' :
                               'More than 90 min'}
                         </span>
                       </label>
@@ -556,50 +634,58 @@ function LearningHub() {
                 </>
               ) : (
                 <>
-                  {/* Topic Filter */}
+                  {/* Duration Filter */}
                   <div className="filter-section">
-                    <h4 className="filter-heading">Topic</h4>
-                    {['Design', 'Marketing', 'Development', 'Business'].map(topic => (
-                      <label key={topic} className="filter-option">
+                    <h4 className="filter-heading">Duration</h4>
+                    {[
+                      { value: 'lt-10', label: 'Less than 10 min' },
+                      { value: '10-20', label: '10-20 min' },
+                      { value: '20-40', label: '20-40 min' },
+                      { value: 'gt-40', label: 'More than 40 min' },
+                    ].map(opt => (
+                      <label key={opt.value} className="filter-option">
                         <input
                           type="checkbox"
-                          checked={tutorialFilters.topic.includes(topic)}
-                          onChange={() => handleTutorialFilterChange('topic', topic)}
+                          checked={tutorialFilters.duration.includes(opt.value)}
+                          onChange={() => handleTutorialFilterChange('duration', opt.value)}
                         />
-                        <span>{topic}</span>
+                        <span>{opt.label}</span>
                       </label>
                     ))}
                   </div>
 
-                  {/* Difficulty Filter */}
+                  {/* Format Filter */}
                   <div className="filter-section">
-                    <h4 className="filter-heading">Difficulty</h4>
-                    {['Beginner', 'Intermediate', 'Advanced'].map(difficulty => (
-                      <label key={difficulty} className="filter-option">
+                    <h4 className="filter-heading">Format</h4>
+                    {[
+                      { value: 'video', label: 'Video' },
+                      { value: 'article', label: 'Article' },
+                    ].map(opt => (
+                      <label key={opt.value} className="filter-option">
                         <input
                           type="checkbox"
-                          checked={tutorialFilters.difficulty.includes(difficulty)}
-                          onChange={() => handleTutorialFilterChange('difficulty', difficulty)}
+                          checked={tutorialFilters.format.includes(opt.value)}
+                          onChange={() => handleTutorialFilterChange('format', opt.value)}
                         />
-                        <span>{difficulty}</span>
+                        <span>{opt.label}</span>
                       </label>
                     ))}
                   </div>
 
-                  {/* Length Filter */}
-                  <div className="filter-section">
-                    <h4 className="filter-heading">Length</h4>
-                    {['Short', 'Medium', 'Long'].map(length => (
-                      <label key={length} className="filter-option">
+                  {/* Saved Filter (logged-in with saved tutorials) */}
+                  {bookmarkedTutorialIds.length > 0 && (
+                    <div className="filter-section">
+                      <h4 className="filter-heading">Saved</h4>
+                      <label className="filter-option">
                         <input
                           type="checkbox"
-                          checked={tutorialFilters.length.includes(length)}
-                          onChange={() => handleTutorialFilterChange('length', length)}
+                          checked={tutorialFilters.savedOnly}
+                          onChange={toggleTutorialSavedOnly}
                         />
-                        <span>{length}</span>
+                        <span>Saved</span>
                       </label>
-                    ))}
-                  </div>
+                    </div>
+                  )}
                 </>
               )}
             </div>
@@ -620,7 +706,7 @@ function LearningHub() {
                     } else if (activeTab === 'seminars') {
                       setSeminarFilters({ type: [], duration: [], status: [] });
                     } else if (activeTab === 'tutorials') {
-                      setTutorialFilters({ topic: [], difficulty: [], length: [] });
+                      setTutorialFilters({ duration: [], format: [], savedOnly: false });
                     }
                   }}>
                     Clear Filters
@@ -743,15 +829,15 @@ function LearningHub() {
                         <div className="tutorial-details">
                           <div className="tutorial-detail">
                             <span className="detail-icon">📚</span>
-                            <span>{tutorial.topic}</span>
-                          </div>
-                          <div className="tutorial-detail">
-                            <span className="detail-icon">🎯</span>
-                            <span>{tutorial.difficulty}</span>
+                            <span>{getTutorialCategory(tutorial)}</span>
                           </div>
                           <div className="tutorial-detail">
                             <span className="detail-icon">⏱️</span>
-                            <span>{tutorial.lengthCategory}</span>
+                            <span>{tutorial.duration || 'Self-paced'}</span>
+                          </div>
+                          <div className="tutorial-detail">
+                            <span className="detail-icon">🎬</span>
+                            <span>{getTutorialFormat(tutorial)}</span>
                           </div>
                         </div>
                         <div className="tutorial-footer">

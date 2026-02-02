@@ -51,6 +51,10 @@ function LearningHub() {
     savedOnly: false,
   });
 
+  const [courseSort, setCourseSort] = useState('all');
+  const [seminarSort, setSeminarSort] = useState('newest');
+  const [tutorialSort, setTutorialSort] = useState('newest');
+
   // Update tab when URL changes
   useEffect(() => {
     const newTab = location.pathname === '/academy/seminars' ? 'seminars' :
@@ -222,8 +226,34 @@ function LearningHub() {
       });
     }
 
+    // Apply sort
+    const getCourseDate = (c) => {
+      const t = new Date(c?.createdAt || c?.updatedAt || 0).getTime();
+      return Number.isFinite(t) ? t : 0;
+    };
+
+    if (courseSort === 'newest') {
+      filtered.sort((a, b) => getCourseDate(b) - getCourseDate(a));
+    } else if (courseSort === 'price-low-high') {
+      filtered.sort((a, b) => {
+        const aPrice = typeof a?.pricing?.amount === 'number' ? a.pricing.amount : Number(a?.priceAmount || 0);
+        const bPrice = typeof b?.pricing?.amount === 'number' ? b.pricing.amount : Number(b?.priceAmount || 0);
+        if (aPrice !== bPrice) return aPrice - bPrice;
+        return getCourseDate(b) - getCourseDate(a);
+      });
+    } else if (courseSort === 'price-high-low') {
+      filtered.sort((a, b) => {
+        const aPrice = typeof a?.pricing?.amount === 'number' ? a.pricing.amount : Number(a?.priceAmount || 0);
+        const bPrice = typeof b?.pricing?.amount === 'number' ? b.pricing.amount : Number(b?.priceAmount || 0);
+        if (aPrice !== bPrice) return bPrice - aPrice;
+        return getCourseDate(b) - getCourseDate(a);
+      });
+    } else if (courseSort === 'popular') {
+      // No reliable popularity field in the current schema; keep existing order.
+    }
+
     setFilteredCourses(filtered);
-  }, [courses, searchTerm, courseFilters, activeTab, enrolledCourseIds]);
+  }, [courses, searchTerm, courseFilters, activeTab, enrolledCourseIds, courseSort]);
 
   // Filter seminars
   const filterSeminars = useCallback(() => {
@@ -260,8 +290,28 @@ function LearningHub() {
       });
     }
 
+    // Apply sort
+    const getSeminarDate = (s) => {
+      const t = new Date(s?.createdAt || s?.updatedAt || 0).getTime();
+      return Number.isFinite(t) ? t : 0;
+    };
+
+    if (seminarSort === 'newest') {
+      filtered.sort((a, b) => getSeminarDate(b) - getSeminarDate(a));
+    } else if (seminarSort === 'oldest') {
+      filtered.sort((a, b) => getSeminarDate(a) - getSeminarDate(b));
+    } else if (seminarSort === 'live') {
+      // Best-effort: prioritize anything with "live" in type.
+      filtered.sort((a, b) => {
+        const aLive = String(a?.type || '').toLowerCase().includes('live');
+        const bLive = String(b?.type || '').toLowerCase().includes('live');
+        if (aLive !== bLive) return aLive ? -1 : 1;
+        return getSeminarDate(b) - getSeminarDate(a);
+      });
+    }
+
     setFilteredSeminars(filtered);
-  }, [seminars, searchTerm, seminarFilters, activeTab]);
+  }, [seminars, searchTerm, seminarFilters, activeTab, seminarSort]);
 
   // Filter tutorials
   const filterTutorials = useCallback(() => {
@@ -308,8 +358,49 @@ function LearningHub() {
       });
     }
 
+    // Apply sort
+    const getTutorialDate = (t) => {
+      const time = new Date(t?.createdAt || t?.updatedAt || 0).getTime();
+      return Number.isFinite(time) ? time : 0;
+    };
+
+    const compareTutorialMinutes = (a, b, direction) => {
+      const aMin = getTutorialMinutes(a);
+      const bMin = getTutorialMinutes(b);
+
+      const aUnknown = aMin == null;
+      const bUnknown = bMin == null;
+      if (aUnknown && !bUnknown) return 1;
+      if (!aUnknown && bUnknown) return -1;
+      if (aUnknown && bUnknown) return getTutorialDate(b) - getTutorialDate(a);
+
+      if (aMin !== bMin) return direction === 'asc' ? aMin - bMin : bMin - aMin;
+      return getTutorialDate(b) - getTutorialDate(a);
+    };
+
+    if (tutorialSort === 'newest') {
+      filtered.sort((a, b) => getTutorialDate(b) - getTutorialDate(a));
+    } else if (tutorialSort === 'oldest') {
+      filtered.sort((a, b) => getTutorialDate(a) - getTutorialDate(b));
+    } else if (tutorialSort === 'duration-asc') {
+      filtered.sort((a, b) => compareTutorialMinutes(a, b, 'asc'));
+    } else if (tutorialSort === 'duration-desc') {
+      filtered.sort((a, b) => compareTutorialMinutes(a, b, 'desc'));
+    }
+
     setFilteredTutorials(filtered);
-  }, [tutorials, searchTerm, tutorialFilters, activeTab, bookmarkedTutorialIds, getTutorialCategory, getTutorialMinutes]);
+  }, [tutorials, searchTerm, tutorialFilters, activeTab, bookmarkedTutorialIds, getTutorialCategory, getTutorialMinutes, tutorialSort]);
+
+  const handleSortChange = (e) => {
+    const next = e.target.value;
+    if (activeTab === 'seminars') {
+      setSeminarSort(next);
+    } else if (activeTab === 'tutorials') {
+      setTutorialSort(next);
+    } else {
+      setCourseSort(next);
+    }
+  };
 
   useEffect(() => {
     if (activeTab === 'courses' || activeTab === 'continue-learning') {
@@ -494,26 +585,37 @@ function LearningHub() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <select className="sort-dropdown">
+            <select
+              className="sort-dropdown"
+              value={
+                activeTab === 'seminars'
+                  ? seminarSort
+                  : activeTab === 'tutorials'
+                    ? tutorialSort
+                    : courseSort
+              }
+              onChange={handleSortChange}
+            >
               {activeTab === 'continue-learning' || activeTab === 'courses' ? (
                 <>
-                  <option>All Courses</option>
-                  <option>Most Popular</option>
-                  <option>Newest First</option>
-                  <option>Price: Low to High</option>
-                  <option>Price: High to Low</option>
+                  <option value="all">All Courses</option>
+                  <option value="popular">Most Popular</option>
+                  <option value="newest">Newest First</option>
+                  <option value="price-low-high">Price: Low to High</option>
+                  <option value="price-high-low">Price: High to Low</option>
                 </>
               ) : activeTab === 'seminars' ? (
                 <>
-                  <option>Newest First</option>
-                  <option>Oldest First</option>
-                  <option>Live Sessions</option>
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                  <option value="live">Live Sessions</option>
                 </>
               ) : (
                 <>
-                  <option>Newest First</option>
-                  <option>Most Popular</option>
-                  <option>Duration: Short to Long</option>
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                  <option value="duration-asc">Duration: Short to Long</option>
+                  <option value="duration-desc">Duration: Long to Short</option>
                 </>
               )}
             </select>

@@ -1,24 +1,63 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+
+// ------------------------------
+// STRIPE IMPORTS
+// ------------------------------
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+
+// ------------------------------
+// CHECKOUT COMPONENT
+// ------------------------------
+import CheckoutForm from "../../../components/Shared/CheckoutForm";
+
 import './CourseDetail.css';
+
+// ------------------------------
+// STRIPE INITIALIZATION
+// ------------------------------
+// Must be outside component to avoid re-creating Stripe on every render
+const stripePromise = loadStripe(
+  process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY
+);
+
+console.log(
+  "Stripe publishable key:",
+  process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY
+);
 
 function CourseDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  // ------------------------------
+  // STATE
+  // ------------------------------
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Stripe-related state
+  const [clientSecret, setClientSecret] = useState(null);
+  const [enrolling, setEnrolling] = useState(false);
+
+  // ------------------------------
+  // FETCH COURSE DATA
+  // ------------------------------
   useEffect(() => {
     const fetchCourse = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:5000/api/academy/courses/${id}`);
-        
+
+        const response = await fetch(
+          `http://localhost:5000/api/academy/courses/${id}`
+        );
+
         if (!response.ok) {
           throw new Error('Course not found');
         }
-        
+
         const data = await response.json();
         setCourse(data);
         setError(null);
@@ -30,15 +69,74 @@ function CourseDetail() {
       }
     };
 
-    if (id) {
-      fetchCourse();
-    }
+    if (id) fetchCourse();
   }, [id]);
 
+  // ------------------------------
+  // NAVIGATION
+  // ------------------------------
   const handleBack = () => {
     navigate('/academy/courses');
   };
 
+  // ------------------------------
+  // START ENROLLMENT / PAYMENT FLOW
+  // ------------------------------
+  const handleEnroll = async () => {
+    if (!course) {
+      console.warn("handleEnroll called with no course");
+      return;
+    }
+
+    try {
+      setEnrolling(true);
+
+      const res = await fetch(
+        "http://localhost:5000/api/payments/create-payment-intent",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            courseId: course._id,
+            userId: "TEMP_USER_ID", // replace with real auth user later
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Payment initialization failed");
+      }
+
+      // ------------------------------
+      // FREE COURSE FLOW
+      // ------------------------------
+      if (data.free) {
+        navigate(`/academy/courses/${course._id}/learn`);
+        return;
+      }
+
+      // ------------------------------
+      // PAID COURSE FLOW
+      // ------------------------------
+      if (!data.clientSecret) {
+        throw new Error("Missing clientSecret from backend");
+      }
+
+      setClientSecret(data.clientSecret);
+
+    } catch (err) {
+      console.error("Enrollment failed:", err);
+      alert(`Enrollment failed: ${err.message}`);
+    } finally {
+      setEnrolling(false);
+    }
+  };
+
+  // ------------------------------
+  // HELPERS
+  // ------------------------------
   const getCoursePrice = (course) => {
     if (!course) return 'Free';
     if (course.isLiteVersion) return 'Free (Lite)';
@@ -53,6 +151,9 @@ function CourseDetail() {
     return duration;
   };
 
+  // ------------------------------
+  // LOADING STATE
+  // ------------------------------
   if (loading) {
     return (
       <div className="course-detail-page">
@@ -63,6 +164,9 @@ function CourseDetail() {
     );
   }
 
+  // ------------------------------
+  // ERROR STATE
+  // ------------------------------
   if (error || !course) {
     return (
       <div className="course-detail-page">
@@ -79,6 +183,9 @@ function CourseDetail() {
     );
   }
 
+  // ------------------------------
+  // MAIN RENDER
+  // ------------------------------
   return (
     <div className="course-detail-page">
       <div className="course-detail-container">
@@ -86,30 +193,39 @@ function CourseDetail() {
           ← Back to Courses
         </button>
 
-        {/* Course Header */}
+        {/* ------------------------------
+            COURSE HEADER
+           ------------------------------ */}
         <div className="course-header-section">
           <div className="course-hero">
             <div className="course-hero-image">
               {course.thumbnail ? (
                 <img src={course.thumbnail} alt={course.title} />
               ) : (
-                <div className="placeholder-hero-image">📚</div>
+                <div className="placeholder-hero-image">Image</div>
               )}
             </div>
+
             <div className="course-hero-content">
               <div className="course-badges">
-                {course.isLiteVersion && <span className="lite-badge">Lite Version</span>}
-                <span className="difficulty-badge">{course.difficulty || 'Beginner'}</span>
-                <span className="category-badge">{course.category || 'General'}</span>
+                {course.isLiteVersion && (
+                  <span className="lite-badge">Lite Version</span>
+                )}
+                <span className="difficulty-badge">
+                  {course.difficulty || 'Beginner'}
+                </span>
+                <span className="category-badge">
+                  {course.category || 'General'}
+                </span>
               </div>
+
               <h1 className="course-title">{course.title}</h1>
+
               <div className="course-meta">
                 <div className="meta-item">
-                  <span className="meta-icon">🕐</span>
                   <span>{formatDuration(course.duration)}</span>
                 </div>
                 <div className="meta-item">
-                  <span className="meta-icon">💰</span>
                   <span>{getCoursePrice(course)}</span>
                 </div>
               </div>
@@ -117,57 +233,19 @@ function CourseDetail() {
           </div>
         </div>
 
-        {/* Course Overview */}
+        {/* ------------------------------
+            COURSE OVERVIEW
+           ------------------------------ */}
         <div className="course-section">
           <h2 className="section-title">Course Overview</h2>
           <div className="course-description">
-            {course.description ? (
-              <p>{course.description}</p>
-            ) : (
-              <p>No description available for this course.</p>
-            )}
+            {course.description || 'No description available for this course.'}
           </div>
         </div>
 
-        {/* Instructor Information */}
-        {course.instructor && (
-          <div className="course-section">
-            <h2 className="section-title">Instructor</h2>
-            <div className="instructor-info">
-              {course.instructor.avatar && (
-                <div className="instructor-avatar">
-                  <img src={course.instructor.avatar} alt={course.instructor.name} />
-                </div>
-              )}
-              <div className="instructor-details">
-                <h3 className="instructor-name">{course.instructor.name}</h3>
-                {course.instructor.title && (
-                  <p className="instructor-title">{course.instructor.title}</p>
-                )}
-                {course.instructor.bio && (
-                  <p className="instructor-bio">{course.instructor.bio}</p>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Learning Points */}
-        {course.learningPoints && course.learningPoints.length > 0 && (
-          <div className="course-section">
-            <h2 className="section-title">What You'll Learn</h2>
-            <ul className="learning-points-list">
-              {course.learningPoints.map((point, index) => (
-                <li key={index} className="learning-point">
-                  <span className="point-icon">✓</span>
-                  <span>{point}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Course Modules */}
+        {/* ------------------------------
+            COURSE MODULES 
+           ------------------------------ */}
         {course.modules && course.modules.length > 0 && (
           <div className="course-section">
             <h2 className="section-title">Course Modules</h2>
@@ -177,54 +255,15 @@ function CourseDetail() {
                 .map((module, index) => (
                   <div key={module._id || index} className="module-card">
                     <div className="module-header">
-                      <div className="module-number">Module {index + 1}</div>
+                      <div className="module-number">
+                        Module {index + 1}
+                      </div>
                       <h3 className="module-title">{module.title}</h3>
                     </div>
+
                     {module.description && (
                       <div className="module-description">
-                        <h4 className="module-subtitle">Overview</h4>
                         <p>{module.description}</p>
-                      </div>
-                    )}
-                    {module.learningPoints && module.learningPoints.length > 0 && (
-                      <div className="module-learning-points">
-                        <h4 className="module-subtitle">Learning Outcomes</h4>
-                        <ul className="module-points-list">
-                          {module.learningPoints.map((point, pointIndex) => (
-                            <li key={pointIndex}>{point}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    <div className="module-content">
-                      {module.videoUrl && (
-                        <div className="content-item">
-                          <span className="content-icon">🎥</span>
-                          <a href={module.videoUrl} target="_blank" rel="noopener noreferrer" className="content-link">
-                            Video Content
-                          </a>
-                        </div>
-                      )}
-                      {module.articleContent && (
-                        <div className="content-item">
-                          <span className="content-icon">📄</span>
-                          <span className="content-text">Article Content Available</span>
-                        </div>
-                      )}
-                      {module.pdfUrl && (
-                        <div className="content-item">
-                          <span className="content-icon">📕</span>
-                          <a href={module.pdfUrl} target="_blank" rel="noopener noreferrer" className="content-link">
-                            PDF Resource
-                          </a>
-                        </div>
-                      )}
-                    </div>
-                    {(module.duration || module.estimatedMinutes) && (
-                      <div className="module-meta">
-                        <span className="module-duration">
-                          {module.duration || `${module.estimatedMinutes} minutes`}
-                        </span>
                       </div>
                     )}
                   </div>
@@ -233,14 +272,44 @@ function CourseDetail() {
           </div>
         )}
 
-        {/* Course Actions */}
-        <div className="course-actions">
-          <button className="enroll-button">Enroll in Course</button>
+        {/* ------------------------------ */}
+        {/* COURSE ACTIONS / ENROLLMENT */}
+        {/* ------------------------------ */}
+        {!clientSecret ? (
+        <button
+          className="enroll-button"
+          onClick={handleEnroll}
+          disabled={enrolling}
+        >
+          {course.isFree
+            ? "Enroll Free"
+            : enrolling
+            ? "Starting Checkout..."
+            : `Enroll for $${course.priceAmount}`}
+        </button>
+      ) : (
+        <div className="checkout-container">
+          <h3>Complete Your Purchase</h3>
+          <Elements
+            stripe={stripePromise}
+            options={{
+              clientSecret,
+              appearance: {
+                theme: 'stripe',
+                variables: {
+                  colorPrimary: '#0070f3',
+                }
+              }
+            }}
+          >
+            <CheckoutForm />
+          </Elements>
         </div>
+      )}
+
       </div>
     </div>
   );
 }
 
 export default CourseDetail;
-

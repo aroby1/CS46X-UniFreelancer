@@ -74,6 +74,7 @@
     "side-channel-map": "^1.0.1",
     "side-channel-weakmap": "^1.0.2",
     "statuses": "^2.0.2",
+    "stripe": "^20.1.2",
     "toidentifier": "^1.0.1",
     "type-is": "^2.0.1",
     "unpipe": "^1.0.0",

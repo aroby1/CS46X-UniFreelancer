@@ -13,6 +13,13 @@
   padding: 0 40px;
 }
 
+.checkout-container {
+  border: 2px solid red;
+  padding: 24px;
+  background: white;
+  margin-top: 32px;
+}
+
 .nav-item {
   display: flex;
   align-items: center;

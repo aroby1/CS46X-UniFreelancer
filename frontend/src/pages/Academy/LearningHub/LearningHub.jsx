@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { FiArrowLeft } from 'react-icons/fi';
 import './LearningHub.css';
 
 
@@ -310,7 +311,7 @@ function LearningHub() {
     <div className="learning-hub-page">
       <div className="learning-hub-container">
         <button className="back-link" onClick={handleBackToAcademy}>
-          ← Back to Academy
+          <FiArrowLeft size={18} /> Back to Academy
         </button>
 
         {/* My Learning Section */}

@@ -338,7 +338,6 @@ function TutorialDetail() {
                 </div>
 
                 <h1 className="tutorial-title">{tutorial.title}</h1>
-                <p className="tutorial-description">{tutorial.description}</p>
 
                 <div className="tutorial-hero-bottom">
                   <div className="tutorial-meta">

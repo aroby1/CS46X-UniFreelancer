@@ -1,6 +1,7 @@
 /* global process */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FiArrowLeft } from 'react-icons/fi';
 import './CreateSeminar.css';
 
 function CreateSeminar() {
@@ -88,7 +89,7 @@ function CreateSeminar() {
       <div className="create-seminar-container">
 
         <button className="back-button" onClick={handleBack}>
-          ← Back
+          <FiArrowLeft size={18} /> Back
         </button>
 
         <h1 className="create-seminar-title">Create New Seminar</h1>

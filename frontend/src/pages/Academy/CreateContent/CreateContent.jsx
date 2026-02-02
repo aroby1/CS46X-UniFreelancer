@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FiArrowLeft } from 'react-icons/fi';
 import './CreateContent.css';
 
 function CreateContent() {
@@ -26,7 +27,7 @@ function CreateContent() {
     <div className="create-content-page">
       <div className="create-content-container">
         <button className="back-link" onClick={handleBackToAcademy}>
-          ← Back to Academy
+          <FiArrowLeft size={18} /> Back to Academy
         </button>
 
         <h1 className="page-title">Create New Content</h1>

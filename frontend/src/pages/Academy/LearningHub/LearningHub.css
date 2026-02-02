@@ -20,6 +20,7 @@
   padding: 8px 0;
   display: inline-flex;
   align-items: center;
+  gap: 8px;
   transition: color 0.3s ease;
 }
 
@@ -601,4 +602,3 @@
   }
 
 }
-

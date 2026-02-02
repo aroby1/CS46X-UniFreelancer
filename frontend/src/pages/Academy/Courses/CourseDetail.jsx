@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FiClock, FiDollarSign } from 'react-icons/fi';
+import { FiArrowLeft, FiClock, FiDollarSign } from 'react-icons/fi';
 import './CourseDetail.css';
 
 function CourseDetail() {
@@ -123,7 +123,7 @@ function CourseDetail() {
       <div className="course-detail-page">
         <div className="course-detail-container">
           <button className="back-button" onClick={handleBack}>
-            ← Back to Courses
+            <FiArrowLeft size={18} /> Back to Courses
           </button>
           <div className="error-message">
             <h2>Course Not Found</h2>
@@ -142,7 +142,7 @@ function CourseDetail() {
     <div className="course-detail-page">
       <div className="course-detail-container">
         <button className="back-button" onClick={handleBack}>
-          ← Back to Courses
+          <FiArrowLeft size={18} /> Back to Courses
         </button>
 
         {/* Course Header */}

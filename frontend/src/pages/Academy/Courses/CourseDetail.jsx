@@ -10,12 +10,58 @@ function CourseDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedModules, setExpandedModules] = useState({});
+  const [openVideos, setOpenVideos] = useState({});
 
   const toggleModule = (moduleId) => {
-    setExpandedModules(prev => ({
+    setExpandedModules(prev => {
+      const next = { ...prev, [moduleId]: !prev[moduleId] };
+
+      // If closing module, also close its video dropdown
+      if (prev[moduleId]) {
+        setOpenVideos(v => ({ ...v, [moduleId]: false }));
+      }
+
+      return next;
+    });
+  };
+
+  const toggleVideo = (moduleKey) => {
+    setOpenVideos(prev => ({
       ...prev,
-      [moduleId]: !prev[moduleId]
+      [moduleKey]: !prev[moduleKey]
     }));
+  };
+
+  const toYouTubeEmbedUrl = (url) => {
+    if (!url) return "";
+
+    try {
+      const u = new URL(url);
+
+      // Already an embed link
+      if (u.hostname.includes("youtube.com") && u.pathname.startsWith("/embed/")) {
+        return url;
+      }
+
+      // youtu.be/<id>
+      if (u.hostname === "youtu.be") {
+        const id = u.pathname.replace("/", "");
+        return id ? `https://www.youtube.com/embed/${id}` : "";
+      }
+
+      // youtube.com/watch?v=<id>
+      const v = u.searchParams.get("v");
+      if (v) {
+        const list = u.searchParams.get("list");
+        return list
+          ? `https://www.youtube.com/embed/${v}?list=${encodeURIComponent(list)}`
+          : `https://www.youtube.com/embed/${v}`;
+      }
+
+      return "";
+    } catch {
+      return "";
+    }
   };
 
   useEffect(() => {
@@ -201,21 +247,22 @@ function CourseDetail() {
               {course.modules
                 .sort((a, b) => (a.order || 0) - (b.order || 0))
                 .map((module, index) => {
-                  const isExpanded = expandedModules[module._id || index];
+                  const moduleKey = module._id || index;
+                  const isExpanded = expandedModules[moduleKey];
+
+                  const embedUrl = toYouTubeEmbedUrl(module.videoUrl);
+
                   return (
-                    <div key={module._id || index} className={`module-card ${isExpanded ? 'expanded' : ''}`}>
-                      <div className="module-card-header" onClick={() => toggleModule(module._id || index)}>
-                        {/* Thumbnail Section */}
+                    <div key={moduleKey} className={`module-card ${isExpanded ? 'expanded' : ''}`}>
+                      <div className="module-card-header" onClick={() => toggleModule(moduleKey)}>
                         <div className="module-thumbnail">
                           {module.thumbnail ? (
                             <img src={module.thumbnail} alt={`Module ${index + 1}`} />
                           ) : (
-                            <div className="module-placeholder-thumbnail">
-                            </div>
+                            <div className="module-placeholder-thumbnail" />
                           )}
                         </div>
 
-                        {/* Info Section */}
                         <div className="module-info-compact">
                           <div className="module-number">Module {index + 1}</div>
                           <h3 className="module-title-compact">{module.title}</h3>
@@ -235,13 +282,11 @@ function CourseDetail() {
                           )}
                         </div>
 
-                        {/* Toggle Icon */}
                         <div className="module-toggle-icon">
                           {isExpanded ? '−' : '+'}
                         </div>
                       </div>
 
-                      {/* Expanded Details */}
                       <div className={`module-details-expanded ${isExpanded ? 'expanded' : ''}`}>
                         {module.description && (
                           <div className="module-full-description">
@@ -263,19 +308,48 @@ function CourseDetail() {
 
                         <div className="module-content">
                           {module.videoUrl && (
-                            <div className="content-item">
-                              <span className="content-icon">🎥</span>
-                              <a href={module.videoUrl} target="_blank" rel="noopener noreferrer" className="content-link">
-                                Video Content
-                              </a>
+                            <div className="content-item content-item-video">
+                              <button
+                                type="button"
+                                className="video-toggle"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleVideo(moduleKey);
+                                }}
+                                aria-expanded={!!openVideos[moduleKey]}
+                              >
+                                <span className="content-icon">🎥</span>
+                                <span>Watch Video</span>
+                                <span className="video-toggle-icon">{openVideos[moduleKey] ? '−' : '+'}</span>
+                              </button>
+
+                              {openVideos[moduleKey] && embedUrl && (
+                                <div
+                                  className="video-embed"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <iframe
+                                    src={embedUrl}
+                                    title={`${module.title || `Module ${index + 1}`} video`}
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    allowFullScreen
+                                    loading="lazy"
+                                    referrerPolicy="strict-origin-when-cross-origin"
+                                  />
+                                </div>
+                              )}
                             </div>
                           )}
+
+
                           {module.articleContent && (
                             <div className="content-item">
                               <span className="content-icon">📄</span>
                               <span className="content-text">Article Content Available</span>
                             </div>
                           )}
+
                           {module.pdfUrl && (
                             <div className="content-item">
                               <span className="content-icon">📕</span>

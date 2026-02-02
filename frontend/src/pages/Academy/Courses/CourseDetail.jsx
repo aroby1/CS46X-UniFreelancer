@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { FiClock, FiDollarSign } from 'react-icons/fi';
 import './CourseDetail.css';
 
 function CourseDetail() {
@@ -87,6 +88,10 @@ function CourseDetail() {
     );
   }
 
+  const publishedDate = course?.createdAt
+    ? new Date(course.createdAt).toLocaleDateString()
+    : null;
+
   return (
     <div className="course-detail-page">
       <div className="course-detail-container">
@@ -111,15 +116,28 @@ function CourseDetail() {
                 <span className="category-badge">{course.category || 'General'}</span>
               </div>
               <h1 className="course-title">{course.title}</h1>
-              <div className="course-meta">
-                <div className="meta-item">
-                  <span className="meta-icon">🕐</span>
-                  <span>{formatDuration(course.duration)}</span>
+
+              <div className="course-hero-bottom">
+                <div className="course-meta">
+                  <div className="course-meta-item">
+                    <FiClock className="course-meta-icon" />
+                    <div>
+                      <span className="course-meta-label">Estimated Time</span>
+                      <span className="course-meta-value">{formatDuration(course.duration)}</span>
+                    </div>
+                  </div>
+                  <div className="course-meta-item">
+                    <FiDollarSign className="course-meta-icon" />
+                    <div>
+                      <span className="course-meta-label">Price</span>
+                      <span className="course-meta-value">{getCoursePrice(course)}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="meta-item">
-                  <span className="meta-icon">💰</span>
-                  <span>{getCoursePrice(course)}</span>
-                </div>
+
+                {publishedDate && (
+                  <p className="published-date">Published {publishedDate}</p>
+                )}
               </div>
             </div>
           </div>
@@ -285,4 +303,3 @@ function CourseDetail() {
 }
 
 export default CourseDetail;
-

@@ -713,40 +713,61 @@ function LearningHub() {
                   </div>
                 ))
               ) : (
-                filteredTutorials.map(tutorial => (
-                  <div key={tutorial._id} className="tutorial-card">
-                    <div className="tutorial-image">
-                      {tutorial.thumbnail ? (
-                        <img src={tutorial.thumbnail} alt={tutorial.title} />
-                      ) : (
-                        <div className="placeholder-image">📘</div>
-                      )}
-                    </div>
-                    <div className="tutorial-content">
-                      <h3 className="tutorial-title">{tutorial.title}</h3>
-                      <p className="tutorial-description">
-                        {tutorial.description?.substring(0, 90)}...
-                      </p>
-                      <div className="tutorial-details">
-                        <div className="tutorial-detail">
-                          <span className="detail-icon">📚</span>
-                          <span>{tutorial.topic}</span>
+                filteredTutorials.map((tutorial) => {
+                  const tutorialId = tutorial._id || tutorial.id;
+                  const goToTutorial = () => {
+                    if (!tutorialId) return;
+                    navigate(`/academy/tutorials/${tutorialId}`);
+                  };
+
+                  return (
+                    <div
+                      key={tutorialId || tutorial.title}
+                      className="tutorial-card"
+                      onClick={goToTutorial}
+                      style={{ cursor: tutorialId ? "pointer" : "default" }}
+                    >
+                      <div className="tutorial-image">
+                        {tutorial.thumbnail ? (
+                          <img src={tutorial.thumbnail} alt={tutorial.title} />
+                        ) : (
+                          <div className="placeholder-image">📘</div>
+                        )}
+                      </div>
+                      <div className="tutorial-content">
+                        <h3 className="tutorial-title">{tutorial.title}</h3>
+                        <p className="tutorial-description">
+                          {tutorial.description?.substring(0, 90)}...
+                        </p>
+                        <div className="tutorial-details">
+                          <div className="tutorial-detail">
+                            <span className="detail-icon">📚</span>
+                            <span>{tutorial.topic}</span>
+                          </div>
+                          <div className="tutorial-detail">
+                            <span className="detail-icon">🎯</span>
+                            <span>{tutorial.difficulty}</span>
+                          </div>
+                          <div className="tutorial-detail">
+                            <span className="detail-icon">⏱️</span>
+                            <span>{tutorial.lengthCategory}</span>
+                          </div>
                         </div>
-                        <div className="tutorial-detail">
-                          <span className="detail-icon">🎯</span>
-                          <span>{tutorial.difficulty}</span>
-                        </div>
-                        <div className="tutorial-detail">
-                          <span className="detail-icon">⏱️</span>
-                          <span>{tutorial.lengthCategory}</span>
+                        <div className="tutorial-footer">
+                          <button
+                            className="view-details-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              goToTutorial();
+                            }}
+                          >
+                            View Tutorial →
+                          </button>
                         </div>
                       </div>
-                      <div className="tutorial-footer">
-                        <button className="view-details-btn">View Tutorial →</button>
-                      </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>
@@ -757,4 +778,3 @@ function LearningHub() {
 }
 
 export default LearningHub;
-

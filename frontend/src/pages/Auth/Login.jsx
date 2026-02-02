@@ -1,10 +1,11 @@
 /* global process */
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import './Login.css';
 
 const Login = () => {
     //const navigate = useNavigate();
+    const location = useLocation();
     const [formData, setFormData] = useState({
         email: '',
         password: ''
@@ -36,8 +37,12 @@ const Login = () => {
 
             if (response.ok) {
                 console.log('Login successful:', data);
-                // Redirect to home and reload to update App state
-                window.location.href = '/';
+                const params = new URLSearchParams(location.search);
+                const returnTo = params.get('returnTo');
+                const safeReturnTo = returnTo && returnTo.startsWith('/') ? returnTo : null;
+
+                // Redirect and reload to update App state
+                window.location.href = safeReturnTo || '/';
             } else {
                 alert(data.message || 'Login failed');
             }
@@ -104,7 +109,7 @@ const Login = () => {
 
                 <div className="auth-footer">
                     Don't have an account?
-                    <Link to="/signup" className="auth-link">Sign up</Link>
+                    <Link to={`/signup${location.search || ''}`} className="auth-link">Sign up</Link>
                 </div>
             </div>
         </div>

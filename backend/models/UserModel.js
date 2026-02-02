@@ -50,6 +50,10 @@ const UserSchema = new mongoose.Schema({
     { type: mongoose.Schema.Types.ObjectId, ref: "Tutorial" }
   ],
 
+  bookmarkedTutorials: [
+    { type: mongoose.Schema.Types.ObjectId, ref: "Tutorial" }
+  ],
+
   savedPodcasts: [
     { type: mongoose.Schema.Types.ObjectId, ref: "Podcast" }
   ],
@@ -78,5 +82,6 @@ UserSchema.pre("save", async function (next) {
 UserSchema.index({ role: 1 });
 UserSchema.index({ enrolledCourses: 1 });
 UserSchema.index({ completedCourses: 1 });
+UserSchema.index({ bookmarkedTutorials: 1 });
 
 module.exports = mongoose.model("User", UserSchema);

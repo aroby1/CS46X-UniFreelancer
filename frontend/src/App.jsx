@@ -9,6 +9,7 @@ import CreateCourse from './pages/Academy/Courses/CreateCourse';
 import CourseDetail from './pages/Academy/Courses/CourseDetail';
 import CreateSeminar from './pages/Academy/Seminars/CreateSeminar';
 import CreateTutorial from './pages/Academy/Tutorials/CreateTutorial';
+import TutorialDetail from './pages/Academy/Tutorials/TutorialDetail';
 import Login from './pages/Auth/Login';
 import Signup from './pages/Auth/Signup';
 import Profile from './pages/Auth/Profile';
@@ -52,6 +53,7 @@ function App() {
           <Route path="/academy/create" element={<CreateContent />} />
           <Route path="/academy/seminars" element={<LearningHub />} />
           <Route path="/academy/tutorials" element={<LearningHub />} />
+          <Route path="/academy/tutorials/:id" element={<TutorialDetail />} />
           <Route path="/academy/create/course" element={<CreateCourse />} />
           <Route path="/academy/courses/:id" element={<CourseDetail />} />
           <Route path="/login" element={<Login />} />

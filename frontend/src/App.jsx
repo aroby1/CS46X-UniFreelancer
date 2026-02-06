@@ -13,6 +13,7 @@ import TutorialDetail from './pages/Academy/Tutorials/TutorialDetail';
 import Login from './pages/Auth/Login';
 import Signup from './pages/Auth/Signup';
 import Profile from './pages/Auth/Profile';
+import PaymentSuccess from './pages/Payment/PaymentSuccess';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -61,6 +62,7 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/academy/create/seminar" element={<CreateSeminar />} />
           <Route path="/academy/create/tutorial" element={<CreateTutorial />} />
+          <Route path="/academy/payment-success" element={<PaymentSuccess />} />
         </Routes>
       </div>
     </Router>

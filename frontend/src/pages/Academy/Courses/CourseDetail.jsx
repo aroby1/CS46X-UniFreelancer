@@ -1,11 +1,41 @@
+/* global process */
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+
+// ------------------------------
+// STRIPE IMPORTS
+// ------------------------------
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+
+// ------------------------------
+// CHECKOUT COMPONENT
+// ------------------------------
+import CheckoutForm from "../../../components/Shared/CheckoutForm";
+
 import { FiClock, FiDollarSign } from 'react-icons/fi';
 import './CourseDetail.css';
+
+// ------------------------------
+// STRIPE INITIALIZATION
+// ------------------------------
+// Must be outside component to avoid re-creating Stripe on every render
+const stripePromise = loadStripe(
+  process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY
+);
+
+console.log(
+  "Stripe publishable key:",
+  process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY
+);
 
 function CourseDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  // ------------------------------
+  // STATE
+  // ------------------------------
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -64,10 +94,18 @@ function CourseDetail() {
     }
   };
 
+  // Stripe-related state
+  const [clientSecret, setClientSecret] = useState(null);
+  const [enrolling, setEnrolling] = useState(false);
+
+  // ------------------------------
+  // FETCH COURSE DATA
+  // ------------------------------
   useEffect(() => {
     const fetchCourse = async () => {
       try {
         setLoading(true);
+
         const response = await fetch(`http://localhost:5000/api/academy/courses/${id}`);
 
         if (!response.ok) {
@@ -85,15 +123,74 @@ function CourseDetail() {
       }
     };
 
-    if (id) {
-      fetchCourse();
-    }
+    if (id) fetchCourse();
   }, [id]);
 
+  // ------------------------------
+  // NAVIGATION
+  // ------------------------------
   const handleBack = () => {
     navigate('/academy/courses');
   };
 
+  // ------------------------------
+  // START ENROLLMENT / PAYMENT FLOW
+  // ------------------------------
+  const handleEnroll = async () => {
+    if (!course) {
+      console.warn("handleEnroll called with no course");
+      return;
+    }
+
+    try {
+      setEnrolling(true);
+
+      const res = await fetch(
+        "http://localhost:5000/api/payments/create-payment-intent",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            courseId: course._id,
+            userId: "TEMP_USER_ID", // replace with real auth user later
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Payment initialization failed");
+      }
+
+      // ------------------------------
+      // FREE COURSE FLOW
+      // ------------------------------
+      if (data.free) {
+        navigate(`/academy/courses/${course._id}/learn`);
+        return;
+      }
+
+      // ------------------------------
+      // PAID COURSE FLOW
+      // ------------------------------
+      if (!data.clientSecret) {
+        throw new Error("Missing clientSecret from backend");
+      }
+
+      setClientSecret(data.clientSecret);
+
+    } catch (err) {
+      console.error("Enrollment failed:", err);
+      alert(`Enrollment failed: ${err.message}`);
+    } finally {
+      setEnrolling(false);
+    }
+  };
+
+  // ------------------------------
+  // HELPERS
+  // ------------------------------
   const getCoursePrice = (course) => {
     if (!course) return 'Free';
     if (course.isLiteVersion) return 'Free (Lite)';
@@ -108,6 +205,9 @@ function CourseDetail() {
     return duration;
   };
 
+  // ------------------------------
+  // LOADING STATE
+  // ------------------------------
   if (loading) {
     return (
       <div className="course-detail-page">
@@ -118,6 +218,9 @@ function CourseDetail() {
     );
   }
 
+  // ------------------------------
+  // ERROR STATE
+  // ------------------------------
   if (error || !course) {
     return (
       <div className="course-detail-page">
@@ -134,6 +237,9 @@ function CourseDetail() {
     );
   }
 
+  // ------------------------------
+  // MAIN RENDER
+  // ------------------------------
   const publishedDate = course?.createdAt
     ? new Date(course.createdAt).toLocaleDateString()
     : null;
@@ -145,232 +251,115 @@ function CourseDetail() {
           ← Back to Courses
         </button>
 
-        {/* Course Header */}
+ {/* COURSE HEADER */}
         <div className="course-header-section">
           <div className="course-hero">
             <div className="course-hero-image">
               {course.thumbnail ? (
                 <img src={course.thumbnail} alt={course.title} />
               ) : (
-                <div className="placeholder-hero-image">📚</div>
+                <div className="placeholder-hero-image">Image</div>
               )}
             </div>
+
             <div className="course-hero-content">
               <div className="course-badges">
-                {course.isLiteVersion && <span className="lite-badge">Lite Version</span>}
-                <span className="difficulty-badge">{course.difficulty || 'Beginner'}</span>
-                <span className="category-badge">{course.category || 'General'}</span>
-              </div>
-              <h1 className="course-title">{course.title}</h1>
-
-              <div className="course-hero-bottom">
-                <div className="course-meta">
-                  <div className="course-meta-item">
-                    <FiClock className="course-meta-icon" />
-                    <div>
-                      <span className="course-meta-label">Estimated Time</span>
-                      <span className="course-meta-value">{formatDuration(course.duration)}</span>
-                    </div>
-                  </div>
-                  <div className="course-meta-item">
-                    <FiDollarSign className="course-meta-icon" />
-                    <div>
-                      <span className="course-meta-label">Price</span>
-                      <span className="course-meta-value">{getCoursePrice(course)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {publishedDate && (
-                  <p className="published-date">Published {publishedDate}</p>
+                {course.isLiteVersion && (
+                  <span className="lite-badge">Lite Version</span>
                 )}
+                <span className="difficulty-badge">
+                  {course.difficulty || "Beginner"}
+                </span>
+                <span className="category-badge">
+                  {course.category || "General"}
+                </span>
+              </div>
+
+              <h1>{course.title}</h1>
+
+              <div className="course-meta">
+                <div>
+                  <FiClock /> {course.duration || "N/A"}
+                </div>
+                <div>
+                  <FiDollarSign />{" "}
+                  {course.isFree ? "Free" : `$${course.priceAmount}`}
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Course Overview */}
+        {/* COURSE OVERVIEW */}
         <div className="course-section">
-          <h2 className="section-title">Course Overview</h2>
-          <div className="course-description">
-            {course.description ? (
-              <p>{course.description}</p>
-            ) : (
-              <p>No description available for this course.</p>
-            )}
-          </div>
+          <h2>Course Overview</h2>
+          <p>{course.description}</p>
         </div>
 
-        {/* Instructor Information */}
-        {course.instructor && (
+        {/* COURSE MODULES */}
+        {course.modules?.length > 0 && (
           <div className="course-section">
-            <h2 className="section-title">Instructor</h2>
-            <div className="instructor-info">
-              {course.instructor.avatar && (
-                <div className="instructor-avatar">
-                  <img src={course.instructor.avatar} alt={course.instructor.name} />
-                </div>
-              )}
-              <div className="instructor-details">
-                <h3 className="instructor-name">{course.instructor.name}</h3>
-                {course.instructor.title && (
-                  <p className="instructor-title">{course.instructor.title}</p>
-                )}
-                {course.instructor.bio && (
-                  <p className="instructor-bio">{course.instructor.bio}</p>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+            <h2>Course Modules</h2>
 
-        {/* Learning Points */}
-        {course.learningPoints && course.learningPoints.length > 0 && (
-          <div className="course-section">
-            <h2 className="section-title">What You'll Learn</h2>
-            <ul className="learning-points-list">
-              {course.learningPoints.map((point, index) => (
-                <li key={index} className="learning-point">
-                  <span className="point-icon">✓</span>
-                  <span>{point}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+            {course.modules.map((module, index) => {
+              const key = module._id || index;
+              const embedUrl = toYouTubeEmbedUrl(module.videoUrl);
 
-        {/* Course Modules */}
-        {course.modules && course.modules.length > 0 && (
-          <div className="course-section">
-            <h2 className="section-title">Course Modules</h2>
-            <div className="modules-list">
-              {course.modules
-                .sort((a, b) => (a.order || 0) - (b.order || 0))
-                .map((module, index) => {
-                  const moduleKey = module._id || index;
-                  const isExpanded = expandedModules[moduleKey];
+              return (
+                <div key={key} className="module-card">
+                  <div
+                    className="module-card-header"
+                    onClick={() => toggleModule(key)}
+                  >
+                    <h3>{module.title}</h3>
+                    <span>{expandedModules[key] ? "−" : "+"}</span>
+                  </div>
 
-                  const embedUrl = toYouTubeEmbedUrl(module.videoUrl);
+                  {expandedModules[key] && (
+                    <div className="module-content">
+                      <p>{module.description}</p>
 
-                  return (
-                    <div key={moduleKey} className={`module-card ${isExpanded ? 'expanded' : ''}`}>
-                      <div className="module-card-header" onClick={() => toggleModule(moduleKey)}>
-                        <div className="module-thumbnail">
-                          {module.thumbnail ? (
-                            <img src={module.thumbnail} alt={`Module ${index + 1}`} />
-                          ) : (
-                            <div className="module-placeholder-thumbnail" />
+                      {embedUrl && (
+                        <>
+                          <button onClick={() => toggleVideo(key)}>
+                            Watch Video
+                          </button>
+
+                          {openVideos[key] && (
+                            <iframe
+                              src={embedUrl}
+                              title={module.title}
+                              allowFullScreen
+                            />
                           )}
-                        </div>
-
-                        <div className="module-info-compact">
-                          <div className="module-number">Module {index + 1}</div>
-                          <h3 className="module-title-compact">{module.title}</h3>
-                          <div className="module-meta-compact">
-                            {(module.duration || module.estimatedMinutes) && (
-                              <span className="module-duration-compact">
-                                {module.duration || `${module.estimatedMinutes} min`}
-                              </span>
-                            )}
-                          </div>
-                          {module.description && (
-                            <p className="module-description-preview">
-                              {module.description.length > 100
-                                ? `${module.description.substring(0, 100)}...`
-                                : module.description}
-                            </p>
-                          )}
-                        </div>
-
-                        <div className="module-toggle-icon">
-                          {isExpanded ? '−' : '+'}
-                        </div>
-                      </div>
-
-                      <div className={`module-details-expanded ${isExpanded ? 'expanded' : ''}`}>
-                        {module.description && (
-                          <div className="module-full-description">
-                            <h4 className="module-subtitle">Overview</h4>
-                            <p>{module.description}</p>
-                          </div>
-                        )}
-
-                        {module.learningPoints && module.learningPoints.length > 0 && (
-                          <div className="module-learning-points">
-                            <h4 className="module-subtitle">Learning Outcomes</h4>
-                            <ul className="module-points-list">
-                              {module.learningPoints.map((point, pointIndex) => (
-                                <li key={pointIndex}>{point}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-
-                        <div className="module-content">
-                          {module.videoUrl && (
-                            <div className="content-item content-item-video">
-                              <button
-                                type="button"
-                                className="video-toggle"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleVideo(moduleKey);
-                                }}
-                                aria-expanded={!!openVideos[moduleKey]}
-                              >
-                                <span className="content-icon">🎥</span>
-                                <span>Watch Video</span>
-                                <span className="video-toggle-icon">{openVideos[moduleKey] ? '−' : '+'}</span>
-                              </button>
-
-                              {openVideos[moduleKey] && embedUrl && (
-                                <div
-                                  className="video-embed"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <iframe
-                                    src={embedUrl}
-                                    title={`${module.title || `Module ${index + 1}`} video`}
-                                    frameBorder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                    allowFullScreen
-                                    loading="lazy"
-                                    referrerPolicy="strict-origin-when-cross-origin"
-                                  />
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-
-                          {module.articleContent && (
-                            <div className="content-item">
-                              <span className="content-icon">📄</span>
-                              <span className="content-text">Article Content Available</span>
-                            </div>
-                          )}
-
-                          {module.pdfUrl && (
-                            <div className="content-item">
-                              <span className="content-icon">📕</span>
-                              <a href={module.pdfUrl} target="_blank" rel="noopener noreferrer" className="content-link">
-                                PDF Resource
-                              </a>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                        </>
+                      )}
                     </div>
-                  );
-                })}
-            </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 
-        {/* Course Actions */}
-        <div className="course-actions">
-          <button className="enroll-button">Enroll in Course</button>
-        </div>
+        {/* ENROLLMENT */}
+        {!clientSecret ? (
+          <button
+            className="enroll-button"
+            onClick={handleEnroll}
+            disabled={enrolling}
+          >
+            {course.isFree
+              ? "Enroll Free"
+              : enrolling
+              ? "Starting Checkout..."
+              : `Enroll for $${course.priceAmount}`}
+          </button>
+        ) : (
+          <Elements stripe={stripePromise} options={{ clientSecret }}>
+            <CheckoutForm />
+          </Elements>
+        )}
       </div>
     </div>
   );

@@ -52,8 +52,8 @@ function LearningHub() {
   // Update tab when URL changes
   useEffect(() => {
     const newTab = location.pathname === '/academy/seminars' ? 'seminars' :
-                   location.pathname === '/academy/tutorials' ? 'tutorials' :
-                   'courses';
+      location.pathname === '/academy/tutorials' ? 'tutorials' :
+        'courses';
     setActiveTab(newTab);
   }, [location.pathname]);
 
@@ -67,13 +67,13 @@ function LearningHub() {
 
   const fetchStats = async () => {
     try {
-      const userStr = localStorage.getItem('user');
-      if (!userStr) return;
+      // Use configured API URL and new profile endpoint
+      // eslint-disable-next-line no-undef
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${apiUrl}/api/users/profile`, {
+        credentials: 'include' // Use cookies!
+      });
 
-      const user = JSON.parse(userStr);
-      if (!user._id) return;
-
-      const response = await fetch(`http://localhost:5000/api/users/${user._id}`);
       if (response.ok) {
         const userData = await response.json();
         const enrolledCount = userData.enrolledCourses ? userData.enrolledCourses.length : 0;
@@ -312,12 +312,12 @@ function LearningHub() {
         <button className="back-link" onClick={handleBackToAcademy}>
           ← Back to Academy
         </button>
-        
+
         {/* My Learning Section */}
         <div className="my-learning-section">
           <h2 className="section-title">My Learning</h2>
           <p className="section-subtitle">Track your progress and continue your learning journey</p>
-          
+
           <div className="stats-grid">
             <div className="stat-card">
               <span className="stat-icon">📖</span>
@@ -390,15 +390,15 @@ function LearningHub() {
         <div className="content-section">
           <h2 className="section-title">
             {activeTab === 'continue-learning' ? 'Continue Learning' :
-             activeTab === 'courses' ? 'Courses' :
-             activeTab === 'seminars' ? 'Seminars & Events' :
-             'Tutorials'}
+              activeTab === 'courses' ? 'Courses' :
+                activeTab === 'seminars' ? 'Seminars & Events' :
+                  'Tutorials'}
           </h2>
           <p className="section-subtitle">
             {activeTab === 'continue-learning' ? 'Continue your learning journey with enrolled courses' :
-             activeTab === 'courses' ? 'Structured learning programs to master freelancing disciplines' :
-             activeTab === 'seminars' ? 'Interactive live sessions and expert workshops' :
-             'Quick, focused lessons to learn specific skills'}
+              activeTab === 'courses' ? 'Structured learning programs to master freelancing disciplines' :
+                activeTab === 'seminars' ? 'Interactive live sessions and expert workshops' :
+                  'Quick, focused lessons to learn specific skills'}
           </p>
 
           <div className="search-bar-container">
@@ -408,8 +408,8 @@ function LearningHub() {
                 type="text"
                 placeholder={
                   activeTab === 'continue-learning' || activeTab === 'courses' ? 'Search courses...' :
-                  activeTab === 'seminars' ? 'Search seminars...' :
-                  'Search tutorials...'
+                    activeTab === 'seminars' ? 'Search seminars...' :
+                      'Search tutorials...'
                 }
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -627,8 +627,8 @@ function LearningHub() {
                 </div>
               ) : (activeTab === 'courses' || activeTab === 'continue-learning') ? (
                 filteredCourses.map(course => (
-                  <div 
-                    key={course.id || course._id} 
+                  <div
+                    key={course.id || course._id}
                     className="course-card"
                     onClick={() => navigate(`/academy/courses/${course._id || course.id}`)}
                     style={{ cursor: 'pointer' }}
@@ -664,7 +664,7 @@ function LearningHub() {
                       </div>
                       <div className="course-footer">
                         <div className="course-price">{getCoursePrice(course)}</div>
-                        <button 
+                        <button
                           className="view-details-btn"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -713,40 +713,61 @@ function LearningHub() {
                   </div>
                 ))
               ) : (
-                filteredTutorials.map(tutorial => (
-                  <div key={tutorial._id} className="tutorial-card">
-                    <div className="tutorial-image">
-                      {tutorial.thumbnail ? (
-                        <img src={tutorial.thumbnail} alt={tutorial.title} />
-                      ) : (
-                        <div className="placeholder-image">📘</div>
-                      )}
-                    </div>
-                    <div className="tutorial-content">
-                      <h3 className="tutorial-title">{tutorial.title}</h3>
-                      <p className="tutorial-description">
-                        {tutorial.description?.substring(0, 90)}...
-                      </p>
-                      <div className="tutorial-details">
-                        <div className="tutorial-detail">
-                          <span className="detail-icon">📚</span>
-                          <span>{tutorial.topic}</span>
+                filteredTutorials.map((tutorial) => {
+                  const tutorialId = tutorial._id || tutorial.id;
+                  const goToTutorial = () => {
+                    if (!tutorialId) return;
+                    navigate(`/academy/tutorials/${tutorialId}`);
+                  };
+
+                  return (
+                    <div
+                      key={tutorialId || tutorial.title}
+                      className="tutorial-card"
+                      onClick={goToTutorial}
+                      style={{ cursor: tutorialId ? "pointer" : "default" }}
+                    >
+                      <div className="tutorial-image">
+                        {tutorial.thumbnail ? (
+                          <img src={tutorial.thumbnail} alt={tutorial.title} />
+                        ) : (
+                          <div className="placeholder-image">📘</div>
+                        )}
+                      </div>
+                      <div className="tutorial-content">
+                        <h3 className="tutorial-title">{tutorial.title}</h3>
+                        <p className="tutorial-description">
+                          {tutorial.description?.substring(0, 90)}...
+                        </p>
+                        <div className="tutorial-details">
+                          <div className="tutorial-detail">
+                            <span className="detail-icon">📚</span>
+                            <span>{tutorial.topic}</span>
+                          </div>
+                          <div className="tutorial-detail">
+                            <span className="detail-icon">🎯</span>
+                            <span>{tutorial.difficulty}</span>
+                          </div>
+                          <div className="tutorial-detail">
+                            <span className="detail-icon">⏱️</span>
+                            <span>{tutorial.lengthCategory}</span>
+                          </div>
                         </div>
-                        <div className="tutorial-detail">
-                          <span className="detail-icon">🎯</span>
-                          <span>{tutorial.difficulty}</span>
-                        </div>
-                        <div className="tutorial-detail">
-                          <span className="detail-icon">⏱️</span>
-                          <span>{tutorial.lengthCategory}</span>
+                        <div className="tutorial-footer">
+                          <button
+                            className="view-details-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              goToTutorial();
+                            }}
+                          >
+                            View Tutorial →
+                          </button>
                         </div>
                       </div>
-                      <div className="tutorial-footer">
-                        <button className="view-details-btn">View Tutorial →</button>
-                      </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>
@@ -757,4 +778,3 @@ function LearningHub() {
 }
 
 export default LearningHub;
-

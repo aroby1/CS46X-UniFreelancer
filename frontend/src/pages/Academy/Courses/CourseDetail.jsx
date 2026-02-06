@@ -12,6 +12,7 @@ import { loadStripe } from "@stripe/stripe-js";
 // ------------------------------
 import CheckoutForm from "../../../components/Shared/CheckoutForm";
 
+import { FiClock, FiDollarSign } from 'react-icons/fi';
 import './CourseDetail.css';
 
 // ------------------------------
@@ -37,6 +38,60 @@ function CourseDetail() {
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [expandedModules, setExpandedModules] = useState({});
+  const [openVideos, setOpenVideos] = useState({});
+
+  const toggleModule = (moduleId) => {
+    setExpandedModules(prev => {
+      const next = { ...prev, [moduleId]: !prev[moduleId] };
+
+      // If closing module, also close its video dropdown
+      if (prev[moduleId]) {
+        setOpenVideos(v => ({ ...v, [moduleId]: false }));
+      }
+
+      return next;
+    });
+  };
+
+  const toggleVideo = (moduleKey) => {
+    setOpenVideos(prev => ({
+      ...prev,
+      [moduleKey]: !prev[moduleKey]
+    }));
+  };
+
+  const toYouTubeEmbedUrl = (url) => {
+    if (!url) return "";
+
+    try {
+      const u = new URL(url);
+
+      // Already an embed link
+      if (u.hostname.includes("youtube.com") && u.pathname.startsWith("/embed/")) {
+        return url;
+      }
+
+      // youtu.be/<id>
+      if (u.hostname === "youtu.be") {
+        const id = u.pathname.replace("/", "");
+        return id ? `https://www.youtube.com/embed/${id}` : "";
+      }
+
+      // youtube.com/watch?v=<id>
+      const v = u.searchParams.get("v");
+      if (v) {
+        const list = u.searchParams.get("list");
+        return list
+          ? `https://www.youtube.com/embed/${v}?list=${encodeURIComponent(list)}`
+          : `https://www.youtube.com/embed/${v}`;
+      }
+
+      return "";
+    } catch {
+      return "";
+    }
+  };
 
   // Stripe-related state
   const [clientSecret, setClientSecret] = useState(null);
@@ -53,6 +108,7 @@ function CourseDetail() {
         const response = await fetch(
           `http://localhost:5000/api/academy/courses/${id}`
         );
+        const response = await fetch(`http://localhost:5000/api/academy/courses/${id}`);
 
         if (!response.ok) {
           throw new Error('Course not found');
@@ -186,6 +242,10 @@ function CourseDetail() {
   // ------------------------------
   // MAIN RENDER
   // ------------------------------
+  const publishedDate = course?.createdAt
+    ? new Date(course.createdAt).toLocaleDateString()
+    : null;
+
   return (
     <div className="course-detail-page">
       <div className="course-detail-container">
@@ -227,7 +287,27 @@ function CourseDetail() {
                 </div>
                 <div className="meta-item">
                   <span>{getCoursePrice(course)}</span>
+              <div className="course-hero-bottom">
+                <div className="course-meta">
+                  <div className="course-meta-item">
+                    <FiClock className="course-meta-icon" />
+                    <div>
+                      <span className="course-meta-label">Estimated Time</span>
+                      <span className="course-meta-value">{formatDuration(course.duration)}</span>
+                    </div>
+                  </div>
+                  <div className="course-meta-item">
+                    <FiDollarSign className="course-meta-icon" />
+                    <div>
+                      <span className="course-meta-label">Price</span>
+                      <span className="course-meta-value">{getCoursePrice(course)}</span>
+                    </div>
+                  </div>
                 </div>
+
+                {publishedDate && (
+                  <p className="published-date">Published {publishedDate}</p>
+                )}
               </div>
             </div>
           </div>
@@ -268,6 +348,123 @@ function CourseDetail() {
                     )}
                   </div>
                 ))}
+                .map((module, index) => {
+                  const moduleKey = module._id || index;
+                  const isExpanded = expandedModules[moduleKey];
+
+                  const embedUrl = toYouTubeEmbedUrl(module.videoUrl);
+
+                  return (
+                    <div key={moduleKey} className={`module-card ${isExpanded ? 'expanded' : ''}`}>
+                      <div className="module-card-header" onClick={() => toggleModule(moduleKey)}>
+                        <div className="module-thumbnail">
+                          {module.thumbnail ? (
+                            <img src={module.thumbnail} alt={`Module ${index + 1}`} />
+                          ) : (
+                            <div className="module-placeholder-thumbnail" />
+                          )}
+                        </div>
+
+                        <div className="module-info-compact">
+                          <div className="module-number">Module {index + 1}</div>
+                          <h3 className="module-title-compact">{module.title}</h3>
+                          <div className="module-meta-compact">
+                            {(module.duration || module.estimatedMinutes) && (
+                              <span className="module-duration-compact">
+                                {module.duration || `${module.estimatedMinutes} min`}
+                              </span>
+                            )}
+                          </div>
+                          {module.description && (
+                            <p className="module-description-preview">
+                              {module.description.length > 100
+                                ? `${module.description.substring(0, 100)}...`
+                                : module.description}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="module-toggle-icon">
+                          {isExpanded ? '−' : '+'}
+                        </div>
+                      </div>
+
+                      <div className={`module-details-expanded ${isExpanded ? 'expanded' : ''}`}>
+                        {module.description && (
+                          <div className="module-full-description">
+                            <h4 className="module-subtitle">Overview</h4>
+                            <p>{module.description}</p>
+                          </div>
+                        )}
+
+                        {module.learningPoints && module.learningPoints.length > 0 && (
+                          <div className="module-learning-points">
+                            <h4 className="module-subtitle">Learning Outcomes</h4>
+                            <ul className="module-points-list">
+                              {module.learningPoints.map((point, pointIndex) => (
+                                <li key={pointIndex}>{point}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        <div className="module-content">
+                          {module.videoUrl && (
+                            <div className="content-item content-item-video">
+                              <button
+                                type="button"
+                                className="video-toggle"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleVideo(moduleKey);
+                                }}
+                                aria-expanded={!!openVideos[moduleKey]}
+                              >
+                                <span className="content-icon">🎥</span>
+                                <span>Watch Video</span>
+                                <span className="video-toggle-icon">{openVideos[moduleKey] ? '−' : '+'}</span>
+                              </button>
+
+                              {openVideos[moduleKey] && embedUrl && (
+                                <div
+                                  className="video-embed"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <iframe
+                                    src={embedUrl}
+                                    title={`${module.title || `Module ${index + 1}`} video`}
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    allowFullScreen
+                                    loading="lazy"
+                                    referrerPolicy="strict-origin-when-cross-origin"
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+
+                          {module.articleContent && (
+                            <div className="content-item">
+                              <span className="content-icon">📄</span>
+                              <span className="content-text">Article Content Available</span>
+                            </div>
+                          )}
+
+                          {module.pdfUrl && (
+                            <div className="content-item">
+                              <span className="content-icon">📕</span>
+                              <a href={module.pdfUrl} target="_blank" rel="noopener noreferrer" className="content-link">
+                                PDF Resource
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
             </div>
           </div>
         )}

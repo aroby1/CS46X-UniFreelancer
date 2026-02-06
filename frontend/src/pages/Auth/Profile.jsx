@@ -1,7 +1,115 @@
 /* global process */
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import './Profile.css';
+
+const COLLAPSED_VISIBLE_ITEMS = 2;
+// Keep this in sync with `.item-list li { height: ... }` in Profile.css
+const COLLAPSED_ROW_HEIGHT = 44;
+const COLLAPSED_LIST_MAX_HEIGHT = COLLAPSED_VISIBLE_ITEMS * COLLAPSED_ROW_HEIGHT;
+
+function CollapsibleListSection({
+    title,
+    items = [],
+    emptyText = "No items yet.",
+    itemToLabel = (item) => item.label || item.title || String(item),
+    itemToKey = (item) => item.id || item._id || String(item),
+    onItemClick = null,
+}) {
+    const [expanded, setExpanded] = useState(false);
+    const [contentHeight, setContentHeight] = useState(0);
+    const listRef = useRef(null);
+
+    const safeItems = useMemo(() => (Array.isArray(items) ? items : []), [items]);
+
+    const measure = useCallback(() => {
+        if (!listRef.current) return;
+        setContentHeight(listRef.current.scrollHeight || 0);
+    }, []);
+
+    useEffect(() => {
+        // Measure after paint so scrollHeight is accurate.
+        const raf = window.requestAnimationFrame(measure);
+        const onResize = () => measure();
+        window.addEventListener('resize', onResize);
+        return () => {
+            window.cancelAnimationFrame(raf);
+            window.removeEventListener('resize', onResize);
+        };
+    }, [measure, safeItems.length]);
+
+    const maxHeightPx = safeItems.length === 0
+        ? 0
+        : (expanded ? (contentHeight || COLLAPSED_LIST_MAX_HEIGHT) : COLLAPSED_LIST_MAX_HEIGHT);
+
+    const minHeightPx = safeItems.length > 0 && !expanded ? COLLAPSED_LIST_MAX_HEIGHT : 0;
+    const bodyMinHeightPx = !expanded ? COLLAPSED_LIST_MAX_HEIGHT : 0;
+
+    const showToggle = safeItems.length > COLLAPSED_VISIBLE_ITEMS;
+
+    return (
+        <div className="profile-section">
+            <div className="profile-section-header">
+                <h3>{title}</h3>
+                {showToggle && (
+                    <button
+                        type="button"
+                        className="profile-section-toggle"
+                        onClick={() => setExpanded(prev => !prev)}
+                        aria-expanded={expanded}
+                        aria-label={expanded ? `Collapse ${title}` : `Expand ${title}`}
+                    >
+                        <span className={`profile-chevron ${expanded ? 'is-expanded' : ''}`} />
+                    </button>
+                )}
+            </div>
+
+            {safeItems.length > 0 ? (
+                <div
+                    className="profile-collapsible"
+                    style={{ maxHeight: `${maxHeightPx}px`, minHeight: `${minHeightPx}px` }}
+                >
+                    <ul ref={listRef} className="item-list">
+                        {safeItems.map((item) => {
+                            const key = itemToKey(item);
+                            const label = itemToLabel(item);
+                            const clickable = typeof onItemClick === 'function';
+                            return (
+                                <li key={key}>
+                                    {clickable ? (
+                                        <button
+                                            type="button"
+                                            className="profile-item-link"
+                                            onClick={() => onItemClick(item)}
+                                        >
+                                            {label}
+                                        </button>
+                                    ) : (
+                                        <span className="profile-item-text">{label}</span>
+                                    )}
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </div>
+            ) : (
+                <div className="profile-empty" style={{ height: `${bodyMinHeightPx}px` }}>
+                    <p className="empty-state">{emptyText}</p>
+                </div>
+            )}
+        </div>
+    );
+}
+
+CollapsibleListSection.propTypes = {
+    title: PropTypes.string.isRequired,
+    items: PropTypes.arrayOf(PropTypes.object),
+    emptyText: PropTypes.string,
+    itemToLabel: PropTypes.func,
+    itemToKey: PropTypes.func,
+    onItemClick: PropTypes.func,
+};
 
 const Profile = () => {
     const navigate = useNavigate();
@@ -9,19 +117,20 @@ const Profile = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const storedUser = JSON.parse(localStorage.getItem('user'));
-        if (!storedUser) {
-            navigate('/login');
-            return;
-        }
-
         const fetchUserData = async () => {
             try {
-                const apiUrl = process.env.REACT_APP_API_URL;
-                const response = await fetch(`${apiUrl}/api/users/${storedUser._id}`);
+                const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+                // Fetch authenticated user's profile directly
+                const response = await fetch(`${apiUrl}/api/users/profile`, {
+                    credentials: 'include' // Send cookies
+                });
+
                 if (response.ok) {
                     const data = await response.json();
                     setUser(data);
+                } else if (response.status === 401) {
+                    // Not authenticated
+                    navigate('/login');
                 } else {
                     console.error('Failed to fetch user data');
                 }
@@ -35,10 +144,18 @@ const Profile = () => {
         fetchUserData();
     }, [navigate]);
 
-    const handleSignOut = () => {
-        localStorage.removeItem('user');
-        navigate('/');
-        window.location.reload(); // Force reload to update App state
+    const handleSignOut = async () => {
+        try {
+            const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+            await fetch(`${apiUrl}/api/users/logout`, {
+                method: 'POST',
+                credentials: 'include',
+            });
+            navigate('/login');
+            window.location.reload();
+        } catch (error) {
+            console.error('Logout failed', error);
+        }
     };
 
     if (loading) {
@@ -62,57 +179,45 @@ const Profile = () => {
             </div>
 
             <div className="profile-content">
-                <div className="profile-section">
-                    <h3>Enrolled Courses</h3>
-                    {user.enrolledCourses && user.enrolledCourses.length > 0 ? (
-                        <ul className="item-list">
-                            {user.enrolledCourses.map(course => (
-                                <li key={course._id}>{course.title}</li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p className="empty-state">No enrolled courses yet.</p>
-                    )}
-                </div>
+                <CollapsibleListSection
+                    title="Enrolled Courses"
+                    items={user.enrolledCourses}
+                    emptyText="No enrolled courses yet."
+                    itemToKey={(course) => course?._id || course?.id || course?.title}
+                    itemToLabel={(course) => course?.title || 'Untitled course'}
+                    onItemClick={(course) => {
+                        const id = course?._id || course?.id;
+                        if (id) navigate(`/academy/courses/${id}`);
+                    }}
+                />
 
-                <div className="profile-section">
-                    <h3>Registered Seminars</h3>
-                    {user.registeredSeminars && user.registeredSeminars.length > 0 ? (
-                        <ul className="item-list">
-                            {user.registeredSeminars.map(seminar => (
-                                <li key={seminar._id}>{seminar.title}</li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p className="empty-state">No registered seminars yet.</p>
-                    )}
-                </div>
+                <CollapsibleListSection
+                    title="Registered Seminars"
+                    items={user.registeredSeminars}
+                    emptyText="No registered seminars yet."
+                    itemToKey={(seminar) => seminar?._id || seminar?.id || seminar?.title}
+                    itemToLabel={(seminar) => seminar?.title || 'Untitled seminar'}
+                />
 
-                <div className="profile-section">
-                    <h3>Completed Tutorials</h3>
-                    {user.completedTutorials && user.completedTutorials.length > 0 ? (
-                        <ul className="item-list">
-                            {user.enrolledCourses.map(tutorial => (
-                                <li key={tutorial._id}>{tutorial.title}</li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p className="empty-state">No completed tutorials yet.</p>
-                    )}
-                </div>
+                <CollapsibleListSection
+                    title="Completed Tutorials"
+                    items={user.completedTutorials}
+                    emptyText="No completed tutorials yet."
+                    itemToKey={(tutorial) => tutorial?._id || tutorial?.id || tutorial?.title}
+                    itemToLabel={(tutorial) => tutorial?.title || 'Untitled tutorial'}
+                    onItemClick={(tutorial) => {
+                        const id = tutorial?._id || tutorial?.id;
+                        if (id) navigate(`/academy/tutorials/${id}`);
+                    }}
+                />
 
-                <div className="profile-section">
-                    <h3>Saved Podcasts</h3>
-                    {user.savedPodcasts && user.savedPodcasts.length > 0 ? (
-                        <ul className="item-list">
-                            {user.savedPodcasts.map(podcast => (
-                                <li key={podcast._id}>{podcast.title}</li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p className="empty-state">No saved podcasts yet.</p>
-                    )}
-                </div>
+                <CollapsibleListSection
+                    title="Saved Podcasts"
+                    items={user.savedPodcasts}
+                    emptyText="No saved podcasts yet."
+                    itemToKey={(podcast) => podcast?._id || podcast?.id || podcast?.title}
+                    itemToLabel={(podcast) => podcast?.title || 'Untitled podcast'}
+                />
             </div>
         </div>
     );

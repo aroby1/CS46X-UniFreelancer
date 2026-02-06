@@ -1,10 +1,11 @@
 /* global process */
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import './Login.css';
 
 const Login = () => {
     //const navigate = useNavigate();
+    const location = useLocation();
     const [formData, setFormData] = useState({
         email: '',
         password: ''
@@ -22,23 +23,26 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const apiUrl = process.env.REACT_APP_API_URL;
+            const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
             const response = await fetch(`${apiUrl}/api/users/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(formData),
+                credentials: 'include', // Important for cookies
             });
 
             const data = await response.json();
 
             if (response.ok) {
                 console.log('Login successful:', data);
-                // Save user data/token
-                localStorage.setItem('user', JSON.stringify(data.user));
-                // Redirect to home and reload to update App state
-                window.location.href = '/';
+                const params = new URLSearchParams(location.search);
+                const returnTo = params.get('returnTo');
+                const safeReturnTo = returnTo && returnTo.startsWith('/') ? returnTo : null;
+
+                // Redirect and reload to update App state
+                window.location.href = safeReturnTo || '/';
             } else {
                 alert(data.message || 'Login failed');
             }
@@ -105,7 +109,7 @@ const Login = () => {
 
                 <div className="auth-footer">
                     Don't have an account?
-                    <Link to="/signup" className="auth-link">Sign up</Link>
+                    <Link to={`/signup${location.search || ''}`} className="auth-link">Sign up</Link>
                 </div>
             </div>
         </div>

@@ -329,22 +329,6 @@ function CourseDetail() {
             <div className="modules-list">
               {course.modules
                 .sort((a, b) => (a.order || 0) - (b.order || 0))
-                .map((module, index) => (
-                  <div key={module._id || index} className="module-card">
-                    <div className="module-header">
-                      <div className="module-number">
-                        Module {index + 1}
-                      </div>
-                      <h3 className="module-title">{module.title}</h3>
-                    </div>
-
-                    {module.description && (
-                      <div className="module-description">
-                        <p>{module.description}</p>
-                      </div>
-                    )}
-                  </div>
-                ))}
                 .map((module, index) => {
                   const moduleKey = module._id || index;
                   const isExpanded = expandedModules[moduleKey];

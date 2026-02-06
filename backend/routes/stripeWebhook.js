@@ -3,11 +3,24 @@ const Stripe = require("stripe");
 const User = require("../models/UserModel");
 
 const router = express.Router();
+
+// If Stripe is not configured (CI), disable this route safely
+if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+  console.warn("Stripe webhook disabled: missing environment variables");
+
+  router.post("/", (req, res) => {
+    return res.status(200).json({ received: true });
+  });
+
+  module.exports = router;
+  return;
+}
+
+// Stripe is fully configured
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 router.post("/", (req, res) => {
   const sig = req.headers["stripe-signature"];
-
   let event;
 
   try {
@@ -23,13 +36,13 @@ router.post("/", (req, res) => {
 
   if (event.type === "payment_intent.succeeded") {
     const intent = event.data.object;
-    const { courseId, userId } = intent.metadata;
+    const { courseId, userId } = intent.metadata || {};
 
-    console.log("Payment succeeded for:", courseId, userId);
-
-    User.findByIdAndUpdate(userId, {
-      $addToSet: { enrolledCourses: courseId },
-    }).catch(console.error);
+    if (courseId && userId) {
+      User.findByIdAndUpdate(userId, {
+        $addToSet: { enrolledCourses: courseId },
+      }).catch(console.error);
+    }
   }
 
   res.json({ received: true });

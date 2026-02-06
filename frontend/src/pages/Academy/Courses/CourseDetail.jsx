@@ -105,9 +105,6 @@ function CourseDetail() {
       try {
         setLoading(true);
 
-        const response = await fetch(
-          `http://localhost:5000/api/academy/courses/${id}`
-        );
         const response = await fetch(`http://localhost:5000/api/academy/courses/${id}`);
 
         if (!response.ok) {

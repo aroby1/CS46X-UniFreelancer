@@ -263,52 +263,44 @@ function CourseDetail() {
               )}
             </div>
 
-            <div className="course-hero-content">
-              <div className="course-badges">
-                {course.isLiteVersion && (
-                  <span className="lite-badge">Lite Version</span>
-                )}
-                <span className="difficulty-badge">
-                  {course.difficulty || 'Beginner'}
-                </span>
-                <span className="category-badge">
-                  {course.category || 'General'}
-                </span>
-              </div>
+<div className="course-hero-content">
+  <div className="course-badges">
+    {course.isLiteVersion && (
+      <span className="lite-badge">Lite Version</span>
+    )}
+    <span className="difficulty-badge">
+      {course.difficulty || 'Beginner'}
+    </span>
+    <span className="category-badge">
+      {course.category || 'General'}
+    </span>
+  </div>
 
-              <h1 className="course-title">{course.title}</h1>
+  <h1 className="course-title">{course.title}</h1>
 
-              <div className="course-meta">
-                <div className="meta-item">
-                  <span>{formatDuration(course.duration)}</span>
-                </div>
-                <div className="meta-item">
-                  <span>{getCoursePrice(course)}</span>
-              <div className="course-hero-bottom">
-                <div className="course-meta">
-                  <div className="course-meta-item">
-                    <FiClock className="course-meta-icon" />
-                    <div>
-                      <span className="course-meta-label">Estimated Time</span>
-                      <span className="course-meta-value">{formatDuration(course.duration)}</span>
-                    </div>
-                  </div>
-                  <div className="course-meta-item">
-                    <FiDollarSign className="course-meta-icon" />
-                    <div>
-                      <span className="course-meta-label">Price</span>
-                      <span className="course-meta-value">{getCoursePrice(course)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {publishedDate && (
-                  <p className="published-date">Published {publishedDate}</p>
-                )}
-              </div>
-            </div>
-          </div>
+  <div className="course-hero-bottom">
+    <div className="course-meta">
+      <div className="course-meta-item">
+        <FiClock className="course-meta-icon" />
+        <div>
+          <span className="course-meta-label">Estimated Time</span>
+          <span className="course-meta-value">{formatDuration(course.duration)}</span>
         </div>
+      </div>
+      <div className="course-meta-item">
+        <FiDollarSign className="course-meta-icon" />
+        <div>
+          <span className="course-meta-label">Price</span>
+          <span className="course-meta-value">{getCoursePrice(course)}</span>
+        </div>
+      </div>
+    </div>
+
+    {publishedDate && (
+      <p className="published-date">Published {publishedDate}</p>
+    )}
+  </div>
+</div>
 
         {/* ------------------------------
             COURSE OVERVIEW

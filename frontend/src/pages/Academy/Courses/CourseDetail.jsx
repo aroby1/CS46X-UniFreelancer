@@ -250,31 +250,31 @@ function CourseDetail() {
           ← Back to Courses
         </button>
 
-        {/* ------------------------------
-            COURSE HEADER
-           ------------------------------ */}
-        <div className="course-header-section">
-          <div className="course-hero">
-            <div className="course-hero-image">
-              {course.thumbnail ? (
-                <img src={course.thumbnail} alt={course.title} />
-              ) : (
-                <div className="placeholder-hero-image">Image</div>
-              )}
-            </div>
+{/* ------------------------------
+    COURSE HEADER
+------------------------------ */}
+<div className="course-header-section">
+  <div className="course-hero">
+    <div className="course-hero-image">
+      {course.thumbnail ? (
+        <img src={course.thumbnail} alt={course.title} />
+      ) : (
+        <div className="placeholder-hero-image">Image</div>
+      )}
+    </div>
 
-<div className="course-hero-content">
-  <div className="course-badges">
-    {course.isLiteVersion && (
-      <span className="lite-badge">Lite Version</span>
-    )}
-    <span className="difficulty-badge">
-      {course.difficulty || 'Beginner'}
-    </span>
-    <span className="category-badge">
-      {course.category || 'General'}
-    </span>
-  </div>
+    <div className="course-hero-content">
+      <div className="course-badges">
+        {course.isLiteVersion && (
+          <span className="lite-badge">Lite Version</span>
+        )}
+        <span className="difficulty-badge">
+          {course.difficulty || 'Beginner'}
+        </span>
+        <span className="category-badge">
+          {course.category || 'General'}
+        </span>
+      </div>
 
   <h1 className="course-title">{course.title}</h1>
 

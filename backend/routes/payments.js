@@ -3,6 +3,26 @@ const Stripe = require("stripe");
 const Course = require("../models/CourseModel");
 
 const router = express.Router();
+
+// --------------------------------------------------
+// Disable Stripe payments if key is missing (CI)
+// --------------------------------------------------
+if (!process.env.STRIPE_SECRET_KEY) {
+  console.warn("Stripe payments disabled: STRIPE_SECRET_KEY not set");
+
+  router.post("/create-payment-intent", (req, res) => {
+    return res.status(501).json({
+      error: "Payments are disabled in this environment",
+    });
+  });
+
+  module.exports = router;
+  return;
+}
+
+// --------------------------------------------------
+// Stripe is configured (local / prod)
+// --------------------------------------------------
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 router.post("/create-payment-intent", async (req, res) => {
@@ -30,6 +50,9 @@ router.post("/create-payment-intent", async (req, res) => {
       isFree: course.isFree,
     });
 
+    // ------------------------------
+    // FREE COURSE FLOW
+    // ------------------------------
     if (course.isFree) {
       console.log("Free course → skipping Stripe");
       return res.json({ free: true });
@@ -41,18 +64,8 @@ router.post("/create-payment-intent", async (req, res) => {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountInCents,
       currency: "usd",
-
-      // ------------------------------
-      // REQUIRED FOR PAYMENT ELEMENT
-      // ------------------------------
-      automatic_payment_methods: {
-        enabled: true,
-      },
-
-      metadata: {
-        courseId,
-        userId,
-      },
+      automatic_payment_methods: { enabled: true },
+      metadata: { courseId, userId },
     });
 
     console.log("PaymentIntent created:", paymentIntent.id);
@@ -66,6 +79,5 @@ router.post("/create-payment-intent", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 module.exports = router;

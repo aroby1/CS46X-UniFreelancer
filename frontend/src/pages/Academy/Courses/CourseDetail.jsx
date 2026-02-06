@@ -325,131 +325,125 @@ function CourseDetail() {
            ------------------------------ */}
         {course.modules && course.modules.length > 0 && (
           <div className="course-section">
-            <h2 className="section-title">Course Modules</h2>
-            <div className="modules-list">
-              {course.modules
-                .sort((a, b) => (a.order || 0) - (b.order || 0))
-                .map((module, index) => {
-                  const moduleKey = module._id || index;
-                  const isExpanded = expandedModules[moduleKey];
+    <h2 className="section-title">Course Modules</h2>
+    <div className="modules-list">
+      {course.modules
+        .sort((a, b) => (a.order || 0) - (b.order || 0))
+        .map((module, index) => {
+          const moduleKey = module._id || index;
+          const isExpanded = expandedModules[moduleKey];
+          const embedUrl = toYouTubeEmbedUrl(module.videoUrl);
+          
+          return (
+            <div key={moduleKey} className={`module-card ${isExpanded ? 'expanded' : ''}`}>
+              <div className="module-card-header" onClick={() => toggleModule(moduleKey)}>
+                <div className="module-thumbnail">
+                  {module.thumbnail ? (
+                    <img src={module.thumbnail} alt={`Module ${index + 1}`} />
+                  ) : (
+                    <div className="module-placeholder-thumbnail" />
+                  )}
+                </div>
 
-                  const embedUrl = toYouTubeEmbedUrl(module.videoUrl);
+                <div className="module-info-compact">
+                  <div className="module-number">Module {index + 1}</div>
+                  <h3 className="module-title-compact">{module.title}</h3>
+                  <div className="module-meta-compact">
+                    {(module.duration || module.estimatedMinutes) && (
+                      <span className="module-duration-compact">
+                        {module.duration || `${module.estimatedMinutes} min`}
+                      </span>
+                    )}
+                  </div>
+                  {module.description && (
+                    <p className="module-description-preview">
+                      {module.description.length > 100
+                        ? `${module.description.substring(0, 100)}...`
+                        : module.description}
+                    </p>
+                  )}
+                </div>
 
-                  return (
-                    <div key={moduleKey} className={`module-card ${isExpanded ? 'expanded' : ''}`}>
-                      <div className="module-card-header" onClick={() => toggleModule(moduleKey)}>
-                        <div className="module-thumbnail">
-                          {module.thumbnail ? (
-                            <img src={module.thumbnail} alt={`Module ${index + 1}`} />
-                          ) : (
-                            <div className="module-placeholder-thumbnail" />
-                          )}
+                <div className="module-toggle-icon">
+                  {isExpanded ? '−' : '+'}
+                </div>
+              </div>
+
+              <div className={`module-details-expanded ${isExpanded ? 'expanded' : ''}`}>
+                {module.description && (
+                  <div className="module-full-description">
+                    <h4 className="module-subtitle">Overview</h4>
+                    <p>{module.description}</p>
+                  </div>
+                )}
+
+                {module.learningPoints && module.learningPoints.length > 0 && (
+                  <div className="module-learning-points">
+                    <h4 className="module-subtitle">Learning Outcomes</h4>
+                    <ul className="module-points-list">
+                      {module.learningPoints.map((point, pointIndex) => (
+                        <li key={pointIndex}>{point}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <div className="module-content">
+                  {module.videoUrl && (
+                    <div className="content-item content-item-video">
+                      <button
+                        type="button"
+                        className="video-toggle"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleVideo(moduleKey);
+                        }}
+                        aria-expanded={!!openVideos[moduleKey]}
+                      >
+                        <span className="content-icon">🎥</span>
+                        <span>Watch Video</span>
+                        <span className="video-toggle-icon">{openVideos[moduleKey] ? '−' : '+'}</span>
+                      </button>
+
+                      {openVideos[moduleKey] && embedUrl && (
+                        <div className="video-embed" onClick={(e) => e.stopPropagation()}>
+                          <iframe
+                            src={embedUrl}
+                            title={`${module.title || `Module ${index + 1}`} video`}
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen
+                            loading="lazy"
+                            referrerPolicy="strict-origin-when-cross-origin"
+                          />
                         </div>
-
-                        <div className="module-info-compact">
-                          <div className="module-number">Module {index + 1}</div>
-                          <h3 className="module-title-compact">{module.title}</h3>
-                          <div className="module-meta-compact">
-                            {(module.duration || module.estimatedMinutes) && (
-                              <span className="module-duration-compact">
-                                {module.duration || `${module.estimatedMinutes} min`}
-                              </span>
-                            )}
-                          </div>
-                          {module.description && (
-                            <p className="module-description-preview">
-                              {module.description.length > 100
-                                ? `${module.description.substring(0, 100)}...`
-                                : module.description}
-                            </p>
-                          )}
-                        </div>
-
-                        <div className="module-toggle-icon">
-                          {isExpanded ? '−' : '+'}
-                        </div>
-                      </div>
-
-                      <div className={`module-details-expanded ${isExpanded ? 'expanded' : ''}`}>
-                        {module.description && (
-                          <div className="module-full-description">
-                            <h4 className="module-subtitle">Overview</h4>
-                            <p>{module.description}</p>
-                          </div>
-                        )}
-
-                        {module.learningPoints && module.learningPoints.length > 0 && (
-                          <div className="module-learning-points">
-                            <h4 className="module-subtitle">Learning Outcomes</h4>
-                            <ul className="module-points-list">
-                              {module.learningPoints.map((point, pointIndex) => (
-                                <li key={pointIndex}>{point}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-
-                        <div className="module-content">
-                          {module.videoUrl && (
-                            <div className="content-item content-item-video">
-                              <button
-                                type="button"
-                                className="video-toggle"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleVideo(moduleKey);
-                                }}
-                                aria-expanded={!!openVideos[moduleKey]}
-                              >
-                                <span className="content-icon">🎥</span>
-                                <span>Watch Video</span>
-                                <span className="video-toggle-icon">{openVideos[moduleKey] ? '−' : '+'}</span>
-                              </button>
-
-                              {openVideos[moduleKey] && embedUrl && (
-                                <div
-                                  className="video-embed"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <iframe
-                                    src={embedUrl}
-                                    title={`${module.title || `Module ${index + 1}`} video`}
-                                    frameBorder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                    allowFullScreen
-                                    loading="lazy"
-                                    referrerPolicy="strict-origin-when-cross-origin"
-                                  />
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-
-                          {module.articleContent && (
-                            <div className="content-item">
-                              <span className="content-icon">📄</span>
-                              <span className="content-text">Article Content Available</span>
-                            </div>
-                          )}
-
-                          {module.pdfUrl && (
-                            <div className="content-item">
-                              <span className="content-icon">📕</span>
-                              <a href={module.pdfUrl} target="_blank" rel="noopener noreferrer" className="content-link">
-                                PDF Resource
-                              </a>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                      )}
                     </div>
-                  );
-                })}
-            </div>
-          </div>
-        )}
+                  )}
 
+                  {module.articleContent && (
+                    <div className="content-item">
+                      <span className="content-icon">📄</span>
+                      <span className="content-text">Article Content Available</span>
+                    </div>
+                  )}
+
+                  {module.pdfUrl && (
+                    <div className="content-item">
+                      <span className="content-icon">📕</span>
+                      <a href={module.pdfUrl} target="_blank" rel="noopener noreferrer" className="content-link">
+                        PDF Resource
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+    </div>
+  </div>
+)}
         {/* ------------------------------ */}
         {/* COURSE ACTIONS / ENROLLMENT */}
         {/* ------------------------------ */}

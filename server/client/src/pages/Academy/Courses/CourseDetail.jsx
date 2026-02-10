@@ -1,19 +1,31 @@
 /* global process */
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 
-// Stripe
+// ------------------------------
+// STRIPE IMPORTS
+// ------------------------------
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 
-// Components
+// ------------------------------
+// CHECKOUT COMPONENT
+// ------------------------------
 import CheckoutForm from "../../../components/Shared/CheckoutForm";
 
-import { FiClock, FiDollarSign } from "react-icons/fi";
-import "./CourseDetail.css";
+import { FiClock, FiDollarSign } from 'react-icons/fi';
+import './CourseDetail.css';
 
-// Stripe init (outside component)
+// ------------------------------
+// STRIPE INITIALIZATION
+// ------------------------------
+// Must be outside component to avoid re-creating Stripe on every render
 const stripePromise = loadStripe(
+  process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY
+);
+
+console.log(
+  "Stripe publishable key:",
   process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY
 );
 
@@ -27,134 +39,308 @@ function CourseDetail() {
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [expandedModules, setExpandedModules] = useState({});
+  const [openVideos, setOpenVideos] = useState({});
 
+  const toggleModule = (moduleId) => {
+    setExpandedModules(prev => {
+      const next = { ...prev, [moduleId]: !prev[moduleId] };
+
+      // If closing module, also close its video dropdown
+      if (prev[moduleId]) {
+        setOpenVideos(v => ({ ...v, [moduleId]: false }));
+      }
+
+      return next;
+    });
+  };
+
+  const toggleVideo = (moduleKey) => {
+    setOpenVideos(prev => ({
+      ...prev,
+      [moduleKey]: !prev[moduleKey]
+    }));
+  };
+
+  const toYouTubeEmbedUrl = (url) => {
+    if (!url) return "";
+
+    try {
+      const u = new URL(url);
+
+      // Already an embed link
+      if (u.hostname.includes("youtube.com") && u.pathname.startsWith("/embed/")) {
+        return url;
+      }
+
+      // youtu.be/<id>
+      if (u.hostname === "youtu.be") {
+        const id = u.pathname.replace("/", "");
+        return id ? `https://www.youtube.com/embed/${id}` : "";
+      }
+
+      // youtube.com/watch?v=<id>
+      const v = u.searchParams.get("v");
+      if (v) {
+        const list = u.searchParams.get("list");
+        return list
+          ? `https://www.youtube.com/embed/${v}?list=${encodeURIComponent(list)}`
+          : `https://www.youtube.com/embed/${v}`;
+      }
+
+      return "";
+    } catch {
+      return "";
+    }
+  };
+
+  // Stripe-related state
   const [clientSecret, setClientSecret] = useState(null);
   const [enrolling, setEnrolling] = useState(false);
 
   // ------------------------------
-  // FETCH COURSE
+  // FETCH COURSE DATA
   // ------------------------------
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const res = await fetch(`/api/academy/courses/${id}`);
-        if (!res.ok) throw new Error("Course not found");
-        const data = await res.json();
+        setLoading(true);
+
+        const response = await fetch(`/api/academy/courses/${id}`);
+
+        if (!response.ok) {
+          throw new Error('Course not found');
+        }
+
+        const data = await response.json();
         setCourse(data);
+        setError(null);
       } catch (err) {
+        console.error('Error fetching course:', err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCourse();
+    if (id) fetchCourse();
   }, [id]);
 
   // ------------------------------
-  // ENROLL / PAYMENT
+  // NAVIGATION
+  // ------------------------------
+  const handleBack = () => {
+    navigate('/academy/courses');
+  };
+
+  // ------------------------------
+  // START ENROLLMENT / PAYMENT FLOW
   // ------------------------------
   const handleEnroll = async () => {
-    if (!course) return;
+    if (!course) {
+      console.warn("handleEnroll called with no course");
+      return;
+    }
 
     try {
       setEnrolling(true);
 
-      // 1️⃣ Confirm logged-in user (cookie auth)
-      const meRes = await fetch("/api/users/me", {
-        credentials: "include",
-      });
-
-      if (!meRes.ok) {
-        navigate(`/login?returnTo=/academy/courses/${course._id}`);
-        return;
-      }
-
-      const user = await meRes.json();
-
-      // 2️⃣ Create payment intent
-      const payRes = await fetch("/api/payments/create-payment-intent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          courseId: course._id,
-          userId: user._id,
-        }),
-      });
-
-      if (!payRes.ok) {
-        const text = await payRes.text();
-        throw new Error(text);
-      }
-
-      const data = await payRes.json();
-
-      // 3️⃣ Free course → enroll immediately
-      if (data.free) {
-        await fetch(`/api/users/${user._id}/enroll-course/${course._id}`, {
+      const res = await fetch(
+        "/api/payments/create-payment-intent",
+        {
           method: "POST",
-          credentials: "include",
-        });
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            courseId: course._id,
+            userId: user._id, // replace with real auth user later
+          }),
+        }
+      );
 
-        navigate("/academy/my-courses");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Payment initialization failed");
+      }
+
+      // ------------------------------
+      // FREE COURSE FLOW
+      // ------------------------------
+      if (data.free) {
+        navigate(`/academy/courses/${course._id}/learn`);
         return;
       }
 
-      // 4️⃣ Paid course → Stripe checkout
+      // ------------------------------
+      // PAID COURSE FLOW
+      // ------------------------------
+      if (!data.clientSecret) {
+        throw new Error("Missing clientSecret from backend");
+      }
+
       setClientSecret(data.clientSecret);
+
     } catch (err) {
       console.error("Enrollment failed:", err);
-      alert("Enrollment failed. Please try again.");
+      alert(`Enrollment failed: ${err.message}`);
     } finally {
       setEnrolling(false);
     }
   };
 
   // ------------------------------
-  // UI STATES
+  // HELPERS
   // ------------------------------
-  if (loading) return <p className="loading-message">Loading course...</p>;
+  const getCoursePrice = (course) => {
+    if (!course) return 'Free';
+    if (course.isLiteVersion) return 'Free (Lite)';
+    if (course.priceAmount && course.priceAmount > 0) {
+      return `$${course.priceAmount}`;
+    }
+    return 'Free';
+  };
 
-  if (error || !course) {
+  const formatDuration = (duration) => {
+    if (!duration) return 'N/A';
+    return duration;
+  };
+
+  // ------------------------------
+  // LOADING STATE
+  // ------------------------------
+  if (loading) {
     return (
       <div className="course-detail-page">
-        <button onClick={() => navigate("/academy/courses")}>
-          ← Back to Courses
-        </button>
-        <h2>Course not found</h2>
+        <div className="course-detail-container">
+          <div className="loading-message">Loading course...</div>
+        </div>
       </div>
     );
   }
 
   // ------------------------------
-  // RENDER
+  // ERROR STATE
   // ------------------------------
+  if (error || !course) {
+    return (
+      <div className="course-detail-page">
+        <div className="course-detail-container">
+          <button className="back-button" onClick={handleBack}>
+            ← Back to Courses
+          </button>
+          <div className="error-message">
+            <h2>Course Not Found</h2>
+            <p>{error || 'The course you are looking for does not exist.'}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ------------------------------
+  // MAIN RENDER
+  // ------------------------------
+  const publishedDate = course?.createdAt
+    ? new Date(course.createdAt).toLocaleDateString()
+    : null;
+
   return (
     <div className="course-detail-page">
       <div className="course-detail-container">
-        <button
-          className="back-button"
-          onClick={() => navigate("/academy/courses")}
-        >
+        <button className="back-button" onClick={handleBack}>
           ← Back to Courses
         </button>
 
-        {/* HEADER */}
-        <h1>{course.title}</h1>
+ {/* COURSE HEADER */}
+        <div className="course-header-section">
+          <div className="course-hero">
+            <div className="course-hero-image">
+              {course.thumbnail ? (
+                <img src={course.thumbnail} alt={course.title} />
+              ) : (
+                <div className="placeholder-hero-image">Image</div>
+              )}
+            </div>
 
-        <div className="course-meta">
-          <span>
-            <FiClock /> {course.duration || "Self-paced"}
-          </span>
-          <span>
-            <FiDollarSign />{" "}
-            {course.isFree ? "Free" : `$${course.priceAmount}`}
-          </span>
+            <div className="course-hero-content">
+              <div className="course-badges">
+                {course.isLiteVersion && (
+                  <span className="lite-badge">Lite Version</span>
+                )}
+                <span className="difficulty-badge">
+                  {course.difficulty || "Beginner"}
+                </span>
+                <span className="category-badge">
+                  {course.category || "General"}
+                </span>
+              </div>
+
+              <h1>{course.title}</h1>
+
+              <div className="course-meta">
+                <div>
+                  <FiClock /> {course.duration || "N/A"}
+                </div>
+                <div>
+                  <FiDollarSign />{" "}
+                  {course.isFree ? "Free" : `$${course.priceAmount}`}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* DESCRIPTION */}
-        <p>{course.description}</p>
+        {/* COURSE OVERVIEW */}
+        <div className="course-section">
+          <h2>Course Overview</h2>
+          <p>{course.description}</p>
+        </div>
+
+        {/* COURSE MODULES */}
+        {course.modules?.length > 0 && (
+          <div className="course-section">
+            <h2>Course Modules</h2>
+
+            {course.modules.map((module, index) => {
+              const key = module._id || index;
+              const embedUrl = toYouTubeEmbedUrl(module.videoUrl);
+
+              return (
+                <div key={key} className="module-card">
+                  <div
+                    className="module-card-header"
+                    onClick={() => toggleModule(key)}
+                  >
+                    <h3>{module.title}</h3>
+                    <span>{expandedModules[key] ? "−" : "+"}</span>
+                  </div>
+
+                  {expandedModules[key] && (
+                    <div className="module-content">
+                      <p>{module.description}</p>
+
+                      {embedUrl && (
+                        <>
+                          <button onClick={() => toggleVideo(key)}>
+                            Watch Video
+                          </button>
+
+                          {openVideos[key] && (
+                            <iframe
+                              src={embedUrl}
+                              title={module.title}
+                              allowFullScreen
+                            />
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* ENROLLMENT */}
         {!clientSecret ? (

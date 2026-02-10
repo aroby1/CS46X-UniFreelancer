@@ -267,20 +267,24 @@ router.delete("/tutorials/:tutorialId/complete", protect, async (req, res) => {
 // -------------------------------
 // Enroll in a course
 // -------------------------------
-router.post("/:id/enroll-course/:courseId", async (req, res) => {
+router.post("/enroll/:courseId", protect, async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.user._id);
 
     if (!user.enrolledCourses.includes(req.params.courseId)) {
       user.enrolledCourses.push(req.params.courseId);
       await user.save();
     }
 
-    res.json({ message: "Course enrolled", enrolledCourses: user.enrolledCourses });
+    res.json({
+      message: "Course enrolled successfully",
+      enrolledCourses: user.enrolledCourses,
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 // -------------------------------
 // Register for seminar

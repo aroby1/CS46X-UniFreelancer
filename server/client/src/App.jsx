@@ -50,6 +50,7 @@ function App() {
           <Route path="/" element={<Academy />} />
           <Route path="/academy" element={<Academy />} />
           <Route path="/academy/courses" element={<LearningHub />} />
+          <Route path="/academy/my-courses" element={<MyCourses />} />
           <Route path="/academy/create" element={<CreateContent />} />
           <Route path="/academy/seminars" element={<LearningHub />} />
           <Route path="/academy/tutorials" element={<LearningHub />} />

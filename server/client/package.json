@@ -2,6 +2,7 @@
   "name": "unifreelancer-frontend",
   "version": "1.0.0",
   "private": true,
+  "proxy": "http://localhost:5000",
   "description": "UniFreelancer Academy Frontend",
   "dependencies": {
     "@stripe/react-stripe-js": "^5.4.1",

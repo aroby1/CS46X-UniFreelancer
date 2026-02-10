@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const express = require("express");
+const path = require("path");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
@@ -27,15 +28,19 @@ app.use(
 // ------------------------------
 // NORMAL MIDDLEWARE
 // ------------------------------
-app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:3000",
-  credentials: true
-}));
+// Only use CORS in development
+if (process.env.NODE_ENV !== 'production') {
+  app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true
+  }));
+}
+
 app.use(express.json());
 app.use(cookieParser());
 
 // ------------------------------
-// ROUTES
+// API ROUTES (MUST COME BEFORE STATIC FILES)
 // ------------------------------
 const academyRoutes = require("./routes/academy");
 const coursesRoutes = require("./routes/courses");
@@ -64,6 +69,19 @@ app.get("/api/health", (req, res) => {
 });
 
 // ------------------------------
+// SERVE REACT APP IN PRODUCTION
+// ------------------------------
+if (process.env.NODE_ENV === 'production') {
+  // Serve static files from React build
+  app.use(express.static(path.join(__dirname, 'client/build')));
+  
+  // Catch-all handler: send back React's index.html for any route not matched above
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+  });
+}
+
+// ------------------------------
 // ERROR HANDLER
 // ------------------------------
 app.use((err, req, res, _next) => {
@@ -78,7 +96,8 @@ let server;
 
 if (process.env.NODE_ENV !== "test") {
   server = app.listen(PORT, () => {
-    console.log(`Backend running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   });
 }
 

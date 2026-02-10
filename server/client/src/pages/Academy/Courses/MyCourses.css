@@ -1,0 +1,21 @@
+.my-courses-page {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.my-courses-page h1 {
+  margin-bottom: 1.5rem;
+}
+
+.my-courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.my-courses-loading {
+  padding: 3rem;
+  text-align: center;
+  font-size: 1.2rem;
+}

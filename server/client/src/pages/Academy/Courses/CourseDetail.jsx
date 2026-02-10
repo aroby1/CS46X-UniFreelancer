@@ -152,7 +152,7 @@ function CourseDetail() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             courseId: course._id,
-            userId: user._id, // replace with real auth user later
+            userId: "TEMP_USER_ID", // replace with real auth user later
           }),
         }
       );

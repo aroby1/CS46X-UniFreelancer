@@ -2,17 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
-// ------------------------------
-// STRIPE IMPORTS
-// ------------------------------
-import { Elements } from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
-
-// ------------------------------
-// CHECKOUT COMPONENT
-// ------------------------------
-import CheckoutForm from "../../../components/Shared/CheckoutForm";
-
 import { FiClock, FiDollarSign } from 'react-icons/fi';
 import './CourseDetail.css';
 
@@ -358,7 +347,6 @@ const handleEnroll = async () => {
         )}
 
         {/* ENROLLMENT */}
-        {!clientSecret ? (
         <button
           className="enroll-button"
           onClick={handleEnroll}
@@ -370,14 +358,7 @@ const handleEnroll = async () => {
             ? "Starting Checkout..."
             : `Enroll for $${course.priceAmount}`}
         </button>
-        ) : (
-          <Elements stripe={stripePromise} options={{ clientSecret }}>
-            <CheckoutForm />
-          </Elements>
-        )}
       </div>
     </div>
-  );
-}
-
+  )};
 export default CourseDetail;

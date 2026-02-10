@@ -29,25 +29,31 @@ if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    // ✅ Correct Stripe event for completed checkout
+    console.log(`Received event: ${event.type}`);
+
+    // Handle successful checkout
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
 
       const { courseId, userId } = session.metadata || {};
 
       if (!courseId || !userId) {
-        console.warn("Missing metadata on checkout session");
+        console.warn("Missing metadata on checkout session:", session.id);
         return res.json({ received: true });
       }
 
       try {
-        await User.findByIdAndUpdate(
+        const user = await User.findByIdAndUpdate(
           userId,
           { $addToSet: { enrolledCourses: courseId } },
           { new: true }
         );
 
-        console.log(`User ${userId} enrolled in course ${courseId}`);
+        if (user) {
+          console.log(`✅ User ${userId} enrolled in course ${courseId}`);
+        } else {
+          console.warn(`⚠️ User ${userId} not found`);
+        }
       } catch (err) {
         console.error("Failed to enroll user:", err);
       }

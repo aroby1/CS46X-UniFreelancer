@@ -19,15 +19,6 @@ import './CourseDetail.css';
 // ------------------------------
 // STRIPE INITIALIZATION
 // ------------------------------
-// Must be outside component to avoid re-creating Stripe on every render
-const stripePromise = loadStripe(
-  process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY
-);
-
-console.log(
-  "Stripe publishable key:",
-  process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY
-);
 
 function CourseDetail() {
   const { id } = useParams();
@@ -95,8 +86,29 @@ function CourseDetail() {
   };
 
   // Stripe-related state
-  const [clientSecret, setClientSecret] = useState(null);
   const [enrolling, setEnrolling] = useState(false);
+  const [user, setUser] = useState(null);
+
+  // ------------------------------
+  // FETCH USER DATA
+  // ------------------------------
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await fetch('/api/users/me', {
+          credentials: 'include',
+        });
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData);
+        }
+      } catch (error) {
+        console.error('Failed to fetch user', error);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   // ------------------------------
   // FETCH COURSE DATA
@@ -136,9 +148,15 @@ function CourseDetail() {
   // ------------------------------
   // START ENROLLMENT / PAYMENT FLOW
   // ------------------------------
-  const handleEnroll = async () => {
+const handleEnroll = async () => {
     if (!course) {
       console.warn("handleEnroll called with no course");
+      return;
+    }
+
+    // Check if user is logged in
+    if (!user) {
+      navigate(`/login?returnTo=/academy/courses/${id}`);
       return;
     }
 
@@ -146,13 +164,13 @@ function CourseDetail() {
       setEnrolling(true);
 
       const res = await fetch(
-        "/api/payments/create-payment-intent",
+        "/api/payments/create-checkout-session",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({
             courseId: course._id,
-            userId: "TEMP_USER_ID", // replace with real auth user later
           }),
         }
       );
@@ -163,22 +181,20 @@ function CourseDetail() {
         throw new Error(data.error || "Payment initialization failed");
       }
 
-      // ------------------------------
       // FREE COURSE FLOW
-      // ------------------------------
       if (data.free) {
-        navigate(`/academy/courses/${course._id}/learn`);
+        alert("You've been enrolled in this free course!");
+        navigate(`/academy/my-courses`);
         return;
       }
 
-      // ------------------------------
-      // PAID COURSE FLOW
-      // ------------------------------
-      if (!data.clientSecret) {
-        throw new Error("Missing clientSecret from backend");
+      // PAID COURSE FLOW - Redirect to Stripe Checkout
+      if (data.url) {
+        window.location.href = data.url;
+        return;
       }
 
-      setClientSecret(data.clientSecret);
+      throw new Error("Invalid response from server");
 
     } catch (err) {
       console.error("Enrollment failed:", err);
@@ -187,7 +203,6 @@ function CourseDetail() {
       setEnrolling(false);
     }
   };
-
   // ------------------------------
   // HELPERS
   // ------------------------------
@@ -344,17 +359,17 @@ function CourseDetail() {
 
         {/* ENROLLMENT */}
         {!clientSecret ? (
-          <button
-            className="enroll-button"
-            onClick={handleEnroll}
-            disabled={enrolling}
-          >
-            {course.isFree
-              ? "Enroll Free"
-              : enrolling
-              ? "Starting Checkout..."
-              : `Enroll for $${course.priceAmount}`}
-          </button>
+        <button
+          className="enroll-button"
+          onClick={handleEnroll}
+          disabled={enrolling}
+        >
+          {course.isFree
+            ? enrolling ? "Enrolling..." : "Enroll Free"
+            : enrolling
+            ? "Starting Checkout..."
+            : `Enroll for $${course.priceAmount}`}
+        </button>
         ) : (
           <Elements stripe={stripePromise} options={{ clientSecret }}>
             <CheckoutForm />

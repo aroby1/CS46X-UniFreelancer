@@ -7,7 +7,7 @@ function PaymentSuccess() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const paymentIntent = searchParams.get("payment_intent");
+  const sessionId = searchParams.get("session_id");
 
   const handleGoToMyCourses = () => {
     navigate("/academy/my-courses");
@@ -30,10 +30,10 @@ function PaymentSuccess() {
           Your course has been added to <strong>My Courses</strong>.
         </p>
 
-        {paymentIntent && (
+        {sessionId && (
           <div className="payment-details">
             <p className="payment-id">
-              Payment ID: <span>{paymentIntent.slice(0, 20)}…</span>
+              Session ID: <span>{sessionId.slice(0, 20)}…</span>
             </p>
           </div>
         )}

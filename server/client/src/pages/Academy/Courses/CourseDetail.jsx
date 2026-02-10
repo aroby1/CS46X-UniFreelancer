@@ -106,7 +106,7 @@ function CourseDetail() {
       try {
         setLoading(true);
 
-        const response = await fetch(`http://localhost:5000/api/academy/courses/${id}`);
+        const response = await fetch(`/api/academy/courses/${id}`);
 
         if (!response.ok) {
           throw new Error('Course not found');
@@ -146,7 +146,7 @@ function CourseDetail() {
       setEnrolling(true);
 
       const res = await fetch(
-        "http://localhost:5000/api/payments/create-payment-intent",
+        "/api/payments/create-payment-intent",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

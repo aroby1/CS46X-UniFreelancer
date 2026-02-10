@@ -58,7 +58,7 @@ app.use("/api/academy/seminars", seminarsRoutes);
 app.use("/api/academy/podcasts", podcastsRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/payments", paymentRoutes);
-app.use("/api/courseProgress", courseProgressRoutes);
+app.use("/api/courses", courseProgressRoutes);
 
 // ------------------------------
 // HEALTH CHECK

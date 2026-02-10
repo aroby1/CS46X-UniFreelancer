@@ -1,82 +1,111 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import './PaymentSuccess.css';
+/* global process */
+import React, { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import "./PaymentSuccess.css";
 
 function PaymentSuccess() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
   const [paymentIntent, setPaymentIntent] = useState(null);
+  const [enrolling, setEnrolling] = useState(true);
 
   useEffect(() => {
-    // Get payment_intent from URL
-    const pi = searchParams.get('payment_intent');
-    setPaymentIntent(pi);
-  }, [searchParams]);
+    const enrollUserInCourse = async () => {
+      try {
+        const paymentIntentId = searchParams.get("payment_intent");
+        const courseId = searchParams.get("courseId");
 
-  const handleGoToCourses = () => {
-    navigate('/academy/courses');
-  };
+        setPaymentIntent(paymentIntentId);
+
+        if (!courseId) {
+          console.error("Missing courseId in URL");
+          setEnrolling(false);
+          return;
+        }
+
+        const apiUrl =
+          process.env.REACT_APP_API_URL || "http://localhost:5000";
+
+        // Get logged-in user
+        const meRes = await fetch(`${apiUrl}/api/users/me`, {
+          credentials: "include",
+        });
+
+        if (!meRes.ok) {
+          navigate("/login?returnTo=/academy/my-courses");
+          return;
+        }
+
+        const user = await meRes.json();
+
+        // Enroll user in course
+        await fetch(
+          `${apiUrl}/api/users/${user._id}/enroll-course/${courseId}`,
+          {
+            method: "POST",
+            credentials: "include",
+          }
+        );
+
+        setEnrolling(false);
+      } catch (err) {
+        console.error("Enrollment failed:", err);
+        setEnrolling(false);
+      }
+    };
+
+    enrollUserInCourse();
+  }, [navigate, searchParams]);
 
   const handleGoToMyCourses = () => {
-    // Navigate to user's enrolled courses (you'll need to create this route)
-    navigate('/academy/my-courses');
+    navigate("/academy/my-courses");
+  };
+
+  const handleBrowseCourses = () => {
+    navigate("/academy/courses");
   };
 
   return (
     <div className="payment-success-page">
       <div className="payment-success-container">
-        {/* Success Icon */}
-        <div className="success-icon">
-          <svg
-            width="80"
-            height="80"
-            viewBox="0 0 80 80"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <circle cx="40" cy="40" r="40" fill="#10B981" />
-            <path
-              d="M25 40L35 50L55 30"
-              stroke="white"
-              strokeWidth="4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
+        <div className="success-icon">✅</div>
 
-        {/* Success Message */}
         <h1 className="success-title">Payment Successful! 🎉</h1>
-        <p className="success-message">
-          Thank you for your purchase. You now have full access to your course.
-        </p>
 
-        {/* Payment Details */}
+        {enrolling ? (
+          <p className="success-message">
+            Finalizing your enrollment…
+          </p>
+        ) : (
+          <p className="success-message">
+            You now have full access to your course.
+          </p>
+        )}
+
         {paymentIntent && (
           <div className="payment-details">
             <p className="payment-id">
-              Payment ID: <span>{paymentIntent.substring(0, 20)}...</span>
+              Payment ID: <span>{paymentIntent.slice(0, 20)}…</span>
             </p>
           </div>
         )}
 
-        {/* Action Buttons */}
         <div className="success-actions">
-          <button className="primary-button" onClick={handleGoToMyCourses}>
+          <button
+            className="primary-button"
+            onClick={handleGoToMyCourses}
+            disabled={enrolling}
+          >
             Go to My Courses
           </button>
-          <button className="secondary-button" onClick={handleGoToCourses}>
+
+          <button
+            className="secondary-button"
+            onClick={handleBrowseCourses}
+          >
             Browse More Courses
           </button>
-        </div>
-
-        {/* Additional Info */}
-        <div className="success-info">
-          <p>
-            A confirmation email has been sent to your email address.
-            <br />
-            You can start learning right away!
-          </p>
         </div>
       </div>
     </div>

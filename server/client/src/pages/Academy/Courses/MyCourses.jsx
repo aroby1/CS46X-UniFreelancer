@@ -1,3 +1,9 @@
+/* global process */
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import CourseCard from "../../../components/Courses/CourseCard";
+import "./MyCourses.css";
+
 const MyCourses = () => {
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]);

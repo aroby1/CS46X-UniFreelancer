@@ -36,8 +36,7 @@ function CreateSeminar() {
 
   const handleCreateSeminar = async () => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${apiUrl}/api/academy/seminars`, {
+      const response = await fetch(`/api/academy/seminars`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

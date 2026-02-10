@@ -80,8 +80,7 @@ function TutorialDetail() {
       try {
         setLoading(true);
         setError(null);
-        const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
-        const response = await fetch(`${apiUrl}/api/academy/tutorials/${id}`);
+        const response = await fetch(`/api/academy/tutorials/${id}`);
 
         if (!response.ok) {
           throw new Error("Tutorial not found");
@@ -104,8 +103,7 @@ function TutorialDetail() {
     const fetchProfileForStatus = async () => {
       try {
         setAuthChecked(false);
-        const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
-        const response = await fetch(`${apiUrl}/api/users/profile`, {
+        const response = await fetch(`/api/users/profile`, {
           credentials: "include",
         });
 
@@ -181,8 +179,7 @@ function TutorialDetail() {
 
     try {
       setIsSaving(true);
-      const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
-      const response = await fetch(`${apiUrl}/api/users/tutorials/${id}/bookmark`, {
+      const response = await fetch(`/api/users/tutorials/${id}/bookmark`, {
         method: next ? "POST" : "DELETE",
         credentials: "include",
       });
@@ -213,8 +210,7 @@ function TutorialDetail() {
 
     try {
       setIsSaving(true);
-      const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
-      const response = await fetch(`${apiUrl}/api/users/tutorials/${id}/complete`, {
+      const response = await fetch(`/api/users/tutorials/${id}/complete`, {
         method: next ? "POST" : "DELETE",
         credentials: "include",
       });

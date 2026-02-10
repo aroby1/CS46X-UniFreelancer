@@ -46,8 +46,7 @@ function CreateTutorial() {
     try {
       console.log("Submitting Tutorial:", formData);
 
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${apiUrl}/api/academy/tutorials`, {
+      const response = await fetch(`/api/academy/tutorials`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

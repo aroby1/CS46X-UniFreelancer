@@ -72,22 +72,18 @@ app.get("/api/health", (req, res) => {
 // SERVE REACT APP IN PRODUCTION
 // ------------------------------
 if (process.env.NODE_ENV === 'production') {
-  // Serve static files from React build
   app.use(express.static(path.join(__dirname, 'client/build')));
   
-  // Catch-all handler: send back React's index.html for any route not matched above
-  app.get('/*', (req, res) => {
+  // Handle React routing - send all non-API requests to React
+  app.use((req, res, next) => {
+    // Skip API routes
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    // Send everything else to React
     res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
   });
 }
-
-// ------------------------------
-// ERROR HANDLER
-// ------------------------------
-app.use((err, req, res, _next) => {
-  console.error("SERVER ERROR:", err);
-  res.status(500).json({ error: "Internal Server Error", details: err.message });
-});
 
 // ------------------------------
 // START SERVER

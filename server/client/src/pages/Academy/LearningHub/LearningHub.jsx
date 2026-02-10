@@ -69,8 +69,7 @@ function LearningHub() {
     try {
       // Use configured API URL and new profile endpoint
       // eslint-disable-next-line no-undef
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${apiUrl}/api/users/profile`, {
+      const response = await fetch(`/api/users/profile`, {
         credentials: 'include' // Use cookies!
       });
 
@@ -93,7 +92,7 @@ function LearningHub() {
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/academy/courses');
+      const response = await fetch('/api/academy/courses');
       if (response.ok) {
         const data = await response.json();
         setCourses(data);
@@ -108,7 +107,7 @@ function LearningHub() {
 
   const fetchSeminars = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/academy/seminars');
+      const response = await fetch('/api/academy/seminars');
       if (response.ok) {
         const data = await response.json();
         setSeminars(data);
@@ -121,7 +120,7 @@ function LearningHub() {
 
   const fetchTutorials = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/academy/tutorials');
+      const response = await fetch('/api/academy/tutorials');
       if (response.ok) {
         const data = await response.json();
         setTutorials(data);

@@ -14,6 +14,7 @@ import Login from './pages/Auth/Login';
 import Signup from './pages/Auth/Signup';
 import Profile from './pages/Auth/Profile';
 import PaymentSuccess from './pages/Payment/PaymentSuccess';
+import MyCourses from './pages/Academy/Courses/MyCourses';
 
 function App() {
   const [user, setUser] = useState(null);

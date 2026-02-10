@@ -22,8 +22,7 @@ function App() {
     const fetchUser = async () => {
       try {
         // eslint-disable-next-line no-undef
-        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-        const response = await fetch(`${apiUrl}/api/users/me`, {
+        const response = await fetch('/api/users/me', {
           credentials: 'include',
         });
         if (response.ok) {

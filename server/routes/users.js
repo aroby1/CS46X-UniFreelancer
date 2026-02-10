@@ -343,20 +343,17 @@ router.post("/:id/save-podcast/:podcastId", async (req, res) => {
 // -------------------------------
 // Complete a course
 // -------------------------------
-router.post("/:id/complete-course/:courseId", async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id);
+router.post("/enroll-course/:courseId", protect, async (req, res) => {
+  const user = await User.findById(req.user._id);
 
-    if (!user.completedCourses.includes(req.params.courseId)) {
-      user.completedCourses.push(req.params.courseId);
-      await user.save();
-    }
-
-    res.json({ message: "Course completed", completedCourses: user.completedCourses });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  if (!user.enrolledCourses.includes(req.params.courseId)) {
+    user.enrolledCourses.push(req.params.courseId);
+    await user.save();
   }
+
+  res.json({ message: "Course enrolled" });
 });
+
 
 // -------------------------------
 // Get learning summary

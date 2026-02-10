@@ -22,10 +22,14 @@ const MyCourses = () => {
           return;
         }
 
+        if (!res.ok) {
+          throw new Error("Failed to fetch profile");
+        }
+
         const data = await res.json();
         setCourses(data.enrolledCourses || []);
       } catch (err) {
-        console.error("Failed to load courses", err);
+        console.error("Failed to load courses:", err);
       } finally {
         setLoading(false);
       }

@@ -49,6 +49,7 @@ const seminarsRoutes = require("./routes/seminars");
 const podcastsRoutes = require("./routes/podcasts");
 const userRoutes = require("./routes/users");
 const paymentRoutes = require("./routes/payments");
+const courseProgressRoutes = require("./routes/courseProgress");
 
 app.use("/api/academy", academyRoutes);
 app.use("/api/academy/courses", coursesRoutes);
@@ -57,6 +58,7 @@ app.use("/api/academy/seminars", seminarsRoutes);
 app.use("/api/academy/podcasts", podcastsRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/courseProgress", courseProgressRoutes);
 
 // ------------------------------
 // HEALTH CHECK

@@ -15,6 +15,7 @@ import Signup from './pages/Auth/Signup';
 import Profile from './pages/Auth/Profile';
 import PaymentSuccess from './pages/Payment/PaymentSuccess';
 import MyCourses from './pages/Academy/Courses/MyCourses';
+import CourseLearning from './pages/Academy/Courses/CourseLearning';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -64,6 +65,7 @@ function App() {
           <Route path="/academy/create/seminar" element={<CreateSeminar />} />
           <Route path="/academy/create/tutorial" element={<CreateTutorial />} />
           <Route path="/academy/payment-success" element={<PaymentSuccess />} />
+          <Route path="/academy/courses/:id/learn" element={<CourseLearning />} />
         </Routes>
       </div>
     </Router>

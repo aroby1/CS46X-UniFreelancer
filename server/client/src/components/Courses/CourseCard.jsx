@@ -52,9 +52,15 @@ const CourseCard = ({ course }) => {
             )}
           </div>
           
-          <button className="view-details-btn">
-            View Details →
-          </button>
+          <button
+            className="view-details-btn"
+            onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/academy/courses/${course._id}/learn`);
+            }}
+            >
+            Go to Course →
+        </button>
         </div>
       </div>
     </div>

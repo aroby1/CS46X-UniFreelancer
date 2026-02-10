@@ -22,26 +22,85 @@ const SubscriptionSchema = new mongoose.Schema({
   tier: { type: String, default: "" }
 }, { _id: false });
 
+// Lesson Schema (videos, assignments, quizzes within a module)
+const LessonSchema = new mongoose.Schema({
+  type: {
+    type: String,
+    enum: ["video", "assignment", "quiz"],
+    required: true
+  },
+  title: { type: String, required: true },
+  order: { type: Number, required: true },
+  
+  // For VIDEO lessons
+  videoUrl: { type: String, default: "" },
+  duration: { type: String, default: "" },
+  
+  // For ASSIGNMENT lessons
+  assignmentType: {
+    type: String,
+    enum: ["text", "file", "both"],
+    default: "text"
+  },
+  instructions: { type: String, default: "" },
+  
+  // For QUIZ lessons
+  questions: [{
+    question: { type: String },
+    questionType: {
+      type: String,
+      enum: ["multiple-choice", "short-answer"],
+      default: "multiple-choice"
+    },
+    options: [{ type: String }], // for multiple choice
+    correctAnswer: { type: String }, // answer text or option index
+    points: { type: Number, default: 1 }
+  }],
+  passingScore: { type: Number, default: 70 }, // percentage
+  
+}, { _id: true });
+
 const ModuleSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, default: "" },
-
-  // Content types
+  order: { type: Number, default: 0 },
+  
+  // NEW: Array of lessons instead of single content
+  lessons: { type: [LessonSchema], default: [] },
+  
+  // DEPRECATED: Old fields kept for backward compatibility
   videoUrl: { type: String, default: "" },
   articleContent: { type: String, default: "" },
   pdfUrl: { type: String, default: "" },
-
-  // Quiz placeholder for future
   hasQuiz: { type: Boolean, default: false },
   quizData: { type: Object, default: null },
-
   learningPoints: { type: [String], default: [] },
   duration: { type: String, default: "" },
   estimatedMinutes: { type: Number, default: 0 },
   thumbnail: { type: String, default: "" },
-
-  order: { type: Number, default: 0 }
 }, { _id: true });
+
+// NEW: Final Test Schema
+const FinalTestSchema = new mongoose.Schema({
+  title: { type: String, default: "Final Test" },
+  description: { type: String, default: "" },
+  passingScore: { type: Number, default: 70 }, // percentage to pass
+  questions: [{
+    question: { type: String, required: true },
+    options: [{ type: String }], // multiple choice options
+    correctAnswer: { type: Number }, // index of correct option (0-based)
+    points: { type: Number, default: 1 }
+  }],
+  timeLimit: { type: Number, default: 0 }, // minutes, 0 = no limit
+}, { _id: false });
+
+// NEW: Course Badge Schema
+const BadgeSchema = new mongoose.Schema({
+  name: { type: String, default: "" },
+  description: { type: String, default: "" },
+  imageUrl: { type: String, default: "" },
+  color: { type: String, default: "#4F46E5" } // hex color for badge
+}, { _id: false });
 
 const CourseSchema = new mongoose.Schema({
   title: { type: String, required: true },
@@ -75,7 +134,17 @@ const CourseSchema = new mongoose.Schema({
 
   learningPoints: { type: [String], default: [] },
   modules: { type: [ModuleSchema], default: [] },
-
+  
+  // NEW: Final test and badge
+  finalTest: {
+    type: FinalTestSchema,
+    default: null
+  },
+  
+  badge: {
+    type: BadgeSchema,
+    default: () => ({})
+  },
 },
   {
     timestamps: true,
@@ -83,7 +152,6 @@ const CourseSchema = new mongoose.Schema({
 );
 
 CourseSchema.virtual("priceAmount").get(function () {
-  // 1) If pricing.amount is set, use that
   if (
     this.pricing &&
     typeof this.pricing.amount === "number" &&
@@ -92,7 +160,6 @@ CourseSchema.virtual("priceAmount").get(function () {
     return this.pricing.amount;
   }
 
-  // 2) If the raw document (e.g., created via Atlas) has priceAmount, use it
   if (this._doc && typeof this._doc.priceAmount === "number") {
     return this._doc.priceAmount;
   }
@@ -100,17 +167,21 @@ CourseSchema.virtual("priceAmount").get(function () {
   return 0;
 });
 
-// Virtual: whether the course counts as free
 CourseSchema.virtual("isFree").get(function () {
   const price = this.priceAmount;
   return this.isLiteVersion || price === 0;
 });
 
-// Make sure virtuals show up in JSON sent to frontend
+// NEW: Virtual to calculate total lessons
+CourseSchema.virtual("totalLessons").get(function () {
+  return this.modules.reduce((total, module) => {
+    return total + (module.lessons?.length || 0);
+  }, 0);
+});
+
 CourseSchema.set("toJSON", { virtuals: true });
 CourseSchema.set("toObject", { virtuals: true });
 
-// Indexes to support search & filtering (optional but good to add)
 CourseSchema.index({
   title: "text",
   description: "text",

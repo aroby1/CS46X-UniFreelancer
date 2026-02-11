@@ -22,7 +22,7 @@ function AcademyAudienceCards({ onBrowseCourses, onCreateContent }) {
 
         <div className="section-tags" aria-label="Learner highlights">
           <span className="section-tag">Structured roadmap</span>
-          <span className="section-tag">Weekly practice briefs</span>
+          <span className="section-tag">Skill drills</span>
           <span className="section-tag">Portfolio outcomes</span>
         </div>
 

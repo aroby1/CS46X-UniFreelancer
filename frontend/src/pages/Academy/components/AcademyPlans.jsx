@@ -56,11 +56,11 @@ function AcademyPlans() {
         >
           <h4>Free</h4>
           <p className="plan-price">$0/mo</p>
-          <p className="plan-subtitle">Great for getting started</p>
+          <p className="plan-subtitle">Get started and explore</p>
           <ul className="plan-features">
-            <li><FiCheck aria-hidden="true" />Access to selected tutorials</li>
-            <li><FiCheck aria-hidden="true" />Basic course previews</li>
-            <li><FiCheck aria-hidden="true" />Community announcements</li>
+            <li><FiCheck aria-hidden="true" />Access to free courses</li>
+            <li><FiCheck aria-hidden="true" />Access to free tutorials</li>
+            <li><FiCheck aria-hidden="true" />Limited seminars + podcasts</li>
             <li><FiCheck aria-hidden="true" />Limited resource downloads</li>
           </ul>
           <button className="plan-button ghost" onClick={handleFreeSelect}>
@@ -71,27 +71,29 @@ function AcademyPlans() {
         <article className="plan-card plan-plus featured">
           <span className="plan-badge">Most popular</span>
           <h4>Plus</h4>
-          <p className="plan-price">$19/mo</p>
-          <p className="plan-subtitle">Best for active learners</p>
+          <p className="plan-price">$14.99/mo</p>
+          <p className="plan-subtitle">Best for consistent learners</p>
           <ul className="plan-features">
-            <li><FiCheck aria-hidden="true" />Full course and tutorial library</li>
-            <li><FiCheck aria-hidden="true" />Weekly live seminar access</li>
-            <li><FiCheck aria-hidden="true" />Downloadable templates/resources</li>
-            <li><FiCheck aria-hidden="true" />Priority support updates</li>
+            <li><FiCheck aria-hidden="true" />Access to most courses</li>
+            <li><FiCheck aria-hidden="true" />Full tutorials library</li>
+            <li><FiCheck aria-hidden="true" />Expanded seminars + podcasts</li>
+            <li><FiCheck aria-hidden="true" />10 resource downloads / month</li>
+            <li><FiCheck aria-hidden="true" />Monthly AI feedback credits</li>
           </ul>
           <button className="plan-button primary">Choose Plus</button>
         </article>
 
         <article className="plan-card plan-premium">
           <h4>Premium</h4>
-          <p className="plan-price">$39/mo</p>
-          <p className="plan-subtitle">For creators and power users</p>
+          <p className="plan-price">$24.99/mo</p>
+          <p className="plan-subtitle">For power learners and creators</p>
           <ul className="plan-features">
-            <li><FiCheck aria-hidden="true" />Everything in Plus</li>
-            <li><FiCheck aria-hidden="true" />Advanced creator tools</li>
-            <li><FiCheck aria-hidden="true" />Early access to new releases</li>
-            <li><FiCheck aria-hidden="true" />Exclusive premium sessions</li>
+            <li><FiCheck aria-hidden="true" />Full access to all academy content</li>
+            <li><FiCheck aria-hidden="true" />Unlimited resource downloads</li>
+            <li><FiCheck aria-hidden="true" />Unlimited AI feedback (Fair Use)</li>
+            <li><FiCheck aria-hidden="true" />AI-assisted creator tools</li>
           </ul>
+          <p className="plan-note">Unlimited AI is subject to fair use and anti-abuse protections.</p>
           <button className="plan-button secondary">Go Premium</button>
         </article>
       </div>

@@ -371,7 +371,17 @@ function LearningHub() {
 
   const getCourseDuration = (duration) => {
     if (!duration) return 'Self-paced';
-    return duration.includes('week') ? duration : `${duration} weeks`;
+    const text = String(duration).trim();
+    if (!text) return 'Self-paced';
+    if (!text.toLowerCase().includes('week')) {
+      return `${text} weeks`;
+    }
+
+    return text.replace(/week(s)?/ig, (match) =>
+      match.toLowerCase().startsWith('week')
+        ? (match.toLowerCase().endsWith('s') ? 'Weeks' : 'Week')
+        : match
+    );
   };
 
   const getCoursePrice = (course) => {

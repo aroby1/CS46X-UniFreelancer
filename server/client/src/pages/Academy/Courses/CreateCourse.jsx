@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './CreateCourse.css';
-import ImageUpload from '../../components/ImageUpload';
+import ImageUpload from '../../../components/ImageUpload';
 
 function CreateCourse() {
   const navigate = useNavigate();

@@ -18,6 +18,7 @@ function CreateTutorial() {
     videoUrl: "",
     writtenContent: "",
     resources: [],
+    instructorName: "",
   });
 
   const handleChange = (e) => {
@@ -73,10 +74,19 @@ function CreateTutorial() {
     }
 
     try {
+      const { instructorName, ...rest } = formData;
       const payload = {
-        ...formData,
+        ...rest,
         duration: durationMinutes
       };
+
+      const trimmedInstructor = instructorName.trim();
+      if (!trimmedInstructor) {
+        alert("Instructor name is required.");
+        return;
+      }
+
+      payload.instructor = { name: trimmedInstructor };
 
       console.log("Submitting Tutorial:", payload);
 
@@ -245,6 +255,18 @@ function CreateTutorial() {
                     onChange={handleChange}
                   />
                 </div>
+              </div>
+
+              <div className="form-group">
+                <label>Instructor *</label>
+                <input
+                  type="text"
+                  name="instructorName"
+                  placeholder="e.g., Jane Doe"
+                  value={formData.instructorName}
+                  onChange={handleChange}
+                  required
+                />
               </div>
 
               <ImageUpload

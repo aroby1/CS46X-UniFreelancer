@@ -1,7 +1,7 @@
 /* global process */
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { FiArrowLeft, FiClock, FiVideo, FiLink } from "react-icons/fi";
+import { FiArrowLeft, FiBookOpen, FiClock, FiVideo, FiLink } from "react-icons/fi";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
 import "./TutorialDetail.css";
 
@@ -276,6 +276,7 @@ function TutorialDetail() {
   const category = tutorial?.category || tutorial?.topic || "General";
   const hasVideo = Boolean(tutorial?.videoUrl);
   const hasArticle = paragraphs.length > 0;
+  const instructorName = tutorial?.instructor?.name || "";
   const publishedDate = tutorial?.createdAt
     ? new Date(tutorial.createdAt).toLocaleDateString()
     : null;
@@ -344,6 +345,15 @@ function TutorialDetail() {
 
                 <div className="tutorial-hero-bottom">
                   <div className="tutorial-meta">
+                    <div className="tutorial-meta-item">
+                      <FiBookOpen className="tutorial-meta-icon" />
+                      <div>
+                        <span className="tutorial-meta-label">Instructor</span>
+                        <span className="tutorial-meta-value">
+                          {instructorName || "Not specified"}
+                        </span>
+                      </div>
+                    </div>
                     <div className="tutorial-meta-item">
                       <FiClock className="tutorial-meta-icon" />
                       <div>

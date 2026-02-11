@@ -1,6 +1,16 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FiArrowLeft } from 'react-icons/fi';
+import {
+  FiArrowLeft,
+  FiBookOpen,
+  FiTag,
+  FiBarChart2,
+  FiMic,
+  FiCalendar,
+  FiHeadphones,
+  FiClock,
+  FiSearch
+} from 'react-icons/fi';
 import './LearningHub.css';
 
 
@@ -476,7 +486,7 @@ function LearningHub() {
 
           <div className="search-bar-container">
             <div className="search-bar">
-              <span className="search-icon">🔍</span>
+              <FiSearch className="search-icon" />
               <input
                 type="text"
                 placeholder={
@@ -752,15 +762,15 @@ function LearningHub() {
                       </p>
                       <div className="course-details">
                         <div className="course-detail">
-                          <span className="detail-icon">🕐</span>
+                          <FiClock className="detail-icon" />
                           <span>{getCourseDuration(course.duration)}</span>
                         </div>
                         <div className="course-detail">
-                          <span className="detail-icon">🏷️</span>
+                          <FiTag className="detail-icon" />
                           <span>{course.category || 'General'}</span>
                         </div>
                         <div className="course-detail">
-                          <span className="detail-icon">📊</span>
+                          <FiBarChart2 className="detail-icon" />
                           <span>{course.difficulty}</span>
                         </div>
                       </div>
@@ -796,15 +806,15 @@ function LearningHub() {
                       </p>
                       <div className="seminar-details">
                         <div className="seminar-detail">
-                          <span className="detail-icon">🗣️</span>
+                          <FiMic className="detail-icon" />
                           <span>{seminar.speaker?.name || 'Unknown Speaker'}</span>
                         </div>
                         <div className="seminar-detail">
-                          <span className="detail-icon">📅</span>
+                          <FiCalendar className="detail-icon" />
                           <span>{seminar.schedule?.date || 'TBD'}</span>
                         </div>
                         <div className="seminar-detail">
-                          <span className="detail-icon">🎧</span>
+                          <FiHeadphones className="detail-icon" />
                           <span>{seminar.type}</span>
                         </div>
                       </div>
@@ -842,14 +852,14 @@ function LearningHub() {
                           {tutorial.description?.substring(0, 90)}...
                         </p>
                         <div className="tutorial-details">
-                          <div className="tutorial-detail">
-                            <span className="detail-icon">📚</span>
-                            <span>{tutorial.category || 'General'}</span>
-                          </div>
-                          <div className="tutorial-detail">
-                            <span className="detail-icon">⏱️</span>
-                            <span>{formatTutorialDuration(tutorial.duration)}</span>
-                          </div>
+                        <div className="tutorial-detail">
+                          <FiBookOpen className="detail-icon" />
+                          <span>{tutorial.category || 'General'}</span>
+                        </div>
+                        <div className="tutorial-detail">
+                          <FiClock className="detail-icon" />
+                          <span>{formatTutorialDuration(tutorial.duration)}</span>
+                        </div>
                         </div>
                         <div className="tutorial-footer">
                           <button

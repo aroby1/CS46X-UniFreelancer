@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './CreateCourse.css';
+import ImageUpload from '../../components/ImageUpload';
 
 function CreateCourse() {
   const navigate = useNavigate();
@@ -345,15 +346,11 @@ function CreateCourse() {
               />
             </div>
 
-            <div className="form-group">
-              <label>Thumbnail URL</label>
-              <input
-                type="text"
-                value={courseData.thumbnail}
-                onChange={(e) => handleInputChange(null, 'thumbnail', e.target.value)}
-                placeholder="https://example.com/image.jpg"
-              />
-            </div>
+            <ImageUpload
+              value={courseData.thumbnail}
+              onChange={(url) => handleInputChange(null, 'thumbnail', url)}
+              label="Course Thumbnail"
+            />
 
             <div className="form-group">
               <label className="checkbox-label">
@@ -406,11 +403,10 @@ function CreateCourse() {
 
             <div className="form-group">
               <label>Instructor Avatar URL</label>
-              <input
-                type="text"
+              <ImageUpload
                 value={courseData.instructor.avatar}
-                onChange={(e) => handleInputChange('instructor', 'avatar', e.target.value)}
-                placeholder="https://example.com/avatar.png"
+                onChange={(url) => handleInputChange('instructor', 'avatar', url)}
+                label="Instructor Avatar"
               />
             </div>
           </div>
@@ -907,11 +903,10 @@ function CreateCourse() {
 
             <div className="form-group">
               <label>Badge Image URL (optional)</label>
-              <input
-                type="text"
+              <ImageUpload
                 value={courseData.badge.imageUrl}
-                onChange={(e) => handleInputChange('badge', 'imageUrl', e.target.value)}
-                placeholder="https://example.com/badge.png"
+                onChange={(url) => handleInputChange('badge', 'imageUrl', url)}
+                label="Badge Image (optional)"
               />
             </div>
 

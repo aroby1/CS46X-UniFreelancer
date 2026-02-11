@@ -50,6 +50,7 @@ const podcastsRoutes = require("./routes/podcasts");
 const userRoutes = require("./routes/users");
 const paymentRoutes = require("./routes/payments");
 const courseProgressRoutes = require("./routes/courseProgress");
+const uploadRoutes = require("./routes/upload");
 
 app.use("/api/academy", academyRoutes);
 app.use("/api/academy/courses", coursesRoutes);
@@ -59,6 +60,7 @@ app.use("/api/academy/podcasts", podcastsRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/courses", courseProgressRoutes);
+app.use("/api/upload", uploadRoutes);
 
 // ------------------------------
 // HEALTH CHECK

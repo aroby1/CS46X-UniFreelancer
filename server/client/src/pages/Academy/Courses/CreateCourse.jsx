@@ -1,26 +1,12 @@
-/* global process */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './CreateCourse.css';
 
 function CreateCourse() {
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState('basic-info');
-  const [learningPoint, setLearningPoint] = useState('');
-  const [modulePoint, setModulePoint] = useState('');
-  const [currentModule, setCurrentModule] = useState({
-    title: '',
-    description: '',
-    videoUrl: '',
-    articleContent: '',
-    pdfUrl: '',
-    learningPoints: [],
-    duration: '',
-    thumbnail: '',
-  });
+  const [currentStep, setCurrentStep] = useState(1);
 
   const [courseData, setCourseData] = useState({
-    // basic info
     title: '',
     description: '',
     duration: '',
@@ -28,282 +14,319 @@ function CreateCourse() {
     category: '',
     thumbnail: '',
     isLiteVersion: false,
-
-    // instructor
-    instructorName: '',
-    instructorTitle: '',
-    instructorBio: '',
-    instructorAvatar: '',
-
-    // pricing
-    priceAmount: '',
-    priceCurrency: 'USD',
-    pricingType: 'one-time',
-
-    // subscription info
-    isSubscriptionCourse: false,
-    subscriptionTier: '',
-
-    // content
+    instructor: {
+      name: '',
+      title: '',
+      bio: '',
+      avatar: ''
+    },
+    pricing: {
+      amount: 0,
+      currency: 'USD',
+      type: 'one-time'
+    },
     learningPoints: [],
-
-    // modules
     modules: [],
+    finalTest: {
+      title: 'Final Test',
+      description: '',
+      passingScore: 70,
+      timeLimit: 0,
+      questions: []
+    },
+    badge: {
+      name: '',
+      description: '',
+      color: '#4F46E5',
+      imageUrl: ''
+    }
   });
 
-  const handleBack = () => {
-    navigate('/academy/create');
+  const [newLearningPoint, setNewLearningPoint] = useState('');
+  const [currentModule, setCurrentModule] = useState({
+    title: '',
+    description: '',
+    order: 0,
+    lessons: []
+  });
+  const [currentLesson, setCurrentLesson] = useState({
+    type: 'video',
+    title: '',
+    order: 0,
+    videoUrl: '',
+    duration: '',
+    assignmentType: 'text',
+    instructions: '',
+    questions: [],
+    passingScore: 70
+  });
+  const [currentQuestion, setCurrentQuestion] = useState({
+    question: '',
+    questionType: 'multiple-choice',
+    options: ['', '', '', ''],
+    correctAnswer: '',
+    points: 1
+  });
+
+  const steps = ['Basic Info', 'Instructor', 'Pricing', 'Content', 'Modules', 'Final Test', 'Badge'];
+
+  const handleNext = () => {
+    if (currentStep < steps.length) setCurrentStep(currentStep + 1);
   };
 
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setCourseData({
-      ...courseData,
-      [name]: type === 'checkbox' ? checked : value,
-    });
+  const handlePrevious = () => {
+    if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
-  const handleAddLearningPoint = () => {
-    if (learningPoint.trim()) {
-      setCourseData({
-        ...courseData,
-        learningPoints: [...courseData.learningPoints, learningPoint.trim()],
-      });
-      setLearningPoint('');
+  const handleInputChange = (section, field, value) => {
+    if (section) {
+      setCourseData(prev => ({
+        ...prev,
+        [section]: { ...prev[section], [field]: value }
+      }));
+    } else {
+      setCourseData(prev => ({ ...prev, [field]: value }));
     }
   };
 
-  const handleRemoveLearningPoint = (index) => {
-    setCourseData({
-      ...courseData,
-      learningPoints: courseData.learningPoints.filter((_, i) => i !== index),
-    });
-  };
-
-  const handleModuleInputChange = (e) => {
-    const { name, value } = e.target;
-    setCurrentModule({
-      ...currentModule,
-      [name]: value,
-    });
-  };
-
-  const handleAddModulePoint = () => {
-    if (modulePoint.trim()) {
-      setCurrentModule({
-        ...currentModule,
-        learningPoints: [...currentModule.learningPoints, modulePoint.trim()],
-      });
-      setModulePoint('');
+  const addLearningPoint = () => {
+    if (newLearningPoint.trim()) {
+      setCourseData(prev => ({
+        ...prev,
+        learningPoints: [...prev.learningPoints, newLearningPoint]
+      }));
+      setNewLearningPoint('');
     }
   };
 
-  const handleRemoveModulePoint = (index) => {
-    setCurrentModule({
-      ...currentModule,
-      learningPoints: currentModule.learningPoints.filter((_, i) => i !== index),
+  const removeLearningPoint = (index) => {
+    setCourseData(prev => ({
+      ...prev,
+      learningPoints: prev.learningPoints.filter((_, i) => i !== index)
+    }));
+  };
+
+  const addQuestionToLesson = () => {
+    if (!currentQuestion.question) {
+      alert('Please enter a question');
+      return;
+    }
+    if (currentQuestion.questionType === 'multiple-choice' && currentQuestion.options.some(opt => !opt.trim())) {
+      alert('Please fill in all answer options');
+      return;
+    }
+    if (!currentQuestion.correctAnswer) {
+      alert('Please specify the correct answer');
+      return;
+    }
+
+    setCurrentLesson(prev => ({
+      ...prev,
+      questions: [...prev.questions, currentQuestion]
+    }));
+
+    setCurrentQuestion({
+      question: '',
+      questionType: 'multiple-choice',
+      options: ['', '', '', ''],
+      correctAnswer: '',
+      points: 1
     });
   };
 
-  const handleAddModule = () => {
-    if (!currentModule.title.trim()) {
+  const removeQuestionFromLesson = (index) => {
+    setCurrentLesson(prev => ({
+      ...prev,
+      questions: prev.questions.filter((_, i) => i !== index)
+    }));
+  };
+
+  const addLesson = () => {
+    if (!currentLesson.title) {
+      alert('Please enter a lesson title');
+      return;
+    }
+
+    const lesson = { ...currentLesson, order: currentModule.lessons.length };
+    setCurrentModule(prev => ({
+      ...prev,
+      lessons: [...prev.lessons, lesson]
+    }));
+
+    setCurrentLesson({
+      type: 'video',
+      title: '',
+      order: 0,
+      videoUrl: '',
+      duration: '',
+      assignmentType: 'text',
+      instructions: '',
+      questions: [],
+      passingScore: 70
+    });
+  };
+
+  const removeLesson = (index) => {
+    setCurrentModule(prev => ({
+      ...prev,
+      lessons: prev.lessons.filter((_, i) => i !== index)
+    }));
+  };
+
+  const addModule = () => {
+    if (!currentModule.title) {
       alert('Please enter a module title');
       return;
     }
-
-    setCourseData({
-      ...courseData,
-      modules: [...courseData.modules, { ...currentModule, order: courseData.modules.length }],
-    });
-
-    // Reset current module
-    setCurrentModule({
-      title: '',
-      description: '',
-      videoUrl: '',
-      articleContent: '',
-      pdfUrl: '',
-      learningPoints: [],
-      duration: '',
-      thumbnail: '',
-    });
-    setModulePoint('');
-  };
-
-  const handleRemoveModule = (index) => {
-    setCourseData({
-      ...courseData,
-      modules: courseData.modules.filter((_, i) => i !== index),
-    });
-  };
-
-  const validateForm = () => {
-    if (!courseData.title.trim()) {
-      alert('Please enter a course title');
-      setCurrentStep('basic-info');
-      return false;
-    }
-    if (!courseData.description.trim()) {
-      alert('Please enter a course description');
-      setCurrentStep('basic-info');
-      return false;
-    }
-    if (!courseData.instructorName.trim()) {
-      alert('Please enter an instructor name');
-      setCurrentStep('instructor');
-      return false;
-    }
-    return true;
-  };
-
-  const handleCreateCourse = async () => {
-    if (!validateForm()) {
+    if (currentModule.lessons.length === 0) {
+      alert('Please add at least one lesson to the module');
       return;
     }
 
+    const module = { ...currentModule, order: courseData.modules.length };
+    setCourseData(prev => ({
+      ...prev,
+      modules: [...prev.modules, module]
+    }));
+
+    setCurrentModule({
+      title: '',
+      description: '',
+      order: 0,
+      lessons: []
+    });
+  };
+
+  const removeModule = (index) => {
+    setCourseData(prev => ({
+      ...prev,
+      modules: prev.modules.filter((_, i) => i !== index)
+    }));
+  };
+
+  const addQuestionToTest = () => {
+    if (!currentQuestion.question) {
+      alert('Please enter a question');
+      return;
+    }
+    if (currentQuestion.options.some(opt => !opt.trim())) {
+      alert('Please fill in all answer options');
+      return;
+    }
+    if (currentQuestion.correctAnswer === '') {
+      alert('Please specify the correct answer');
+      return;
+    }
+
+    setCourseData(prev => ({
+      ...prev,
+      finalTest: {
+        ...prev.finalTest,
+        questions: [...prev.finalTest.questions, {
+          question: currentQuestion.question,
+          options: currentQuestion.options,
+          correctAnswer: parseInt(currentQuestion.correctAnswer),
+          points: currentQuestion.points
+        }]
+      }
+    }));
+
+    setCurrentQuestion({
+      question: '',
+      questionType: 'multiple-choice',
+      options: ['', '', '', ''],
+      correctAnswer: '',
+      points: 1
+    });
+  };
+
+  const removeQuestionFromTest = (index) => {
+    setCourseData(prev => ({
+      ...prev,
+      finalTest: {
+        ...prev.finalTest,
+        questions: prev.finalTest.questions.filter((_, i) => i !== index)
+      }
+    }));
+  };
+
+  const handleSubmit = async () => {
     try {
-      const response = await fetch(`/api/academy/courses`, {
+      if (!courseData.title || !courseData.description) {
+        alert('Please fill in all required fields');
+        return;
+      }
+      if (!courseData.instructor.name) {
+        alert('Please fill in instructor information');
+        return;
+      }
+      if (courseData.modules.length === 0) {
+        alert('Please add at least one module');
+        return;
+      }
+
+      const res = await fetch('/api/academy/courses', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: courseData.title,
-          description: courseData.description,
-          duration: courseData.duration,
-          difficulty: courseData.difficulty,
-          category: courseData.category,
-          thumbnail: courseData.thumbnail,
-          isLiteVersion: courseData.isLiteVersion,
-
-          instructor: {
-            name: courseData.instructorName,
-            title: courseData.instructorTitle,
-            bio: courseData.instructorBio,
-            avatar: courseData.instructorAvatar,
-          },
-
-          pricing: {
-            amount: courseData.priceAmount ? Number(courseData.priceAmount) : 0,
-            currency: courseData.priceCurrency,
-            type: courseData.pricingType,
-          },
-
-          subscription: {
-            isSubscriptionCourse: courseData.isSubscriptionCourse,
-            tier: courseData.subscriptionTier,
-          },
-
-          learningPoints: courseData.learningPoints,
-          modules: courseData.modules,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(courseData)
       });
 
-      const data = await response.json();
+      if (!res.ok) throw new Error('Failed to create course');
 
-      if (response.ok) {
-        alert('Course created successfully!');
-        navigate('/academy/courses');
-      } else {
-        alert(`Failed to create course: ${data.error || data.message || 'Unknown error'}`);
-      }
-    } catch (error) {
-      console.error('Error creating course:', error);
-      alert('An error occurred while creating the course. Please try again.');
+      alert('Course created successfully!');
+      navigate('/academy/courses');
+
+    } catch (err) {
+      console.error('Error creating course:', err);
+      alert('Failed to create course');
     }
   };
 
-  const handleCancel = () => {
-    if (window.confirm('Are you sure you want to cancel? All unsaved changes will be lost.')) {
-      navigate('/academy/create');
-    }
-  };
-
-  const steps = [
-    { id: 'basic-info', label: 'Basic Info' },
-    { id: 'instructor', label: 'Instructor' },
-    { id: 'pricing', label: 'Pricing' },
-    { id: 'content', label: 'Content' },
-    { id: 'modules', label: 'Modules' },
-  ];
-
-  return (
-    <div className="create-course-page">
-      <div className="create-course-container">
-        <button className="back-button" onClick={handleBack}>
-          ← Back
-        </button>
-
-        <h1 className="create-course-title">Create New Course</h1>
-        <p className="create-course-subtitle">Fill in the details to create a new course</p>
-
-        <div className="step-navigation">
-          {steps.map((step) => (
-            <button
-              key={step.id}
-              className={`step-button ${currentStep === step.id ? 'active' : ''}`}
-              onClick={() => setCurrentStep(step.id)}
-            >
-              {step.label}
-            </button>
-          ))}
-        </div>
-
-        {currentStep === 'basic-info' && (
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return (
           <div className="form-section">
-            <h2 className="section-title">Course Information</h2>
+            <h2>Course Information</h2>
             <p className="section-subtitle">Basic details about your course</p>
 
             <div className="form-group">
-              <label className="form-label">
-                Course Title <span className="required">*</span>
-              </label>
+              <label>Course Title *</label>
               <input
                 type="text"
-                name="title"
-                className="form-input"
-                placeholder="e.g., Complete Digital Marketing Masterclass"
                 value={courseData.title}
-                onChange={handleInputChange}
-                required
+                onChange={(e) => handleInputChange(null, 'title', e.target.value)}
+                placeholder="e.g., Complete Digital Marketing Masterclass"
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label">
-                Description <span className="required">*</span>
-              </label>
+              <label>Description *</label>
               <textarea
-                name="description"
-                className="form-textarea"
-                rows="5"
-                placeholder="Describe what students will learn in this course..."
                 value={courseData.description}
-                onChange={handleInputChange}
-                required
+                onChange={(e) => handleInputChange(null, 'description', e.target.value)}
+                placeholder="Describe what students will learn in this course..."
+                rows={4}
               />
             </div>
 
             <div className="form-row">
               <div className="form-group">
-                <label className="form-label">Duration</label>
+                <label>Duration</label>
                 <input
                   type="text"
-                  name="duration"
-                  className="form-input"
-                  placeholder="e.g., 12 weeks"
                   value={courseData.duration}
-                  onChange={handleInputChange}
+                  onChange={(e) => handleInputChange(null, 'duration', e.target.value)}
+                  placeholder="e.g., 12 weeks"
                 />
               </div>
 
               <div className="form-group">
-                <label className="form-label">Difficulty Level</label>
+                <label>Difficulty Level</label>
                 <select
-                  name="difficulty"
-                  className="form-select"
                   value={courseData.difficulty}
-                  onChange={handleInputChange}
+                  onChange={(e) => handleInputChange(null, 'difficulty', e.target.value)}
                 >
                   <option value="Beginner">Beginner</option>
                   <option value="Intermediate">Intermediate</option>
@@ -313,215 +336,162 @@ function CreateCourse() {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Category</label>
+              <label>Category</label>
               <input
                 type="text"
-                name="category"
-                className="form-input"
-                placeholder="e.g., Digital Marketing"
                 value={courseData.category}
-                onChange={handleInputChange}
+                onChange={(e) => handleInputChange(null, 'category', e.target.value)}
+                placeholder="e.g., Digital Marketing"
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Thumbnail URL</label>
-              <div className="input-with-icon">
-                <input
-                  type="text"
-                  name="thumbnail"
-                  className="form-input"
-                  placeholder="https://example.com/image.jpg"
-                  value={courseData.thumbnail}
-                  onChange={handleInputChange}
-                />
-                <span className="upload-icon">⬆</span>
-              </div>
+              <label>Thumbnail URL</label>
+              <input
+                type="text"
+                value={courseData.thumbnail}
+                onChange={(e) => handleInputChange(null, 'thumbnail', e.target.value)}
+                placeholder="https://example.com/image.jpg"
+              />
             </div>
 
             <div className="form-group">
               <label className="checkbox-label">
                 <input
                   type="checkbox"
-                  name="isLiteVersion"
                   checked={courseData.isLiteVersion}
-                  onChange={handleInputChange}
+                  onChange={(e) => handleInputChange(null, 'isLiteVersion', e.target.checked)}
                 />
-                <span>This is a Lite version (free tier with limited content)</span>
+                This is a Lite version (free tier with limited content)
               </label>
             </div>
           </div>
-        )}
+        );
 
-        {currentStep === 'instructor' && (
+      case 2:
+        return (
           <div className="form-section">
-            <h2 className="section-title">Instructor Information</h2>
+            <h2>Instructor Information</h2>
             <p className="section-subtitle">Details about the course instructor</p>
 
             <div className="form-group">
-              <label className="form-label">
-                Instructor Name <span className="required">*</span>
-              </label>
+              <label>Instructor Name *</label>
               <input
                 type="text"
-                name="instructorName"
-                className="form-input"
+                value={courseData.instructor.name}
+                onChange={(e) => handleInputChange('instructor', 'name', e.target.value)}
                 placeholder="e.g., Alina Padilla-Miller"
-                value={courseData.instructorName}
-                onChange={handleInputChange}
-                required
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Instructor Title/Role</label>
+              <label>Instructor Title/Role</label>
               <input
                 type="text"
-                name="instructorTitle"
-                className="form-input"
+                value={courseData.instructor.title}
+                onChange={(e) => handleInputChange('instructor', 'title', e.target.value)}
                 placeholder="e.g., Senior Freelance Designer"
-                value={courseData.instructorTitle}
-                onChange={handleInputChange}
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Instructor Bio</label>
+              <label>Instructor Bio</label>
               <textarea
-                name="instructorBio"
-                className="form-textarea"
-                rows="4"
+                value={courseData.instructor.bio}
+                onChange={(e) => handleInputChange('instructor', 'bio', e.target.value)}
                 placeholder="Short overview of the instructor's background..."
-                value={courseData.instructorBio}
-                onChange={handleInputChange}
+                rows={4}
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Instructor Avatar URL</label>
+              <label>Instructor Avatar URL</label>
               <input
                 type="text"
-                name="instructorAvatar"
-                className="form-input"
+                value={courseData.instructor.avatar}
+                onChange={(e) => handleInputChange('instructor', 'avatar', e.target.value)}
                 placeholder="https://example.com/avatar.png"
-                value={courseData.instructorAvatar}
-                onChange={handleInputChange}
               />
             </div>
           </div>
-        )}
+        );
 
-        {currentStep === 'pricing' && (
+      case 3:
+        return (
           <div className="form-section">
-            <h2 className="section-title">Pricing Details</h2>
+            <h2>Pricing Details</h2>
             <p className="section-subtitle">Set the price for your course. Leave blank for free courses</p>
 
             <div className="form-row">
               <div className="form-group">
-                <label className="form-label">Price Amount</label>
+                <label>Price Amount</label>
                 <input
                   type="number"
-                  min="0"
-                  step="0.01"
-                  name="priceAmount"
-                  className="form-input"
+                  value={courseData.pricing.amount}
+                  onChange={(e) => handleInputChange('pricing', 'amount', parseFloat(e.target.value) || 0)}
                   placeholder="e.g., 199"
-                  value={courseData.priceAmount}
-                  onChange={handleInputChange}
+                  min="0"
                 />
               </div>
 
               <div className="form-group">
-                <label className="form-label">Currency</label>
+                <label>Currency</label>
                 <select
-                  name="priceCurrency"
-                  className="form-select"
-                  value={courseData.priceCurrency}
-                  onChange={handleInputChange}
+                  value={courseData.pricing.currency}
+                  onChange={(e) => handleInputChange('pricing', 'currency', e.target.value)}
                 >
                   <option value="USD">USD</option>
                   <option value="EUR">EUR</option>
-                  <option value="CAD">CAD</option>
+                  <option value="GBP">GBP</option>
                 </select>
               </div>
             </div>
 
             <div className="form-group">
-              <label className="form-label">Pricing Type</label>
+              <label>Pricing Type</label>
               <select
-                name="pricingType"
-                className="form-select"
-                value={courseData.pricingType}
-                onChange={handleInputChange}
+                value={courseData.pricing.type}
+                onChange={(e) => handleInputChange('pricing', 'type', e.target.value)}
               >
                 <option value="one-time">One-time payment</option>
                 <option value="subscription">Subscription</option>
               </select>
             </div>
-
-            {courseData.pricingType === 'subscription' && (
-              <p className="section-subtitle" style={{ marginTop: '10px' }}>
-                (You can extend this to monthly / yearly plans later.)
-              </p>
-            )}
-
-            {courseData.isLiteVersion && (
-              <p className="section-subtitle" style={{ marginTop: '10px' }}>
-                Note: this course is marked as "Lite", so it may be treated as
-                free in the course list.
-              </p>
-            )}
           </div>
-        )}
+        );
 
-        {currentStep === 'content' && (
+      case 4:
+        return (
           <div className="form-section">
-            <h2 className="section-title">Course Content</h2>
+            <h2>Course Content</h2>
             <p className="section-subtitle">Add key learning points for your course</p>
 
             <div className="form-group">
-              <label className="form-label">Learning Points</label>
-              <div className="learning-point-input">
+              <label>Learning Points</label>
+              <div className="add-item-container">
                 <input
                   type="text"
-                  className="form-input"
+                  value={newLearningPoint}
+                  onChange={(e) => setNewLearningPoint(e.target.value)}
                   placeholder="e.g., Master social media marketing strategies"
-                  value={learningPoint}
-                  onChange={(e) => setLearningPoint(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleAddLearningPoint();
-                    }
-                  }}
+                  onKeyPress={(e) => e.key === 'Enter' && addLearningPoint()}
                 />
-                <button
-                  type="button"
-                  className="add-point-button"
-                  onClick={handleAddLearningPoint}
-                >
+                <button type="button" onClick={addLearningPoint} className="add-button">
                   Add Point
                 </button>
               </div>
             </div>
 
             {courseData.learningPoints.length > 0 && (
-              <div className="learning-points-list">
-                <h3 className="list-title">Added Learning Points:</h3>
-                <ul className="points-list">
-                  {courseData.learningPoints.map((point, index) => (
-                    <li key={index} className="point-item">
-                      <span className="point-text">✓ {point}</span>
-                      <button
-                        type="button"
-                        className="remove-point-button"
-                        onClick={() => handleRemoveLearningPoint(index)}
-                      >
-                        ✕
-                      </button>
-                    </li>
-                  ))}
-                </ul>
+              <div className="items-list">
+                {courseData.learningPoints.map((point, index) => (
+                  <div key={index} className="list-item">
+                    <span>{point}</span>
+                    <button onClick={() => removeLearningPoint(index)} className="remove-button">
+                      Remove
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
 
@@ -529,217 +499,498 @@ function CreateCourse() {
               <p className="empty-state">No learning points added yet. Add some to help students understand what they'll learn!</p>
             )}
           </div>
-        )}
+        );
 
-        {currentStep === 'modules' && (
+      case 5:
+        return (
           <div className="form-section">
-            <h2 className="section-title">Course Modules</h2>
-            <p className="section-subtitle">Organize your course into structured modules with content</p>
+            <h2>Course Modules</h2>
+            <p className="section-subtitle">Organize your course into structured modules with lessons</p>
 
             <div className="module-form">
-              <h3 className="subsection-title">Add New Module</h3>
-
+              <h3>Add New Module</h3>
+              
               <div className="form-group">
-                <label className="form-label">
-                  Module Title <span className="required">*</span>
-                </label>
+                <label>Module Title *</label>
                 <input
                   type="text"
-                  name="title"
-                  className="form-input"
-                  placeholder="e.g., Introduction to Digital Marketing"
                   value={currentModule.title}
-                  onChange={handleModuleInputChange}
+                  onChange={(e) => setCurrentModule({ ...currentModule, title: e.target.value })}
+                  placeholder="e.g., Introduction to Digital Marketing"
                 />
               </div>
 
               <div className="form-group">
-                <label className="form-label">Module Description</label>
+                <label>Module Description</label>
                 <textarea
-                  name="description"
-                  className="form-textarea"
-                  rows="3"
-                  placeholder="Brief description of what this module covers..."
                   value={currentModule.description}
-                  onChange={handleModuleInputChange}
+                  onChange={(e) => setCurrentModule({ ...currentModule, description: e.target.value })}
+                  placeholder="Brief description of what this module covers..."
+                  rows={3}
                 />
               </div>
 
-              <div className="content-type-section">
-                <h4 className="content-label">Module Content</h4>
+              <div className="lesson-section">
+                <h4>Module Lessons</h4>
 
                 <div className="form-group">
-                  <label className="form-label">Video URL</label>
-                  <input
-                    type="text"
-                    name="videoUrl"
-                    className="form-input"
-                    placeholder="https://youtube.com/watch?v=..."
-                    value={currentModule.videoUrl}
-                    onChange={handleModuleInputChange}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Article Content</label>
-                  <textarea
-                    name="articleContent"
-                    className="form-textarea"
-                    rows="5"
-                    placeholder="Write your article content here..."
-                    value={currentModule.articleContent}
-                    onChange={handleModuleInputChange}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">PDF/Document URL</label>
-                  <input
-                    type="text"
-                    name="pdfUrl"
-                    className="form-input"
-                    placeholder="https://example.com/document.pdf"
-                    value={currentModule.pdfUrl}
-                    onChange={handleModuleInputChange}
-                  />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">Duration</label>
-                  <input
-                    type="text"
-                    name="duration"
-                    className="form-input"
-                    placeholder="e.g., 45 minutes"
-                    value={currentModule.duration}
-                    onChange={handleModuleInputChange}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Thumbnail URL</label>
-                  <input
-                    type="text"
-                    name="thumbnail"
-                    className="form-input"
-                    placeholder="https://example.com/thumb.jpg"
-                    value={currentModule.thumbnail}
-                    onChange={handleModuleInputChange}
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Module Learning Points</label>
-                <div className="learning-point-input">
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder="e.g., Understand key marketing concepts"
-                    value={modulePoint}
-                    onChange={(e) => setModulePoint(e.target.value)}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleAddModulePoint();
-                      }
-                    }}
-                  />
-                  <button
-                    type="button"
-                    className="add-point-button"
-                    onClick={handleAddModulePoint}
+                  <label>Lesson Type</label>
+                  <select
+                    value={currentLesson.type}
+                    onChange={(e) => setCurrentLesson({ ...currentLesson, type: e.target.value })}
                   >
-                    Add Point
-                  </button>
+                    <option value="video">Video</option>
+                    <option value="assignment">Assignment</option>
+                    <option value="quiz">Quiz</option>
+                  </select>
                 </div>
+
+                <div className="form-group">
+                  <label>Lesson Title *</label>
+                  <input
+                    type="text"
+                    value={currentLesson.title}
+                    onChange={(e) => setCurrentLesson({ ...currentLesson, title: e.target.value })}
+                    placeholder="e.g., Course Overview & Welcome"
+                  />
+                </div>
+
+                {currentLesson.type === 'video' && (
+                  <>
+                    <div className="form-group">
+                      <label>Video URL</label>
+                      <input
+                        type="text"
+                        value={currentLesson.videoUrl}
+                        onChange={(e) => setCurrentLesson({ ...currentLesson, videoUrl: e.target.value })}
+                        placeholder="https://youtube.com/watch?v=..."
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Duration</label>
+                      <input
+                        type="text"
+                        value={currentLesson.duration}
+                        onChange={(e) => setCurrentLesson({ ...currentLesson, duration: e.target.value })}
+                        placeholder="e.g., 12 min"
+                      />
+                    </div>
+                  </>
+                )}
+
+                {currentLesson.type === 'assignment' && (
+                  <>
+                    <div className="form-group">
+                      <label>Assignment Type</label>
+                      <select
+                        value={currentLesson.assignmentType}
+                        onChange={(e) => setCurrentLesson({ ...currentLesson, assignmentType: e.target.value })}
+                      >
+                        <option value="text">Text Submission</option>
+                        <option value="file">File Upload</option>
+                        <option value="both">Both Text & File</option>
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label>Instructions</label>
+                      <textarea
+                        value={currentLesson.instructions}
+                        onChange={(e) => setCurrentLesson({ ...currentLesson, instructions: e.target.value })}
+                        placeholder="Instructions for the assignment..."
+                        rows={4}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {currentLesson.type === 'quiz' && (
+                  <>
+                    <div className="form-group">
+                      <label>Passing Score (%)</label>
+                      <input
+                        type="number"
+                        value={currentLesson.passingScore}
+                        onChange={(e) => setCurrentLesson({ ...currentLesson, passingScore: parseInt(e.target.value) })}
+                        min="0"
+                        max="100"
+                      />
+                    </div>
+
+                    <div className="question-builder">
+                      <h5>Quiz Questions</h5>
+
+                      <div className="form-group">
+                        <label>Question Type</label>
+                        <select
+                          value={currentQuestion.questionType}
+                          onChange={(e) => setCurrentQuestion({ ...currentQuestion, questionType: e.target.value })}
+                        >
+                          <option value="multiple-choice">Multiple Choice</option>
+                          <option value="short-answer">Short Answer</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label>Question</label>
+                        <input
+                          type="text"
+                          value={currentQuestion.question}
+                          onChange={(e) => setCurrentQuestion({ ...currentQuestion, question: e.target.value })}
+                          placeholder="Enter your question..."
+                        />
+                      </div>
+
+                      {currentQuestion.questionType === 'multiple-choice' ? (
+                        <>
+                          <div className="form-group">
+                            <label>Answer Options</label>
+                            {currentQuestion.options.map((option, index) => (
+                              <input
+                                key={index}
+                                type="text"
+                                value={option}
+                                onChange={(e) => {
+                                  const newOptions = [...currentQuestion.options];
+                                  newOptions[index] = e.target.value;
+                                  setCurrentQuestion({ ...currentQuestion, options: newOptions });
+                                }}
+                                placeholder={`Option ${index + 1}`}
+                                style={{ marginBottom: '8px' }}
+                              />
+                            ))}
+                          </div>
+
+                          <div className="form-group">
+                            <label>Correct Answer</label>
+                            <select
+                              value={currentQuestion.correctAnswer}
+                              onChange={(e) => setCurrentQuestion({ ...currentQuestion, correctAnswer: e.target.value })}
+                            >
+                              <option value="">Select correct answer...</option>
+                              {currentQuestion.options.map((option, index) => (
+                                <option key={index} value={index}>{option || `Option ${index + 1}`}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="form-group">
+                          <label>Correct Answer</label>
+                          <input
+                            type="text"
+                            value={currentQuestion.correctAnswer}
+                            onChange={(e) => setCurrentQuestion({ ...currentQuestion, correctAnswer: e.target.value })}
+                            placeholder="Enter the correct answer..."
+                          />
+                        </div>
+                      )}
+
+                      <button type="button" onClick={addQuestionToLesson} className="add-button">
+                        Add Question
+                      </button>
+
+                      {currentLesson.questions.length > 0 && (
+                        <div className="items-list">
+                          {currentLesson.questions.map((q, index) => (
+                            <div key={index} className="list-item">
+                              <span>{q.question}</span>
+                              <button onClick={() => removeQuestionFromLesson(index)} className="remove-button">
+                                Remove
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                <button type="button" onClick={addLesson} className="add-button" style={{ marginTop: '15px' }}>
+                  + Add Lesson to Module
+                </button>
+
+                {currentModule.lessons.length > 0 && (
+                  <div className="items-list">
+                    <h5>Lessons in this module:</h5>
+                    {currentModule.lessons.map((lesson, index) => (
+                      <div key={index} className="list-item">
+                        <span>
+                          {lesson.type === 'video' && '▶️'}
+                          {lesson.type === 'assignment' && '📝'}
+                          {lesson.type === 'quiz' && '❓'}
+                          {' '}{lesson.title}
+                        </span>
+                        <button onClick={() => removeLesson(index)} className="remove-button">
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              {currentModule.learningPoints.length > 0 && (
-                <div className="module-points-list">
-                  <ul className="points-list">
-                    {currentModule.learningPoints.map((point, index) => (
-                      <li key={index} className="point-item">
-                        <span className="point-text">✓ {point}</span>
-                        <button
-                          type="button"
-                          className="remove-point-button"
-                          onClick={() => handleRemoveModulePoint(index)}
-                        >
-                          ✕
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              <button
-                type="button"
-                className="add-module-button"
-                onClick={handleAddModule}
-              >
+              <button type="button" onClick={addModule} className="primary-button" style={{ marginTop: '20px' }}>
                 + Add Module to Course
               </button>
             </div>
 
             {courseData.modules.length > 0 && (
               <div className="modules-list">
-                <h3 className="list-title">Course Modules ({courseData.modules.length})</h3>
+                <h3>Course Modules ({courseData.modules.length})</h3>
                 {courseData.modules.map((module, index) => (
                   <div key={index} className="module-card">
                     <div className="module-header">
-                      <div className="module-info">
-                        <span className="module-number">Module {index + 1}</span>
-                        <h4 className="module-title">{module.title}</h4>
-                        {module.duration && <span className="module-duration">⏱ {module.duration}</span>}
-                      </div>
-                      <button
-                        type="button"
-                        className="remove-module-button"
-                        onClick={() => handleRemoveModule(index)}
-                      >
-                        ✕ Remove
+                      <h4>Module {index + 1}: {module.title}</h4>
+                      <button onClick={() => removeModule(index)} className="remove-button">
+                        Remove
                       </button>
                     </div>
-                    {module.description && (
-                      <p className="module-description">{module.description}</p>
-                    )}
-                    <div className="module-content-tags">
-                      {module.videoUrl && <span className="content-tag">📹 Video</span>}
-                      {module.articleContent && <span className="content-tag">📝 Article</span>}
-                      {module.pdfUrl && <span className="content-tag">📄 PDF</span>}
-                    </div>
-                    {module.learningPoints.length > 0 && (
-                      <div className="module-learning-points">
-                        <strong>Learning Points:</strong>
-                        <ul>
-                          {module.learningPoints.map((point, idx) => (
-                            <li key={idx}>{point}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                    <p>{module.description}</p>
+                    <p className="lesson-count">{module.lessons.length} lesson(s)</p>
                   </div>
                 ))}
               </div>
             )}
+          </div>
+        );
 
-            {courseData.modules.length === 0 && (
-              <p className="empty-state">No modules added yet. Create your first module above!</p>
+      case 6:
+        return (
+          <div className="form-section">
+            <h2>Final Test</h2>
+            <p className="section-subtitle">Create a final test to assess student learning (optional)</p>
+
+            <div className="form-group">
+              <label>Test Title</label>
+              <input
+                type="text"
+                value={courseData.finalTest.title}
+                onChange={(e) => handleInputChange('finalTest', 'title', e.target.value)}
+                placeholder="Final Test"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Test Description</label>
+              <textarea
+                value={courseData.finalTest.description}
+                onChange={(e) => handleInputChange('finalTest', 'description', e.target.value)}
+                placeholder="Description of the final test..."
+                rows={3}
+              />
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Passing Score (%)</label>
+                <input
+                  type="number"
+                  value={courseData.finalTest.passingScore}
+                  onChange={(e) => handleInputChange('finalTest', 'passingScore', parseInt(e.target.value))}
+                  min="0"
+                  max="100"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Time Limit (minutes, 0 = no limit)</label>
+                <input
+                  type="number"
+                  value={courseData.finalTest.timeLimit}
+                  onChange={(e) => handleInputChange('finalTest', 'timeLimit', parseInt(e.target.value))}
+                  min="0"
+                />
+              </div>
+            </div>
+
+            <div className="question-builder">
+              <h4>Add Test Questions</h4>
+
+              <div className="form-group">
+                <label>Question</label>
+                <input
+                  type="text"
+                  value={currentQuestion.question}
+                  onChange={(e) => setCurrentQuestion({ ...currentQuestion, question: e.target.value })}
+                  placeholder="Enter your question..."
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Answer Options</label>
+                {currentQuestion.options.map((option, index) => (
+                  <input
+                    key={index}
+                    type="text"
+                    value={option}
+                    onChange={(e) => {
+                      const newOptions = [...currentQuestion.options];
+                      newOptions[index] = e.target.value;
+                      setCurrentQuestion({ ...currentQuestion, options: newOptions });
+                    }}
+                    placeholder={`Option ${index + 1}`}
+                    style={{ marginBottom: '8px' }}
+                  />
+                ))}
+              </div>
+
+              <div className="form-group">
+                <label>Correct Answer</label>
+                <select
+                  value={currentQuestion.correctAnswer}
+                  onChange={(e) => setCurrentQuestion({ ...currentQuestion, correctAnswer: e.target.value })}
+                >
+                  <option value="">Select correct answer...</option>
+                  {currentQuestion.options.map((option, index) => (
+                    <option key={index} value={index}>{option || `Option ${index + 1}`}</option>
+                  ))}
+                </select>
+              </div>
+
+              <button type="button" onClick={addQuestionToTest} className="add-button">
+                Add Question
+              </button>
+
+              {courseData.finalTest.questions.length > 0 && (
+                <div className="items-list">
+                  <h5>Test Questions ({courseData.finalTest.questions.length})</h5>
+                  {courseData.finalTest.questions.map((q, index) => (
+                    <div key={index} className="list-item">
+                      <span>{index + 1}. {q.question}</span>
+                      <button onClick={() => removeQuestionFromTest(index)} className="remove-button">
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
+      case 7:
+        return (
+          <div className="form-section">
+            <h2>Completion Badge</h2>
+            <p className="section-subtitle">Design a badge that students will earn upon completing the course</p>
+
+            <div className="form-group">
+              <label>Badge Name</label>
+              <input
+                type="text"
+                value={courseData.badge.name}
+                onChange={(e) => handleInputChange('badge', 'name', e.target.value)}
+                placeholder="e.g., Digital Marketing Master"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Badge Description</label>
+              <textarea
+                value={courseData.badge.description}
+                onChange={(e) => handleInputChange('badge', 'description', e.target.value)}
+                placeholder="Description of what this badge represents..."
+                rows={3}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Badge Color</label>
+              <input
+                type="color"
+                value={courseData.badge.color}
+                onChange={(e) => handleInputChange('badge', 'color', e.target.value)}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Badge Image URL (optional)</label>
+              <input
+                type="text"
+                value={courseData.badge.imageUrl}
+                onChange={(e) => handleInputChange('badge', 'imageUrl', e.target.value)}
+                placeholder="https://example.com/badge.png"
+              />
+            </div>
+
+            {courseData.badge.name && (
+              <div className="badge-preview">
+                <h4>Badge Preview</h4>
+                <div 
+                  className="preview-badge"
+                  style={{ backgroundColor: courseData.badge.color }}
+                >
+                  {courseData.badge.imageUrl ? (
+                    <img src={courseData.badge.imageUrl} alt={courseData.badge.name} />
+                  ) : (
+                    <span className="badge-emoji">🏆</span>
+                  )}
+                </div>
+                <p><strong>{courseData.badge.name}</strong></p>
+                <p>{courseData.badge.description}</p>
+              </div>
             )}
           </div>
-        )}
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="create-course-page">
+      <div className="create-course-container">
+        <h1>Create New Course</h1>
+        <p className="page-subtitle">Fill in the details to create a new course</p>
+
+        <div className="steps-indicator">
+          {steps.map((step, index) => (
+            <div
+              key={index}
+              className={`step ${currentStep === index + 1 ? 'active' : ''} ${
+                currentStep > index + 1 ? 'completed' : ''
+              }`}
+            >
+              <div className="step-number">{index + 1}</div>
+              <div className="step-label">{step}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="form-container">
+          {renderStepContent()}
+        </div>
 
         <div className="form-actions">
-          <button className="cancel-button" onClick={handleCancel}>
-            Cancel
+          <button
+            type="button"
+            onClick={handlePrevious}
+            disabled={currentStep === 1}
+            className="secondary-button"
+          >
+            Previous
           </button>
-          <button className="submit-button" onClick={handleCreateCourse}>
-            Create Course
-          </button>
+
+          {currentStep < steps.length ? (
+            <button
+              type="button"
+              onClick={handleNext}
+              className="primary-button"
+            >
+              Next
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="primary-button"
+            >
+              Create Course
+            </button>
+          )}
         </div>
       </div>
     </div>

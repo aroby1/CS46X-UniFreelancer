@@ -1,6 +1,7 @@
 /* global process */
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { FiArrowLeft } from 'react-icons/fi';
 import CourseSidebar from './CourseSidebar';
 import VideoLesson from './VideoLesson';
 import AssignmentLesson from './AssignmentLesson';
@@ -232,7 +233,7 @@ function CourseLearning() {
     <div className="course-learning-page">
       <div className="course-learning-header">
         <button className="exit-button" onClick={handleExit}>
-          ← Exit Course
+          <FiArrowLeft size={18} /> Exit Course
         </button>
         <h1>{course.title}</h1>
         <div className="progress-info">
@@ -292,7 +293,7 @@ function CourseLearning() {
                   disabled={currentIndex === 0}
                   className="nav-button prev-button"
                 >
-                  ← Previous
+                  <FiArrowLeft size={18} /> Previous
                 </button>
 
                 <button

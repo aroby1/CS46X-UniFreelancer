@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FiArrowLeft } from 'react-icons/fi';
 import './CreateCourse.css';
 import ImageUpload from '../../../components/ImageUpload';
 
@@ -938,6 +939,10 @@ function CreateCourse() {
   return (
     <div className="create-course-page">
       <div className="create-course-container">
+        <button className="back-button" onClick={() => navigate(-1)}>
+          <FiArrowLeft size={18} /> Back
+        </button>
+
         <h1>Create New Course</h1>
         <p className="page-subtitle">Fill in the details to create a new course</p>
 

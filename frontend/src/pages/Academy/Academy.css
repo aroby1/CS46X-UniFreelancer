@@ -910,6 +910,7 @@
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 22px;
+  min-height: 56px;
 }
 
 .section-tag {
@@ -1300,6 +1301,10 @@
 
   .signal-pill {
     font-size: 11px;
+  }
+
+  .section-tags {
+    min-height: 0;
   }
 
   .feature-slide {

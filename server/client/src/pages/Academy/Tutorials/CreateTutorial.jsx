@@ -14,7 +14,7 @@ function CreateTutorial() {
     description: "",
     duration: "",
     category: "",
-    thumbnailUrl: "",
+    thumbnail: "",
     videoUrl: "",
     writtenContent: "",
     resources: [],
@@ -270,8 +270,8 @@ function CreateTutorial() {
               </div>
 
               <ImageUpload
-                value={formData.thumbnailUrl}
-                onChange={(url) => setFormData({ ...formData, thumbnailUrl: url })}
+                value={formData.thumbnail}
+                onChange={(url) => setFormData({ ...formData, thumbnail: url })}
                 label="Tutorial Thumbnail"
               />
             </div>

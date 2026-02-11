@@ -249,6 +249,29 @@
   color: #2c3e50;
 }
 
+.filter-empty {
+  font-size: 13px;
+  color: #777;
+  margin: 0 0 10px;
+}
+
+.topic-toggle {
+  margin-top: 8px;
+  padding: 6px 10px;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #2c3e50;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.topic-toggle:hover {
+  background: #f5f5f5;
+  border-color: #d0d0d0;
+}
+
 /* Content Grid */
 .content-grid {
   flex: 1;
@@ -601,4 +624,3 @@
   }
 
 }
-

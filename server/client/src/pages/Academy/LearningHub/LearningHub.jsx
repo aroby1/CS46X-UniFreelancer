@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FiArrowLeft } from 'react-icons/fi';
 import './LearningHub.css';
@@ -45,10 +45,50 @@ function LearningHub() {
   });
 
   const [tutorialFilters, setTutorialFilters] = useState({
+    type: [],
     topic: [],
-    difficulty: [],
-    length: []
+    duration: []
   });
+
+  const [tutorialSort, setTutorialSort] = useState("newest");
+  const [showAllTutorialTopics, setShowAllTutorialTopics] = useState(false);
+
+  const tutorialTopicOptions = useMemo(() => {
+    const counts = new Map();
+    tutorials.forEach((tutorial) => {
+      const topic = tutorial?.category || "General";
+      counts.set(topic, (counts.get(topic) || 0) + 1);
+    });
+
+    return Array.from(counts.entries())
+      .sort((a, b) => {
+        if (b[1] !== a[1]) return b[1] - a[1];
+        return a[0].localeCompare(b[0]);
+      })
+      .map(([topic]) => topic);
+  }, [tutorials]);
+
+  const tutorialTopicsToShow = showAllTutorialTopics
+    ? tutorialTopicOptions
+    : tutorialTopicOptions.slice(0, 5);
+
+  const formatTutorialDuration = (duration) => {
+    if (!duration) return "Self-paced";
+    const normalized = String(duration).trim();
+    return /^\d+$/.test(normalized) ? `${normalized} Minutes` : normalized;
+  };
+
+  const parseDurationMinutes = (duration) => {
+    if (!duration || typeof duration !== "string") return 0;
+    const normalized = duration.toLowerCase().trim();
+    const numberMatch = normalized.match(/(\d+(?:\.\d+)?)/);
+    if (!numberMatch) return 0;
+    const value = Number(numberMatch[1]);
+    if (Number.isNaN(value)) return 0;
+    if (normalized.includes("hour")) return Math.round(value * 60);
+    if (normalized.includes("min")) return Math.round(value);
+    return Math.round(value);
+  };
 
   // Update tab when URL changes
   useEffect(() => {
@@ -227,24 +267,57 @@ function LearningHub() {
     if (searchTerm && activeTab === 'tutorials') {
       filtered = filtered.filter(t =>
         t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        t.description?.toLowerCase().includes(searchTerm.toLowerCase())
+        t.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (t.category || "").toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
+    if (tutorialFilters.type.length > 0) {
+      filtered = filtered.filter(t => {
+        const types = [];
+        if (t.videoUrl) types.push("Video");
+        if (t.writtenContent) types.push("Article");
+        return tutorialFilters.type.some(type => types.includes(type));
+      });
+    }
+
     if (tutorialFilters.topic.length > 0) {
-      filtered = filtered.filter(t => tutorialFilters.topic.includes(t.topic));
+      filtered = filtered.filter(t =>
+        tutorialFilters.topic.includes(t.category || "General")
+      );
     }
 
-    if (tutorialFilters.difficulty.length > 0) {
-      filtered = filtered.filter(t => tutorialFilters.difficulty.includes(t.difficulty));
+    if (tutorialFilters.duration.length > 0) {
+      filtered = filtered.filter(t => {
+        const minutes = parseDurationMinutes(t.duration);
+        if (!minutes) return false;
+
+        return tutorialFilters.duration.some(range => {
+          if (range === '0-15') return minutes > 0 && minutes <= 15;
+          if (range === '15-30') return minutes > 15 && minutes <= 30;
+          if (range === '30-45') return minutes > 30 && minutes <= 45;
+          if (range === '45-60') return minutes > 45 && minutes <= 60;
+          if (range === '60+') return minutes > 60;
+          return false;
+        });
+      });
     }
 
-    if (tutorialFilters.length.length > 0) {
-      filtered = filtered.filter(t => tutorialFilters.length.includes(t.lengthCategory));
-    }
+    filtered.sort((a, b) => {
+      if (tutorialSort === "oldest") {
+        return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+      }
+      if (tutorialSort === "duration-asc") {
+        return parseDurationMinutes(a.duration) - parseDurationMinutes(b.duration);
+      }
+      if (tutorialSort === "duration-desc") {
+        return parseDurationMinutes(b.duration) - parseDurationMinutes(a.duration);
+      }
+      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    });
 
     setFilteredTutorials(filtered);
-  }, [tutorials, searchTerm, tutorialFilters, activeTab]);
+  }, [tutorials, searchTerm, tutorialFilters, activeTab, tutorialSort]);
 
   useEffect(() => {
     if (activeTab === 'courses' || activeTab === 'continue-learning') {
@@ -415,7 +488,15 @@ function LearningHub() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <select className="sort-dropdown">
+            <select
+              className="sort-dropdown"
+              value={activeTab === 'tutorials' ? tutorialSort : undefined}
+              onChange={(event) => {
+                if (activeTab === 'tutorials') {
+                  setTutorialSort(event.target.value);
+                }
+              }}
+            >
               {activeTab === 'continue-learning' || activeTab === 'courses' ? (
                 <>
                   <option>All Courses</option>
@@ -432,9 +513,10 @@ function LearningHub() {
                 </>
               ) : (
                 <>
-                  <option>Newest First</option>
-                  <option>Most Popular</option>
-                  <option>Duration: Short to Long</option>
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                  <option value="duration-asc">Duration: Short to Long</option>
+                  <option value="duration-desc">Duration: Long to Short</option>
                 </>
               )}
             </select>
@@ -555,47 +637,67 @@ function LearningHub() {
                 </>
               ) : (
                 <>
-                  {/* Topic Filter */}
-                  <div className="filter-section">
-                    <h4 className="filter-heading">Topic</h4>
-                    {['Design', 'Marketing', 'Development', 'Business'].map(topic => (
-                      <label key={topic} className="filter-option">
-                        <input
-                          type="checkbox"
-                          checked={tutorialFilters.topic.includes(topic)}
-                          onChange={() => handleTutorialFilterChange('topic', topic)}
-                        />
-                        <span>{topic}</span>
-                      </label>
-                    ))}
-                  </div>
+                   {/* Topic Filter */}
+                   <div className="filter-section">
+                     <h4 className="filter-heading">Topic</h4>
+                     {tutorialTopicsToShow.length === 0 ? (
+                       <p className="filter-empty">No topics available.</p>
+                     ) : (
+                       tutorialTopicsToShow.map(topic => (
+                         <label key={topic} className="filter-option">
+                           <input
+                             type="checkbox"
+                             checked={tutorialFilters.topic.includes(topic)}
+                             onChange={() => handleTutorialFilterChange('topic', topic)}
+                           />
+                           <span>{topic}</span>
+                         </label>
+                       ))
+                     )}
 
-                  {/* Difficulty Filter */}
-                  <div className="filter-section">
-                    <h4 className="filter-heading">Difficulty</h4>
-                    {['Beginner', 'Intermediate', 'Advanced'].map(difficulty => (
-                      <label key={difficulty} className="filter-option">
-                        <input
-                          type="checkbox"
-                          checked={tutorialFilters.difficulty.includes(difficulty)}
-                          onChange={() => handleTutorialFilterChange('difficulty', difficulty)}
-                        />
-                        <span>{difficulty}</span>
-                      </label>
-                    ))}
-                  </div>
+                     {tutorialTopicOptions.length > 5 && (
+                       <button
+                         type="button"
+                         className="topic-toggle"
+                         onClick={() => setShowAllTutorialTopics((prev) => !prev)}
+                       >
+                         {showAllTutorialTopics ? "Show less" : "Show more"}
+                        </button>
+                      )}
+                    </div>
 
-                  {/* Length Filter */}
-                  <div className="filter-section">
-                    <h4 className="filter-heading">Length</h4>
-                    {['Short', 'Medium', 'Long'].map(length => (
-                      <label key={length} className="filter-option">
-                        <input
-                          type="checkbox"
-                          checked={tutorialFilters.length.includes(length)}
-                          onChange={() => handleTutorialFilterChange('length', length)}
-                        />
-                        <span>{length}</span>
+                   {/* Type Filter */}
+                   <div className="filter-section">
+                     <h4 className="filter-heading">Type</h4>
+                     {['Article', 'Video'].map(type => (
+                       <label key={type} className="filter-option">
+                         <input
+                           type="checkbox"
+                           checked={tutorialFilters.type.includes(type)}
+                           onChange={() => handleTutorialFilterChange('type', type)}
+                         />
+                         <span>{type}</span>
+                       </label>
+                     ))}
+                   </div>
+
+                   {/* Duration Filter */}
+                   <div className="filter-section">
+                     <h4 className="filter-heading">Duration</h4>
+                     {['0-15', '15-30', '30-45', '45-60', '60+'].map(range => (
+                       <label key={range} className="filter-option">
+                         <input
+                           type="checkbox"
+                           checked={tutorialFilters.duration.includes(range)}
+                           onChange={() => handleTutorialFilterChange('duration', range)}
+                         />
+                        <span>
+                          {range === '0-15' ? '0-15 Minutes' :
+                            range === '15-30' ? '15-30 Minutes' :
+                              range === '30-45' ? '30-45 Minutes' :
+                                range === '45-60' ? '45-60 Minutes' :
+                                  'Over 60 Minutes'}
+                        </span>
                       </label>
                     ))}
                   </div>
@@ -619,7 +721,7 @@ function LearningHub() {
                     } else if (activeTab === 'seminars') {
                       setSeminarFilters({ type: [], duration: [], status: [] });
                     } else if (activeTab === 'tutorials') {
-                      setTutorialFilters({ topic: [], difficulty: [], length: [] });
+                      setTutorialFilters({ type: [], topic: [], duration: [] });
                     }
                   }}>
                     Clear Filters
@@ -742,15 +844,11 @@ function LearningHub() {
                         <div className="tutorial-details">
                           <div className="tutorial-detail">
                             <span className="detail-icon">📚</span>
-                            <span>{tutorial.topic}</span>
-                          </div>
-                          <div className="tutorial-detail">
-                            <span className="detail-icon">🎯</span>
-                            <span>{tutorial.difficulty}</span>
+                            <span>{tutorial.category || 'General'}</span>
                           </div>
                           <div className="tutorial-detail">
                             <span className="detail-icon">⏱️</span>
-                            <span>{tutorial.lengthCategory}</span>
+                            <span>{formatTutorialDuration(tutorial.duration)}</span>
                           </div>
                         </div>
                         <div className="tutorial-footer">

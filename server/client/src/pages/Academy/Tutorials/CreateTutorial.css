@@ -149,6 +149,17 @@
   transition: border-color 0.2s;
 }
 
+.form-group input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.form-group input[type="number"]::-webkit-outer-spin-button,
+.form-group input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {

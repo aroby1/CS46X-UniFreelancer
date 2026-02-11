@@ -21,9 +21,20 @@ function CreateTutorial() {
   });
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    if (name === "duration") {
+      const digitsOnly = value.replace(/[^0-9]/g, "");
+      setFormData({
+        ...formData,
+        [name]: digitsOnly,
+      });
+      return;
+    }
+
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
   };
 
@@ -40,18 +51,39 @@ function CreateTutorial() {
     setFormData({ ...formData, resources: updated });
   };
 
+  const parseDurationMinutes = (value) => {
+    if (!value) return "";
+    const normalized = String(value).trim();
+    const numberMatch = normalized.match(/^(\d+)$/);
+    if (!numberMatch) return null;
+    const minutes = Number(numberMatch[1]);
+    if (!Number.isFinite(minutes) || minutes <= 0) return null;
+    return String(minutes);
+  };
+
   const handleSubmit = async (event) => {
     if (event) {
       event.preventDefault();
     }
 
+    const durationMinutes = parseDurationMinutes(formData.duration);
+    if (durationMinutes === null) {
+      alert("Duration must be a number of minutes (e.g., 15) or left blank for self-paced.");
+      return;
+    }
+
     try {
-      console.log("Submitting Tutorial:", formData);
+      const payload = {
+        ...formData,
+        duration: durationMinutes
+      };
+
+      console.log("Submitting Tutorial:", payload);
 
       const response = await fetch(`/api/academy/tutorials`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
@@ -170,14 +202,37 @@ function CreateTutorial() {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Duration</label>
-                  <input
-                    type="text"
-                    name="duration"
-                    placeholder="e.g., 15 min"
-                    value={formData.duration}
-                    onChange={handleChange}
-                  />
+                  <label>Duration (in Minutes)</label>
+                <input
+                  type="text"
+                  name="duration"
+                  placeholder="Minutes only (e.g., 15)"
+                  value={formData.duration}
+                  onChange={handleChange}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  onKeyDown={(event) => {
+                    const allowedKeys = [
+                      "Backspace",
+                      "Delete",
+                      "ArrowLeft",
+                      "ArrowRight",
+                      "Tab",
+                      "Home",
+                      "End"
+                    ];
+
+                    if (allowedKeys.includes(event.key)) return;
+                    if (/^[0-9]$/.test(event.key)) return;
+                    event.preventDefault();
+                  }}
+                  onPaste={(event) => {
+                    const paste = event.clipboardData.getData("text");
+                    if (!/^[0-9]*$/.test(paste)) {
+                      event.preventDefault();
+                    }
+                  }}
+                />
                 </div>
 
                 <div className="form-group">

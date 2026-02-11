@@ -280,6 +280,12 @@ function TutorialDetail() {
     ? new Date(tutorial.createdAt).toLocaleDateString()
     : null;
 
+  const formatDuration = (duration) => {
+    if (!duration) return "Self-paced";
+    const normalized = String(duration).trim();
+    return /^\d+$/.test(normalized) ? `${normalized} Minutes` : normalized;
+  };
+
   return (
     <div className="tutorial-detail-page">
       <div className="tutorial-detail-container">
@@ -343,7 +349,7 @@ function TutorialDetail() {
                       <div>
                         <span className="tutorial-meta-label">Duration</span>
                         <span className="tutorial-meta-value">
-                          {tutorial.duration || "Self-paced"}
+                          {formatDuration(tutorial.duration)}
                         </span>
                       </div>
                     </div>

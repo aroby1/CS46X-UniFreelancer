@@ -184,38 +184,74 @@ function CreateCourse() {
     }));
   };
 
-  const handleSubmit = async () => {
-    try {
-      if (!courseData.title || !courseData.overview) {
-        alert('Please fill in course title and overview');
-        return;
-      }
-      if (!courseData.instructor.name) {
-        alert('Please fill in instructor information');
-        return;
-      }
-      if (courseData.modules.length === 0) {
-        alert('Please add at least one module');
-        return;
-      }
-
-      const res = await fetch('/api/academy/courses', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(courseData)
-      });
-
-      if (!res.ok) throw new Error('Failed to create course');
-
-      alert('Course created successfully!');
-      navigate('/academy/courses');
-
-    } catch (err) {
-      console.error('Error creating course:', err);
-      alert('Failed to create course');
+const handleSubmit = async () => {
+  try {
+    if (!courseData.title || !courseData.overview) {
+      alert('Please fill in course title and overview');
+      return;
     }
-  };
+    if (!courseData.instructor.name) {
+      alert('Please fill in instructor information');
+      return;
+    }
+    if (courseData.modules.length === 0) {
+      alert('Please add at least one module');
+      return;
+    }
+
+    // Transform data to match backend schema
+    const backendData = {
+      title: courseData.title,
+      description: courseData.overview,
+      duration: courseData.duration,
+      difficulty: courseData.difficulty,
+      category: courseData.category,
+      thumbnail: courseData.thumbnail,
+      isLiteVersion: courseData.isLiteVersion,
+      
+      instructor: courseData.instructor,
+      pricing: courseData.pricing,
+      
+      // Include ALL the new fields
+      modules: courseData.modules.map(module => ({
+        title: module.title,
+        description: module.overview,
+        order: module.order,
+        learningOutcomes: module.learningOutcomes,
+        learningMaterials: module.learningMaterials,
+        assignment: module.assignment,
+        lessons: []
+      })),
+      
+      finalTest: courseData.finalTest.questions.length > 0 ? courseData.finalTest : null,
+      badge: courseData.badge
+    };
+
+    console.log('Sending course data:', JSON.stringify(backendData, null, 2));
+
+    const res = await fetch('/api/academy/courses', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(backendData)
+    });
+
+    const responseData = await res.json();
+    
+    if (!res.ok) {
+      console.error('Server error response:', responseData);
+      alert(`Failed to create course: ${responseData.error || 'Unknown error'}`);
+      return;
+    }
+
+    alert('Course created successfully!');
+    navigate('/academy/courses');
+
+  } catch (err) {
+    console.error('Error creating course:', err);
+    alert(`Failed to create course: ${err.message}`);
+  }
+};
 
   const renderStepContent = () => {
     switch (currentStep) {

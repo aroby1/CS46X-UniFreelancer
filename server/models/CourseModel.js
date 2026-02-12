@@ -22,6 +22,42 @@ const SubscriptionSchema = new mongoose.Schema({
   tier: { type: String, default: "" }
 }, { _id: false });
 
+// NEW: Learning Materials Schema
+const LearningMaterialsSchema = new mongoose.Schema({
+  readings: [{
+    title: { type: String },
+    author: { type: String },
+    citation: { type: String },
+    link: { type: String }
+  }],
+  podcasts: [{
+    title: { type: String },
+    link: { type: String }
+  }],
+  videos: [{
+    title: { type: String },
+    link: { type: String }
+  }]
+}, { _id: false });
+
+// NEW: Assignment Schema
+const AssignmentSchema = new mongoose.Schema({
+  title: { type: String },
+  purpose: { type: String },
+  instructions: { type: String },
+  parts: [{
+    partNumber: { type: Number },
+    title: { type: String },
+    instructions: { type: String }
+  }],
+  gradingCriteria: [{
+    name: { type: String },
+    points: { type: Number }
+  }],
+  deliverableFormat: { type: String },
+  totalPoints: { type: Number, default: 30 }
+}, { _id: false });
+
 // Lesson Schema (videos, assignments, quizzes within a module)
 const LessonSchema = new mongoose.Schema({
   type: {
@@ -65,7 +101,12 @@ const ModuleSchema = new mongoose.Schema({
   description: { type: String, default: "" },
   order: { type: Number, default: 0 },
   
-  // NEW: Array of lessons instead of single content
+  // NEW: Academic structure
+  learningOutcomes: { type: [String], default: [] },
+  learningMaterials: { type: LearningMaterialsSchema, default: () => ({ readings: [], podcasts: [], videos: [] }) },
+  assignment: { type: AssignmentSchema, default: null },
+  
+  // Array of lessons (kept for compatibility)
   lessons: { type: [LessonSchema], default: [] },
   
   // DEPRECATED: Old fields kept for backward compatibility
@@ -80,26 +121,26 @@ const ModuleSchema = new mongoose.Schema({
   thumbnail: { type: String, default: "" },
 }, { _id: true });
 
-// NEW: Final Test Schema
+// Final Test Schema
 const FinalTestSchema = new mongoose.Schema({
   title: { type: String, default: "Final Test" },
   description: { type: String, default: "" },
-  passingScore: { type: Number, default: 70 }, // percentage to pass
+  passingScore: { type: Number, default: 70 },
   questions: [{
     question: { type: String, required: true },
-    options: [{ type: String }], // multiple choice options
-    correctAnswer: { type: Number }, // index of correct option (0-based)
+    options: [{ type: String }],
+    correctAnswer: { type: Number },
     points: { type: Number, default: 1 }
   }],
-  timeLimit: { type: Number, default: 0 }, // minutes, 0 = no limit
+  timeLimit: { type: Number, default: 0 },
 }, { _id: false });
 
-// NEW: Course Badge Schema
+// Course Badge Schema
 const BadgeSchema = new mongoose.Schema({
   name: { type: String, default: "" },
   description: { type: String, default: "" },
   imageUrl: { type: String, default: "" },
-  color: { type: String, default: "#4F46E5" } // hex color for badge
+  color: { type: String, default: "#4F46E5" }
 }, { _id: false });
 
 const CourseSchema = new mongoose.Schema({
@@ -135,7 +176,6 @@ const CourseSchema = new mongoose.Schema({
   learningPoints: { type: [String], default: [] },
   modules: { type: [ModuleSchema], default: [] },
   
-  // NEW: Final test and badge
   finalTest: {
     type: FinalTestSchema,
     default: null
@@ -172,7 +212,6 @@ CourseSchema.virtual("isFree").get(function () {
   return this.isLiteVersion || price === 0;
 });
 
-// NEW: Virtual to calculate total lessons
 CourseSchema.virtual("totalLessons").get(function () {
   return this.modules.reduce((total, module) => {
     return total + (module.lessons?.length || 0);

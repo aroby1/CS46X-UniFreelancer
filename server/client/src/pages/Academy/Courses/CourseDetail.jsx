@@ -1,7 +1,7 @@
 /* global process */
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FiClock, FiDollarSign } from 'react-icons/fi';
+import { FiClock, FiDollarSign, FiBook, FiHeadphones, FiVideo } from 'react-icons/fi';
 import './CourseDetail.css';
 
 function CourseDetail() {
@@ -12,50 +12,15 @@ function CourseDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedModules, setExpandedModules] = useState({});
-  const [openVideos, setOpenVideos] = useState({});
   const [enrolling, setEnrolling] = useState(false);
   const [user, setUser] = useState(null);
   const [isEnrolled, setIsEnrolled] = useState(false);
 
   const toggleModule = (moduleId) => {
-    setExpandedModules(prev => {
-      const next = { ...prev, [moduleId]: !prev[moduleId] };
-      if (prev[moduleId]) {
-        setOpenVideos(v => ({ ...v, [moduleId]: false }));
-      }
-      return next;
-    });
-  };
-
-  const toggleVideo = (moduleKey) => {
-    setOpenVideos(prev => ({
+    setExpandedModules(prev => ({
       ...prev,
-      [moduleKey]: !prev[moduleKey]
+      [moduleId]: !prev[moduleId]
     }));
-  };
-
-  const toYouTubeEmbedUrl = (url) => {
-    if (!url) return "";
-    try {
-      const u = new URL(url);
-      if (u.hostname.includes("youtube.com") && u.pathname.startsWith("/embed/")) {
-        return url;
-      }
-      if (u.hostname === "youtu.be") {
-        const id = u.pathname.replace("/", "");
-        return id ? `https://www.youtube.com/embed/${id}` : "";
-      }
-      const v = u.searchParams.get("v");
-      if (v) {
-        const list = u.searchParams.get("list");
-        return list
-          ? `https://www.youtube.com/embed/${v}?list=${encodeURIComponent(list)}`
-          : `https://www.youtube.com/embed/${v}`;
-      }
-      return "";
-    } catch {
-      return "";
-    }
   };
 
   useEffect(() => {
@@ -236,6 +201,22 @@ function CourseDetail() {
                   {course.isFree ? "Free" : `$${course.priceAmount}`}
                 </div>
               </div>
+
+              {course.instructor && (
+                <div className="instructor-info">
+                  <div className="instructor-avatar">
+                    {course.instructor.avatar ? (
+                      <img src={course.instructor.avatar} alt={course.instructor.name} />
+                    ) : (
+                      <div className="avatar-placeholder">👤</div>
+                    )}
+                  </div>
+                  <div className="instructor-details">
+                    <strong>{course.instructor.name}</strong>
+                    {course.instructor.title && <span>{course.instructor.title}</span>}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -251,7 +232,6 @@ function CourseDetail() {
 
             {course.modules.map((module, index) => {
               const key = module._id || index;
-              const embedUrl = toYouTubeEmbedUrl(module.videoUrl);
 
               return (
                 <div key={key} className="module-card">
@@ -259,28 +239,133 @@ function CourseDetail() {
                     className="module-card-header"
                     onClick={() => toggleModule(key)}
                   >
-                    <h3>{module.title}</h3>
-                    <span>{expandedModules[key] ? "−" : "+"}</span>
+                    <div className="module-title-section">
+                      <h3>Module {index + 1}: {module.title}</h3>
+                      <p className="module-description">{module.description}</p>
+                    </div>
+                    <span className="toggle-icon">{expandedModules[key] ? "−" : "+"}</span>
                   </div>
 
                   {expandedModules[key] && (
                     <div className="module-content">
-                      <p>{module.description}</p>
+                      {/* Learning Outcomes */}
+                      {module.learningOutcomes && module.learningOutcomes.length > 0 && (
+                        <div className="module-section">
+                          <h4>📋 Learning Outcomes</h4>
+                          <ul className="learning-outcomes-list">
+                            {module.learningOutcomes.map((outcome, idx) => (
+                              <li key={idx}>{outcome}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
 
-                      {embedUrl && (
-                        <>
-                          <button onClick={() => toggleVideo(key)}>
-                            Watch Video
-                          </button>
-
-                          {openVideos[key] && (
-                            <iframe
-                              src={embedUrl}
-                              title={module.title}
-                              allowFullScreen
-                            />
+                      {/* Learning Materials */}
+                      {module.learningMaterials && (
+                        <div className="module-section">
+                          <h4>📚 Learning Materials</h4>
+                          
+                          {/* Readings */}
+                          {module.learningMaterials.readings?.length > 0 && (
+                            <div className="materials-subsection">
+                              <h5><FiBook /> Readings</h5>
+                              <ul className="materials-list">
+                                {module.learningMaterials.readings.map((reading, idx) => (
+                                  <li key={idx}>
+                                    <strong>{reading.title}</strong>
+                                    {reading.author && <span className="author"> by {reading.author}</span>}
+                                    <div className="citation">{reading.citation}</div>
+                                    {reading.link && (
+                                      <a href={reading.link} target="_blank" rel="noopener noreferrer">
+                                        View Resource →
+                                      </a>
+                                    )}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
                           )}
-                        </>
+
+                          {/* Podcasts */}
+                          {module.learningMaterials.podcasts?.length > 0 && (
+                            <div className="materials-subsection">
+                              <h5><FiHeadphones /> Podcasts</h5>
+                              <ul className="materials-list">
+                                {module.learningMaterials.podcasts.map((podcast, idx) => (
+                                  <li key={idx}>
+                                    {podcast.title && <strong>{podcast.title}</strong>}
+                                    <a href={podcast.link} target="_blank" rel="noopener noreferrer">
+                                      Listen to Podcast →
+                                    </a>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {/* Videos */}
+                          {module.learningMaterials.videos?.length > 0 && (
+                            <div className="materials-subsection">
+                              <h5><FiVideo /> Videos</h5>
+                              <ul className="materials-list">
+                                {module.learningMaterials.videos.map((video, idx) => (
+                                  <li key={idx}>
+                                    {video.title && <strong>{video.title}</strong>}
+                                    <a href={video.link} target="_blank" rel="noopener noreferrer">
+                                      Watch Video →
+                                    </a>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Assignment */}
+                      {module.assignment && (
+                        <div className="module-section assignment-section">
+                          <h4>📝 Assignment: {module.assignment.title}</h4>
+                          <p className="assignment-purpose"><strong>Purpose:</strong> {module.assignment.purpose}</p>
+                          
+                          {module.assignment.instructions && (
+                            <p className="assignment-instructions">{module.assignment.instructions}</p>
+                          )}
+
+                          {module.assignment.parts && module.assignment.parts.length > 0 && (
+                            <div className="assignment-parts">
+                              <h5>Assignment Parts:</h5>
+                              {module.assignment.parts.map((part, idx) => (
+                                <div key={idx} className="assignment-part">
+                                  <strong>Part {part.partNumber}: {part.title}</strong>
+                                  <p>{part.instructions}</p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {module.assignment.gradingCriteria && module.assignment.gradingCriteria.length > 0 && (
+                            <div className="grading-criteria">
+                              <h5>Grading Criteria:</h5>
+                              <ul>
+                                {module.assignment.gradingCriteria.map((criterion, idx) => (
+                                  <li key={idx}>
+                                    {criterion.name} ({criterion.points} pts)
+                                  </li>
+                                ))}
+                              </ul>
+                              <p className="total-points">
+                                <strong>Total Points:</strong> {module.assignment.gradingCriteria.reduce((sum, c) => sum + c.points, 0)}
+                              </p>
+                            </div>
+                          )}
+
+                          {module.assignment.deliverableFormat && (
+                            <p className="deliverable-format">
+                              <strong>Deliverable Format:</strong> {module.assignment.deliverableFormat}
+                            </p>
+                          )}
+                        </div>
                       )}
                     </div>
                   )}

@@ -4,6 +4,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import CourseSidebar from './CourseSidebar';
 import VideoLesson from './VideoLesson';
 import AssignmentLesson from './AssignmentLesson';
+import ReadingLesson from './ReadingLesson';
+import PodcastLesson from './PodcastLesson';
 import QuizLesson from './QuizLesson';
 import FinalTest from './FinalTest';
 import CourseCompleteModal from './CourseCompleteModal';
@@ -21,6 +23,74 @@ function CourseLearning() {
   const [showFinalTest, setShowFinalTest] = useState(false);
   const [showCompleteModal, setShowCompleteModal] = useState(false);
 
+  // Convert academic structure to lessons
+  const generateLessonsFromModule = (module) => {
+    const lessons = [];
+    let order = 0;
+
+    // Add video lessons from learning materials
+    if (module.learningMaterials?.videos) {
+      module.learningMaterials.videos.forEach((video, index) => {
+        lessons.push({
+          _id: `${module._id}-video-${index}`,
+          type: 'video',
+          title: video.title || `Video ${index + 1}`,
+          videoUrl: video.link,
+          order: order++,
+          duration: video.duration || ''
+        });
+      });
+    }
+
+    // Add reading lessons from learning materials
+    if (module.learningMaterials?.readings) {
+      module.learningMaterials.readings.forEach((reading, index) => {
+        lessons.push({
+          _id: `${module._id}-reading-${index}`,
+          type: 'reading',
+          title: reading.title || `Reading ${index + 1}`,
+          order: order++,
+          readingData: reading
+        });
+      });
+    }
+
+    // Add podcast lessons from learning materials
+    if (module.learningMaterials?.podcasts) {
+      module.learningMaterials.podcasts.forEach((podcast, index) => {
+        lessons.push({
+          _id: `${module._id}-podcast-${index}`,
+          type: 'podcast',
+          title: podcast.title || `Podcast ${index + 1}`,
+          order: order++,
+          podcastData: podcast
+        });
+      });
+    }
+
+    // Add assignment lesson if exists
+    if (module.assignment) {
+      lessons.push({
+        _id: `${module._id}-assignment`,
+        type: 'assignment',
+        title: module.assignment.title,
+        order: order++,
+        assignmentType: 'both',
+        instructions: module.assignment.purpose,
+        assignmentData: module.assignment
+      });
+    }
+
+    // Keep existing lessons if any (for old course structure)
+    if (module.lessons && module.lessons.length > 0) {
+      module.lessons.forEach(lesson => {
+        lessons.push(lesson);
+      });
+    }
+
+    return lessons;
+  };
+
   // Fetch course and progress
   useEffect(() => {
     const fetchCourseAndProgress = async () => {
@@ -31,6 +101,13 @@ function CourseLearning() {
         const courseRes = await fetch(`/api/academy/courses/${id}`);
         if (!courseRes.ok) throw new Error('Course not found');
         const courseData = await courseRes.json();
+        
+        // Add generated lessons to each module
+        courseData.modules = courseData.modules.map(module => ({
+          ...module,
+          lessons: generateLessonsFromModule(module)
+        }));
+        
         setCourse(courseData);
 
         // Fetch progress
@@ -42,7 +119,6 @@ function CourseLearning() {
 
         // Set initial lesson
         if (progressData.currentLessonId && progressData.currentModuleId) {
-          // Resume where left off
           const module = courseData.modules.find(
             m => m._id === progressData.currentModuleId
           );
@@ -54,11 +130,9 @@ function CourseLearning() {
             setCurrentModule(module);
             setCurrentLesson(lesson);
           } else {
-            // Start from first lesson
             startFromBeginning(courseData);
           }
         } else {
-          // Start from first lesson
           startFromBeginning(courseData);
         }
 
@@ -81,7 +155,6 @@ function CourseLearning() {
     }
   };
 
-  // Update current position on server
   const updatePosition = async (moduleId, lessonId) => {
     try {
       await fetch(`/api/courses/${id}/progress/position`, {
@@ -96,17 +169,12 @@ function CourseLearning() {
   };
 
   const handleLessonSelect = (module, lesson) => {
-    // Check if lesson is locked (not yet accessible)
-    const moduleIndex = course.modules.findIndex(m => m._id === module._id);
-    const lessonIndex = module.lessons.findIndex(l => l._id === lesson._id);
-
-    // Get all previous lessons
+    // Check if lesson is locked
     const allLessons = getAllLessonsInOrder();
     const currentLessonIndex = allLessons.findIndex(
       l => l.lesson._id === lesson._id
     );
 
-    // Check if all previous lessons are completed
     if (currentLessonIndex > 0) {
       const previousLessons = allLessons.slice(0, currentLessonIndex);
       const allPreviousCompleted = previousLessons.every(l =>
@@ -146,12 +214,10 @@ function CourseLearning() {
       setCurrentLesson(next.lesson);
       updatePosition(next.module._id, next.lesson._id);
     } else {
-      // All lessons complete, show final test if exists
       if (course.finalTest && course.finalTest.questions.length > 0) {
         setShowFinalTest(true);
       } else {
-        // No final test, mark as complete
-        completeWithoutTest();
+        setShowCompleteModal(true);
       }
     }
   };
@@ -183,7 +249,6 @@ function CourseLearning() {
       const data = await res.json();
       setProgress(data.progress);
 
-      // Auto-advance to next lesson
       handleNext();
 
     } catch (err) {
@@ -191,12 +256,7 @@ function CourseLearning() {
     }
   };
 
-  const completeWithoutTest = async () => {
-    // Mark course as complete even without test
-    setShowCompleteModal(true);
-  };
-
-  const handleTestComplete = (passed, badgeData) => {
+  const handleTestComplete = (passed) => {
     if (passed) {
       setShowCompleteModal(true);
     }
@@ -277,6 +337,22 @@ function CourseLearning() {
                 />
               )}
 
+              {currentLesson.type === 'reading' && (
+                <ReadingLesson
+                  lesson={currentLesson}
+                  onComplete={handleLessonComplete}
+                  isCompleted={progress?.completedLessons?.includes(currentLesson._id)}
+                />
+              )}
+
+              {currentLesson.type === 'podcast' && (
+                <PodcastLesson
+                  lesson={currentLesson}
+                  onComplete={handleLessonComplete}
+                  isCompleted={progress?.completedLessons?.includes(currentLesson._id)}
+                />
+              )}
+
               {currentLesson.type === 'quiz' && (
                 <QuizLesson
                   courseId={id}
@@ -292,7 +368,7 @@ function CourseLearning() {
                   disabled={currentIndex === 0}
                   className="nav-button prev-button"
                 >
-                  ← Previous
+                  Previous Lesson
                 </button>
 
                 <button
@@ -301,7 +377,7 @@ function CourseLearning() {
                 >
                   {currentIndex === allLessons.length - 1
                     ? 'Go to Final Test →'
-                    : 'Next →'}
+                    : 'Next Lesson'}
                 </button>
               </div>
             </>

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-function AcademyTopPicksCarousel({ featuredLoading, featuredTracks, onViewProgram }) {
+function AcademyTopPicksCarousel({ featuredLoading, featuredTracks }) {
   const [activeSlide, setActiveSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [slideStep, setSlideStep] = useState(0);
@@ -126,7 +126,7 @@ function AcademyTopPicksCarousel({ featuredLoading, featuredTracks, onViewProgra
                       <span>{track.metaDetail}</span>
                     </div>
                     <p>{track.outcome}</p>
-                    <button className="slide-cta" onClick={() => onViewProgram(track)}>
+                    <button className="slide-cta" type="button">
                       View Program
                     </button>
                   </div>

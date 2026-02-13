@@ -25,20 +25,6 @@ function Academy() {
     navigate('/academy/courses');
   };
 
-  const handleViewProgram = (track) => {
-    if (track.type === 'course' && track.id) {
-      navigate(`/academy/courses/${track.id}`);
-      return;
-    }
-
-    if (track.type === 'tutorial' && track.id) {
-      navigate(`/academy/tutorials/${track.id}`);
-      return;
-    }
-
-    navigate('/academy/courses');
-  };
-
   useEffect(() => {
     const fetchTopPicks = async () => {
       try {
@@ -150,7 +136,6 @@ function Academy() {
         <AcademyTopPicksCarousel
           featuredLoading={featuredLoading}
           featuredTracks={featuredTracks}
-          onViewProgram={handleViewProgram}
         />
         <AcademyPlans />
         <AcademyBenefits />

@@ -360,6 +360,66 @@
 }
 
 /* ================================================
+   READING & PODCAST LESSONS
+   ================================================ */
+
+.reading-lesson,
+.podcast-lesson {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.lesson-content-box {
+  background: #f9fafb;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.lesson-content-box h3 {
+  margin: 0 0 1rem;
+  color: #1a1a1a;
+  font-size: 1.1rem;
+}
+
+.reading-author {
+  color: #666;
+  font-style: italic;
+  margin: 0.5rem 0;
+}
+
+.reading-citation {
+  color: #555;
+  margin: 0.5rem 0 1rem;
+  font-weight: 500;
+}
+
+.reading-description,
+.podcast-description {
+  color: #4b5563;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.reading-link-button,
+.podcast-link-button {
+  display: inline-block;
+  background: #4F46E5;
+  color: white;
+  padding: 0.875rem 1.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.reading-link-button:hover,
+.podcast-link-button:hover {
+  background: #4338ca;
+}
+
+/* ================================================
    ASSIGNMENT LESSON
    ================================================ */
 
@@ -370,70 +430,154 @@
 }
 
 .assignment-content {
-  max-width: 800px;
+  max-width: 900px;
 }
 
-.instructions {
-  background: #f9fafb;
+.assignment-instructions-box {
+  background: #fef3c7;
   padding: 1.5rem;
   border-radius: 8px;
   margin-bottom: 2rem;
 }
 
-.instructions h3 {
+.assignment-instructions-box h3 {
+  margin: 0 0 0.75rem;
+  color: #92400e;
+}
+
+.assignment-instructions-box p {
+  margin: 0;
+  color: #78350f;
+  line-height: 1.6;
+}
+
+.assignment-parts-input {
+  margin: 2rem 0;
+}
+
+.part-input-section {
+  background: #f0f9ff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #4F46E5;
+}
+
+.part-input-section h4 {
+  margin: 0 0 0.5rem;
+  color: #4F46E5;
+  font-size: 1.05rem;
+}
+
+.part-instructions {
+  margin: 0 0 1rem;
+  color: #555;
+  line-height: 1.5;
+}
+
+.part-input-field {
+  width: 100%;
+  padding: 0.875rem;
+  border: 2px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+
+.part-input-field:focus {
+  outline: none;
+  border-color: #4F46E5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.grading-display {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.grading-display h3 {
   margin: 0 0 1rem;
   color: #1a1a1a;
 }
 
-.instructions p {
-  margin: 0;
+.grading-display ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+}
+
+.grading-display li {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e5e7eb;
   color: #4b5563;
-  line-height: 1.6;
 }
 
-.submission-section {
-  margin-bottom: 2rem;
+.grading-display li:last-child {
+  border-bottom: none;
 }
 
-.submission-section label {
+.total-points-display {
+  padding: 1rem;
+  background: #e0f2fe;
+  border-radius: 6px;
+  font-weight: 600;
+  color: #0369a1;
+  text-align: right;
+}
+
+.deliverable-info {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: #fef3c7;
+  border-radius: 6px;
+  color: #78350f;
+}
+
+.file-url-section {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.file-url-section label {
   display: block;
   font-weight: 600;
   margin-bottom: 0.5rem;
   color: #374151;
 }
 
-.submission-section textarea {
-  width: 100%;
-  padding: 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-family: inherit;
-  resize: vertical;
-}
-
-.submission-section input[type="text"] {
+.file-url-input {
   width: 100%;
   padding: 0.75rem;
   border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
 }
 
-.submission-section small {
+.file-url-section small {
   display: block;
   margin-top: 0.5rem;
   color: #6b7280;
   font-size: 0.875rem;
 }
 
+.assignment-submit-section {
+  margin-top: 2rem;
+  text-align: center;
+}
+
 .submit-button {
   background: #4F46E5;
   color: white;
   border: none;
-  padding: 1rem 2rem;
+  padding: 1rem 3rem;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
@@ -443,13 +587,39 @@
   background: #4338ca;
 }
 
-.submitted-badge {
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.submitted-badge-large {
   background: #d1fae5;
   color: #065f46;
-  padding: 1rem 2rem;
-  border-radius: 8px;
+  padding: 2rem;
+  border-radius: 12px;
+  font-size: 1.5rem;
   font-weight: 600;
-  display: inline-block;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.submission-view {
+  background: #f9fafb;
+  padding: 2rem;
+  border-radius: 8px;
+}
+
+.submission-view h4 {
+  margin: 0 0 1rem;
+  color: #1a1a1a;
+}
+
+.submission-text {
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  font-family: inherit;
 }
 
 /* ================================================

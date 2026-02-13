@@ -43,15 +43,8 @@ function Academy() {
     const fetchTopPicks = async () => {
       try {
         const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-        const [coursesRes, tutorialsRes] = await Promise.all([
-          fetch(`${apiUrl}/api/academy/courses`),
-          fetch(`${apiUrl}/api/academy/tutorials`)
-        ]);
-
-        const [coursesData, tutorialsData] = await Promise.all([
-          coursesRes.ok ? coursesRes.json() : [],
-          tutorialsRes.ok ? tutorialsRes.json() : []
-        ]);
+        const coursesRes = await fetch(`${apiUrl}/api/academy/courses`);
+        const coursesData = coursesRes.ok ? await coursesRes.json() : [];
 
         const pickArrayFromPayload = (payload) => {
           if (Array.isArray(payload)) {
@@ -74,36 +67,47 @@ function Academy() {
         };
 
         const normalizeTitle = (value) => String(value || '').trim().toLowerCase();
+        const summarizeOutcome = (value) => {
+          const text = String(value || '').trim();
+
+          if (!text) {
+            return 'Practical guidance you can apply to your freelance brand right away.';
+          }
+
+          const firstSentence = text.split(/(?<=[.!?])\s+/)[0] || text;
+          const trimmedSentence = firstSentence.length > 170
+            ? `${firstSentence.slice(0, 167).trimEnd()}...`
+            : firstSentence;
+
+          return trimmedSentence;
+        };
 
         const courses = pickArrayFromPayload(coursesData);
-        const tutorials = pickArrayFromPayload(tutorialsData);
-
-        const targetCourseTitle = 'course to check all parts working';
-        const targetTutorialTitle = 'intro to marketing';
-
-        const course =
-          courses.find((item) => normalizeTitle(item?.title) === targetCourseTitle) ||
-          courses.find((item) => normalizeTitle(item?.title).includes(targetCourseTitle)) ||
-          courses[0];
-
-        const tutorial =
-          tutorials.find((item) => normalizeTitle(item?.title) === targetTutorialTitle) ||
-          tutorials.find((item) => normalizeTitle(item?.title).includes(targetTutorialTitle)) ||
-          tutorials[0];
+        const targetCourseTitles = [
+          'branding yourself in freelancing',
+          'catching attention with triggers and emotion for freelancers',
+          'branding yourself in freelancing'
+        ];
 
         const picks = [];
 
-        if (course) {
+        targetCourseTitles.forEach((targetTitle, index) => {
+          const course =
+            courses.find((item) => normalizeTitle(item?.title) === targetTitle) ||
+            courses.find((item) => normalizeTitle(item?.title).includes(targetTitle));
+
+          if (!course) {
+            return;
+          }
+
           picks.push({
-            id: course._id || course.id,
+            id: `${course._id || course.id || targetTitle}-${index}`,
             type: 'course',
             label: 'Top Pick Course',
             title: course.title,
             level: course.difficulty || course.level || 'All levels',
             metaDetail: `Duration: ${course.duration || 'Self-paced'}`,
-            outcome:
-              course.description ||
-              'A practical course designed to walk through every major workflow end to end.',
+            outcome: summarizeOutcome(course.description),
             accent: 'Warm',
             image:
               course.thumbnail ||
@@ -111,29 +115,7 @@ function Academy() {
               'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80',
             imageAlt: `${course.title} course cover`
           });
-        }
-
-        if (tutorial) {
-          const tutorialFormat = tutorial.videoUrl ? 'Video' : 'Article';
-
-          picks.push({
-            id: tutorial._id || tutorial.id,
-            type: 'tutorial',
-            label: 'Top Pick Tutorial',
-            title: tutorial.title,
-            level: tutorial.difficulty || 'All levels',
-            metaDetail: tutorialFormat,
-            outcome:
-              tutorial.description ||
-              'A focused tutorial to strengthen your fundamentals and apply skills immediately.',
-            accent: 'Soft',
-            image:
-              tutorial.thumbnail ||
-              tutorial.thumbnailUrl ||
-              'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1200&q=80',
-            imageAlt: `${tutorial.title} tutorial cover`
-          });
-        }
+        });
 
         setFeaturedTracks(picks);
       } catch (error) {

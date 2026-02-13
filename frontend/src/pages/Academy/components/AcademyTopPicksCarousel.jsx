@@ -116,8 +116,8 @@ function AcademyTopPicksCarousel({ featuredLoading, featuredTracks, onViewProgra
             onTouchEnd={handleTouchEnd}
           >
             <div className="carousel-track" style={{ transform: `translateX(-${activeSlide * slideStep}px)` }}>
-              {featuredTracks.map((track) => (
-                <article className={`feature-slide accent-${track.accent.toLowerCase()}`} key={track.title}>
+              {featuredTracks.map((track, index) => (
+                <article className={`feature-slide accent-${track.accent.toLowerCase()}`} key={`${track.id || track.title}-${index}`}>
                   <div className="slide-body">
                     <span className="slide-label">{track.label}</span>
                     <h4>{track.title}</h4>
@@ -147,7 +147,7 @@ function AcademyTopPicksCarousel({ featuredLoading, featuredTracks, onViewProgra
             <div className="carousel-dots" aria-label="Slide indicators">
               {featuredTracks.map((track, index) => (
                 <button
-                  key={track.title}
+                  key={`${track.id || track.title}-${index}`}
                   className={`carousel-dot ${activeSlide === index ? 'active' : ''}`}
                   onClick={() => setActiveSlide(index)}
                   aria-label={`Go to slide ${index + 1}`}

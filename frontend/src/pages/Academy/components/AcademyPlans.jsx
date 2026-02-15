@@ -1,3 +1,4 @@
+/* global process */
 import React, { useEffect, useState } from 'react';
 import { FiCheck } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
@@ -14,7 +15,7 @@ function AcademyPlans() {
           credentials: 'include'
         });
         setIsSignedIn(response.ok);
-      } catch (error) {
+      } catch (_error) {
         setIsSignedIn(false);
       }
     };

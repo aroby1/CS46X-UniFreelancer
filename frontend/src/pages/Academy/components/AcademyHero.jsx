@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 function AcademyHero({ onBrowseCourses, onCreateContent }) {
   return (
@@ -51,5 +52,10 @@ function AcademyHero({ onBrowseCourses, onCreateContent }) {
     </section>
   );
 }
+
+AcademyHero.propTypes = {
+  onBrowseCourses: PropTypes.func,
+  onCreateContent: PropTypes.func,
+};
 
 export default AcademyHero;

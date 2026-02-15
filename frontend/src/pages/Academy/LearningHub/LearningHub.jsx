@@ -707,7 +707,7 @@ function LearningHub() {
                         </div>
                       </div>
                       <div className="seminar-footer">
-                        <button className="view-details-btn">View Details →</button>
+                        <button className="view-details-btn" onClick={() => navigate(`/academy/seminars/${seminar._id}`)}>View Details →</button>
                       </div>
                     </div>
                   </div>

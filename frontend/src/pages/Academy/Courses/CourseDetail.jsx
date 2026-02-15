@@ -191,16 +191,16 @@ function CourseDetail() {
   // ------------------------------
   // HELPERS
   // ------------------------------
-  const getCoursePrice = (course) => {
-    if (!course) return 'Free';
-    if (course.isLiteVersion) return 'Free (Lite)';
-    if (course.priceAmount && course.priceAmount > 0) {
-      return `$${course.priceAmount}`;
+  const _getCoursePrice = (c) => {
+    if (!c) return 'Free';
+    if (c.isLiteVersion) return 'Free (Lite)';
+    if (c.priceAmount && c.priceAmount > 0) {
+      return `$${c.priceAmount}`;
     }
     return 'Free';
   };
 
-  const formatDuration = (duration) => {
+  const _formatDuration = (duration) => {
     if (!duration) return 'N/A';
     return duration;
   };
@@ -240,7 +240,7 @@ function CourseDetail() {
   // ------------------------------
   // MAIN RENDER
   // ------------------------------
-  const publishedDate = course?.createdAt
+  const _publishedDate = course?.createdAt
     ? new Date(course.createdAt).toLocaleDateString()
     : null;
 

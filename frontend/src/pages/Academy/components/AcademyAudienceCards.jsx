@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { FiDollarSign, FiTarget, FiTrendingUp, FiZap } from 'react-icons/fi';
 
 function AcademyAudienceCards({ onBrowseCourses, onCreateContent }) {
@@ -102,5 +103,10 @@ function AcademyAudienceCards({ onBrowseCourses, onCreateContent }) {
     </div>
   );
 }
+
+AcademyAudienceCards.propTypes = {
+  onBrowseCourses: PropTypes.func,
+  onCreateContent: PropTypes.func,
+};
 
 export default AcademyAudienceCards;

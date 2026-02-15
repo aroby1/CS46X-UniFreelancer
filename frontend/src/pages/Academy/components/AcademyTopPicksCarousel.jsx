@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import PropTypes from 'prop-types';
 
 function AcademyTopPicksCarousel({ featuredLoading, featuredTracks }) {
   const [activeSlide, setActiveSlide] = useState(0);
@@ -165,5 +166,10 @@ function AcademyTopPicksCarousel({ featuredLoading, featuredTracks }) {
     </section>
   );
 }
+
+AcademyTopPicksCarousel.propTypes = {
+  featuredLoading: PropTypes.bool,
+  featuredTracks: PropTypes.array,
+};
 
 export default AcademyTopPicksCarousel;

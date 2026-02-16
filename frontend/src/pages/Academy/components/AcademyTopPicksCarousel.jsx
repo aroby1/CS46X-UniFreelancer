@@ -94,18 +94,18 @@ function AcademyTopPicksCarousel({ featuredLoading, featuredTracks }) {
   };
 
   return (
-    <section className="my-10 mb-8 rounded-[30px] p-8 bg-white border border-[rgba(31,31,36,0.07)] shadow-[0_18px_36px_rgba(17,22,30,0.07)] backdrop-blur-[8px] relative overflow-hidden before:content-[''] before:absolute before:left-0 before:top-0 before:w-2 before:h-full before:bg-[linear-gradient(180deg,rgba(244,102,62,0.22)_0%,rgba(244,102,62,1)_16%,rgba(244,102,62,1)_84%,rgba(244,102,62,0.22)_100%)] md:p-6" aria-label="Featured learning carousel">
+    <section className="my-10 mb-8 rounded-[30px] p-8 bg-light-tertiary border border-border shadow-card backdrop-blur-[8px] relative overflow-hidden before:content-[''] before:absolute before:left-0 before:top-0 before:w-2 before:h-full before:bg-[linear-gradient(180deg,rgba(244,102,62,0.22)_0%,rgba(244,102,62,1)_16%,rgba(244,102,62,1)_84%,rgba(244,102,62,0.22)_100%)] md:p-6" aria-label="Featured learning carousel">
       <div className="flex justify-start items-end gap-5 mb-6 md:flex-col md:items-start">
         <div>
           <span className="inline-block uppercase text-[11px] font-bold tracking-[2px] text-accent mb-1.5">Top Picks</span>
-          <h3 className="text-[30px] text-academy-deep md:text-2xl">Current academy highlights</h3>
+          <h3 className="text-[30px] text-dark-primary md:text-2xl">Current academy highlights</h3>
         </div>
       </div>
 
       {featuredLoading ? (
-        <p className="py-[30px] px-[18px] text-center text-academy-deep-secondary text-md rounded-lg bg-white/40 border border-[rgba(27,36,50,0.06)]">Loading top picks...</p>
+        <p className="py-[30px] px-[18px] text-center text-dark-secondary text-md rounded-lg bg-light-secondary border border-border">Loading top picks...</p>
       ) : featuredTracks.length === 0 ? (
-        <p className="py-[30px] px-[18px] text-center text-academy-deep-secondary text-md rounded-lg bg-white/40 border border-[rgba(27,36,50,0.06)]">No top picks are available yet.</p>
+        <p className="py-[30px] px-[18px] text-center text-dark-secondary text-md rounded-lg bg-light-secondary border border-border">No top picks are available yet.</p>
       ) : (
         <>
           <div
@@ -119,22 +119,22 @@ function AcademyTopPicksCarousel({ featuredLoading, featuredTracks }) {
             <div className="flex gap-4 transition-transform duration-700 ease-in-out" style={{ transform: `translateX(-${activeSlide * slideStep}px)` }}>
               {featuredTracks.map((track, index) => (
                 <article
-                  className={`flex-[0_0_calc(100%-120px)] min-w-[calc(100%-120px)] rounded-2xl p-8 border border-[rgba(27,36,50,0.06)] grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] gap-5 items-center md:flex-[0_0_calc(100%-24px)] md:min-w-[calc(100%-24px)] md:p-[22px] ${track.accent.toLowerCase() === 'warm' ? 'bg-academy-surface/[0.86]' : track.accent.toLowerCase() === 'deep' ? 'bg-academy-surface/80' : 'bg-academy-surface/90'}`}
+                  className={`flex-[0_0_calc(100%-120px)] min-w-[calc(100%-120px)] rounded-2xl p-8 border border-border grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px] gap-5 items-center md:flex-[0_0_calc(100%-24px)] md:min-w-[calc(100%-24px)] md:p-[22px] ${track.accent.toLowerCase() === 'warm' ? 'bg-light-secondary' : track.accent.toLowerCase() === 'deep' ? 'bg-light-secondary' : 'bg-light-secondary'}`}
                   key={`${track.id || track.title}-${index}`}
                 >
                   <div className="min-w-0">
-                    <span className="inline-flex py-1.5 px-[11px] rounded-full text-[11px] uppercase tracking-[1px] font-bold mb-4 bg-white/[0.62] text-academy-deep">{track.label}</span>
-                    <h4 className="text-3xl text-academy-deep mb-4 max-w-[700px] md:text-2xl">{track.title}</h4>
+                    <span className="inline-flex py-1.5 px-[11px] rounded-full text-[11px] uppercase tracking-[1px] font-bold mb-4 bg-light-secondary text-dark-primary">{track.label}</span>
+                    <h4 className="text-3xl text-dark-primary mb-4 max-w-[700px] md:text-2xl">{track.title}</h4>
                     <div className="flex gap-2.5 flex-wrap mb-4">
-                      <span className="text-xs py-1.5 px-2.5 rounded-full bg-white/[0.62] text-academy-deep-tertiary">{track.level}</span>
-                      <span className="text-xs py-1.5 px-2.5 rounded-full bg-white/[0.62] text-academy-deep-tertiary">{track.metaDetail}</span>
+                      <span className="text-xs py-1.5 px-2.5 rounded-full bg-light-secondary text-[#666]">{track.level}</span>
+                      <span className="text-xs py-1.5 px-2.5 rounded-full bg-light-secondary text-[#666]">{track.metaDetail}</span>
                     </div>
-                    <p className="text-base leading-[1.7] text-academy-deep-secondary max-w-[760px] mb-5">{track.outcome}</p>
+                    <p className="text-base leading-[1.7] text-dark-secondary max-w-[760px] mb-5">{track.outcome}</p>
                     <button className="border-none rounded-full py-[11px] px-[18px] text-sm font-semibold bg-accent text-white cursor-pointer transition-all duration-[250ms] ease-in-out hover:-translate-y-0.5 hover:bg-accent-tertiary hover:shadow-[0_10px_20px_rgba(244,102,62,0.28)]" type="button">
                       View Program
                     </button>
                   </div>
-                  <div className="h-[230px] rounded-lg overflow-hidden border border-[rgba(27,36,50,0.07)] shadow-[0_10px_20px_rgba(27,36,50,0.09)] lg:block md:h-[186px] md:-order-1">
+                  <div className="h-[230px] rounded-lg overflow-hidden border border-border shadow-card lg:block md:h-[186px] md:-order-1">
                     <img src={track.image} alt={track.imageAlt} loading="lazy" className="w-full h-full object-cover block" />
                   </div>
                 </article>
@@ -143,7 +143,7 @@ function AcademyTopPicksCarousel({ featuredLoading, featuredTracks }) {
           </div>
 
           <div className="mt-4 flex items-center justify-center gap-4" aria-label="Carousel controls and indicators">
-            <button className="w-[38px] h-[38px] inline-flex items-center justify-center border border-[rgba(27,36,50,0.1)] rounded-full bg-white/[0.66] text-academy-deep cursor-pointer transition-all duration-[250ms] ease-in-out hover:-translate-y-px hover:border-[rgba(27,36,50,0.32)]" onClick={handlePrevSlide} aria-label="Previous slide">
+            <button className="w-[38px] h-[38px] inline-flex items-center justify-center border border-border rounded-full bg-light-tertiary text-dark-primary cursor-pointer transition-all duration-[250ms] ease-in-out hover:-translate-y-px hover:border-[rgba(27,36,50,0.32)]" onClick={handlePrevSlide} aria-label="Previous slide">
               <svg className="w-[18px] h-[18px] stroke-current" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <polyline points="15 18 9 12 15 6" />
               </svg>
@@ -152,13 +152,13 @@ function AcademyTopPicksCarousel({ featuredLoading, featuredTracks }) {
               {featuredTracks.map((track, index) => (
                 <button
                   key={`${track.id || track.title}-${index}`}
-                  className={`w-2.5 h-2.5 rounded-full border-none cursor-pointer transition-all duration-[250ms] ease-in-out ${activeSlide === index ? 'bg-accent scale-[1.2]' : 'bg-academy-deep/[0.28]'}`}
+                  className={`w-2.5 h-2.5 rounded-full border-none cursor-pointer transition-all duration-[250ms] ease-in-out ${activeSlide === index ? 'bg-accent scale-[1.2]' : 'bg-dark-primary/[0.28]'}`}
                   onClick={() => setActiveSlide(index)}
                   aria-label={`Go to slide ${index + 1}`}
                 />
               ))}
             </div>
-            <button className="w-[38px] h-[38px] inline-flex items-center justify-center border border-[rgba(27,36,50,0.1)] rounded-full bg-white/[0.66] text-academy-deep cursor-pointer transition-all duration-[250ms] ease-in-out hover:-translate-y-px hover:border-[rgba(27,36,50,0.32)]" onClick={handleNextSlide} aria-label="Next slide">
+            <button className="w-[38px] h-[38px] inline-flex items-center justify-center border border-border rounded-full bg-light-tertiary text-dark-primary cursor-pointer transition-all duration-[250ms] ease-in-out hover:-translate-y-px hover:border-[rgba(27,36,50,0.32)]" onClick={handleNextSlide} aria-label="Next slide">
               <svg className="w-[18px] h-[18px] stroke-current" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <polyline points="9 18 15 12 9 6" />
               </svg>

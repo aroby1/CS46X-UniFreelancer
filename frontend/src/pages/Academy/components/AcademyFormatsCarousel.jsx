@@ -124,10 +124,10 @@ function AcademyFormatsCarousel() {
   };
 
   return (
-    <section className="my-6 mb-8 rounded-[30px] p-8 bg-academy-surface/95 border border-[rgba(31,31,36,0.07)] shadow-[0_18px_36px_rgba(17,22,30,0.07)] backdrop-blur-[8px] md:p-6" aria-label="Learning format highlights">
+    <section className="my-6 mb-8 rounded-[30px] p-8 bg-light-tertiary border border-border shadow-card backdrop-blur-[8px] md:p-6" aria-label="Learning format highlights">
       <div className="mb-5">
         <span className="inline-block uppercase text-[11px] font-bold tracking-[2px] text-accent mb-1.5">Explore Formats</span>
-        <h3 className="text-[30px] text-academy-deep md:text-2xl">Choose how you want to learn</h3>
+        <h3 className="text-[30px] text-dark-primary md:text-2xl">Choose how you want to learn</h3>
       </div>
 
       <div
@@ -144,7 +144,7 @@ function AcademyFormatsCarousel() {
 
             return (
               <article
-                className={`flex-[0_0_calc(100%-120px)] min-w-[calc(100%-120px)] rounded-2xl p-6 border border-[rgba(27,36,50,0.06)] bg-white md:flex-[0_0_calc(100%-24px)] md:min-w-[calc(100%-24px)] md:p-[22px] ${slide.route ? 'cursor-pointer transition-all duration-[250ms] ease-in-out hover:-translate-y-[3px] hover:border-accent/50 hover:shadow-[0_14px_28px_rgba(17,22,30,0.12)] focus-visible:-translate-y-[3px] focus-visible:border-accent/50 focus-visible:shadow-[0_14px_28px_rgba(17,22,30,0.12)] focus-visible:outline-none' : 'cursor-default'}`}
+                className={`flex-[0_0_calc(100%-120px)] min-w-[calc(100%-120px)] rounded-2xl p-6 border border-border bg-main-bg md:flex-[0_0_calc(100%-24px)] md:min-w-[calc(100%-24px)] md:p-[22px] ${slide.route ? 'cursor-pointer transition-all duration-[250ms] ease-in-out hover:-translate-y-[3px] hover:border-accent/50 hover:shadow-card-hover focus-visible:-translate-y-[3px] focus-visible:border-accent/50 focus-visible:shadow-card-hover focus-visible:outline-none' : 'cursor-default'}`}
                 key={slide.title}
                 role={slide.route ? 'button' : undefined}
                 tabIndex={slide.route ? 0 : -1}
@@ -161,14 +161,14 @@ function AcademyFormatsCarousel() {
                 }}
                 aria-label={slide.route ? `Open ${slide.title}` : `${slide.title} coming soon`}
               >
-                <span className="w-11 h-11 rounded-md inline-flex items-center justify-center text-[#111] bg-academy-surface/[0.72] mb-3" aria-hidden="true">
+                <span className="w-11 h-11 rounded-md inline-flex items-center justify-center text-[#111] bg-light-secondary mb-3" aria-hidden="true">
                   <Icon className="w-5 h-5" strokeWidth={2.1} />
                 </span>
-                <h4 className="text-[26px] text-academy-deep mb-2">{slide.title}</h4>
-                <p className="text-md leading-[1.6] text-academy-deep-secondary mb-4">{slide.description}</p>
+                <h4 className="text-[26px] text-dark-primary mb-2">{slide.title}</h4>
+                <p className="text-md leading-[1.6] text-dark-secondary mb-4">{slide.description}</p>
                 <div className="flex flex-wrap gap-2">
                   {slide.points.map((point) => (
-                    <span key={point} className="inline-flex py-1.5 px-[11px] rounded-full text-[11px] font-bold tracking-[0.4px] text-academy-deep-tertiary bg-white/[0.62] border border-[rgba(27,36,50,0.08)]">
+                    <span key={point} className="inline-flex py-1.5 px-[11px] rounded-full text-[11px] font-bold tracking-[0.4px] text-[#666] bg-light-secondary border border-border">
                       {point}
                     </span>
                   ))}
@@ -180,7 +180,7 @@ function AcademyFormatsCarousel() {
       </div>
 
       <div className="mt-4 flex items-center justify-center gap-4" aria-label="Format carousel controls and indicators">
-        <button className="w-[38px] h-[38px] inline-flex items-center justify-center border border-[rgba(27,36,50,0.1)] rounded-full bg-white/[0.66] text-academy-deep cursor-pointer transition-all duration-[250ms] ease-in-out hover:-translate-y-px hover:border-[rgba(27,36,50,0.32)]" onClick={handlePrevSlide} aria-label="Previous format slide">
+        <button className="w-[38px] h-[38px] inline-flex items-center justify-center border border-border rounded-full bg-light-tertiary text-dark-primary cursor-pointer transition-all duration-[250ms] ease-in-out hover:-translate-y-px hover:border-[rgba(27,36,50,0.32)]" onClick={handlePrevSlide} aria-label="Previous format slide">
           <svg className="w-[18px] h-[18px] stroke-current" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <polyline points="15 18 9 12 15 6" />
           </svg>
@@ -189,13 +189,13 @@ function AcademyFormatsCarousel() {
           {formatSlides.map((slide, index) => (
             <button
               key={slide.title}
-              className={`w-2.5 h-2.5 rounded-full border-none cursor-pointer transition-all duration-[250ms] ease-in-out ${activeSlide === index ? 'bg-accent scale-[1.2]' : 'bg-academy-deep/[0.28]'}`}
+              className={`w-2.5 h-2.5 rounded-full border-none cursor-pointer transition-all duration-[250ms] ease-in-out ${activeSlide === index ? 'bg-accent scale-[1.2]' : 'bg-dark-primary/[0.28]'}`}
               onClick={() => setActiveSlide(index)}
               aria-label={`Go to format slide ${index + 1}`}
             />
           ))}
         </div>
-        <button className="w-[38px] h-[38px] inline-flex items-center justify-center border border-[rgba(27,36,50,0.1)] rounded-full bg-white/[0.66] text-academy-deep cursor-pointer transition-all duration-[250ms] ease-in-out hover:-translate-y-px hover:border-[rgba(27,36,50,0.32)]" onClick={handleNextSlide} aria-label="Next format slide">
+        <button className="w-[38px] h-[38px] inline-flex items-center justify-center border border-border rounded-full bg-light-tertiary text-dark-primary cursor-pointer transition-all duration-[250ms] ease-in-out hover:-translate-y-px hover:border-[rgba(27,36,50,0.32)]" onClick={handleNextSlide} aria-label="Next format slide">
           <svg className="w-[18px] h-[18px] stroke-current" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <polyline points="9 18 15 12 9 6" />
           </svg>

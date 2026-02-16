@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiArrowLeft } from 'react-icons/fi';
 import './CreateCourse.css';
@@ -254,6 +254,86 @@ const handleSubmit = async () => {
   }
 };
 
+  // Camera
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [cameraError, setCameraError] = useState('');
+  const [cameraStream, setCameraStream] = useState(null);
+  const [facingMode, setFacingMode] = useState('user'); // 'user' | 'environment'
+
+  const startCamera = async () => {
+    setCameraError('');
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode },
+        audio: false
+      });
+
+      setCameraStream(stream);
+      setCameraOpen(true);
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+    } catch (err) {
+      const msg =
+        err?.name === 'NotAllowedError'
+          ? 'Camera permission was denied.'
+          : err?.name === 'NotFoundError'
+          ? 'No camera device found.'
+          : 'Could not access the camera.';
+      setCameraError(msg);
+      setCameraOpen(false);
+    }
+  };
+
+  const stopCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach((t) => t.stop());
+    }
+    setCameraStream(null);
+    setCameraOpen(false);
+  };
+
+  const captureInstructorAvatar = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+
+    const w = video.videoWidth || 640;
+    const h = video.videoHeight || 480;
+
+    canvas.width = w;
+    canvas.height = h;
+
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, w, h);
+
+    // data URL works with <img src="..."> and your existing "avatar" string field
+    const dataUrl = canvas.toDataURL('image/png');
+
+    handleInputChange('instructor', 'avatar', dataUrl);
+
+    stopCamera();
+  };
+
+  // If camera is open and we switch cameras, restart stream
+  useEffect(() => {
+    if (!cameraOpen) return;
+    stopCamera();
+    startCamera();
+  }, [facingMode]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => stopCamera();
+  }, []);
+
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
@@ -321,6 +401,72 @@ const handleSubmit = async () => {
               onChange={(url) => handleInputChange(null, 'thumbnail', url)}
               label="Course Thumbnail"
             />
+            
+            <div className="form-group">
+              <label>Or take a photo</label>
+
+              {courseData.instructor.avatar && (
+                <div style={{ marginBottom: 12 }}>
+                  <img
+                    src={courseData.instructor.avatar}
+                    alt="Instructor avatar preview"
+                    style={{
+                      width: 96,
+                      height: 96,
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      border: '1px solid #ddd'
+                    }}
+                  />
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                {!cameraOpen ? (
+                  <button type="button" className="secondary-button" onClick={startCamera}>
+                    Use Camera
+                  </button>
+                ) : (
+                  <>
+                    <button type="button" className="primary-button" onClick={captureInstructorAvatar}>
+                      Take Photo
+                    </button>
+
+                    <button type="button" className="secondary-button" onClick={stopCamera}>
+                      Stop
+                    </button>
+
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      onClick={() => setFacingMode((m) => (m === 'user' ? 'environment' : 'user'))}
+                    >
+                      Switch Camera
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {cameraError && (
+                <p style={{ marginTop: 10, color: 'crimson' }}>{cameraError}</p>
+              )}
+
+              {cameraOpen && (
+                <div style={{ marginTop: 12 }}>
+                  <video
+                    ref={videoRef}
+                    playsInline
+                    style={{ width: '100%', maxWidth: 420, borderRadius: 12 }}
+                  />
+                  <canvas ref={canvasRef} style={{ display: 'none' }} />
+                </div>
+              )}
+
+              <p className="section-subtitle" style={{ marginTop: 10 }}>
+                Camera access works on HTTPS or http://localhost.
+              </p>
+            </div>
+
 
             <div className="form-group">
               <label className="checkbox-label">

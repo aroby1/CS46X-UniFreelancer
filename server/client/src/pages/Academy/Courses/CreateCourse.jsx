@@ -401,7 +401,60 @@ const handleSubmit = async () => {
               onChange={(url) => handleInputChange(null, 'thumbnail', url)}
               label="Course Thumbnail"
             />
-            
+            <div className="form-group">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={courseData.isLiteVersion}
+                  onChange={(e) => handleInputChange(null, 'isLiteVersion', e.target.checked)}
+                />
+                This is a Lite version (free tier with limited content)
+              </label>
+            </div>
+          </div>
+        );
+
+      case 2:
+        return (
+          <div className="form-section">
+            <h2>Instructor Information</h2>
+            <p className="section-subtitle">Details about the course instructor</p>
+
+            <div className="form-group">
+              <label>Instructor Name *</label>
+              <input
+                type="text"
+                value={courseData.instructor.name}
+                onChange={(e) => handleInputChange('instructor', 'name', e.target.value)}
+                placeholder="e.g., Dr. Sarah Johnson"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Instructor Title/Role</label>
+              <input
+                type="text"
+                value={courseData.instructor.title}
+                onChange={(e) => handleInputChange('instructor', 'title', e.target.value)}
+                placeholder="e.g., Senior Marketing Consultant"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Instructor Bio</label>
+              <textarea
+                value={courseData.instructor.bio}
+                onChange={(e) => handleInputChange('instructor', 'bio', e.target.value)}
+                placeholder="Brief overview of the instructor's background and expertise..."
+                rows={4}
+              />
+            </div>
+
+            <ImageUpload
+              value={courseData.instructor.avatar}
+              onChange={(url) => handleInputChange('instructor', 'avatar', url)}
+              label="Instructor Avatar"
+            />
             <div className="form-group">
               <label>Or take a photo</label>
 
@@ -466,63 +519,8 @@ const handleSubmit = async () => {
                 Camera access works on HTTPS or http://localhost.
               </p>
             </div>
-
-
-            <div className="form-group">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={courseData.isLiteVersion}
-                  onChange={(e) => handleInputChange(null, 'isLiteVersion', e.target.checked)}
-                />
-                This is a Lite version (free tier with limited content)
-              </label>
-            </div>
           </div>
-        );
-
-      case 2:
-        return (
-          <div className="form-section">
-            <h2>Instructor Information</h2>
-            <p className="section-subtitle">Details about the course instructor</p>
-
-            <div className="form-group">
-              <label>Instructor Name *</label>
-              <input
-                type="text"
-                value={courseData.instructor.name}
-                onChange={(e) => handleInputChange('instructor', 'name', e.target.value)}
-                placeholder="e.g., Dr. Sarah Johnson"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Instructor Title/Role</label>
-              <input
-                type="text"
-                value={courseData.instructor.title}
-                onChange={(e) => handleInputChange('instructor', 'title', e.target.value)}
-                placeholder="e.g., Senior Marketing Consultant"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Instructor Bio</label>
-              <textarea
-                value={courseData.instructor.bio}
-                onChange={(e) => handleInputChange('instructor', 'bio', e.target.value)}
-                placeholder="Brief overview of the instructor's background and expertise..."
-                rows={4}
-              />
-            </div>
-
-            <ImageUpload
-              value={courseData.instructor.avatar}
-              onChange={(url) => handleInputChange('instructor', 'avatar', url)}
-              label="Instructor Avatar"
-            />
-          </div>
+            
         );
 
       case 3:

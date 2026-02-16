@@ -541,7 +541,6 @@ useEffect(() => {
               )}
 
               <p className="section-subtitle" style={{ marginTop: 10 }}>
-                Camera access works on HTTPS or http://localhost.
               </p>
             </div>
           </div>

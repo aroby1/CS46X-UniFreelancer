@@ -11,13 +11,30 @@ function VideoLesson({ lesson, onComplete, isCompleted }) {
       if (u.hostname.includes("youtube.com") && u.pathname.startsWith("/embed/")) {
         return url;
       }
+
+      // youtu.be/<id>
       if (u.hostname === "youtu.be") {
         const id = u.pathname.replace("/", "");
         return id ? `https://www.youtube.com/embed/${id}` : "";
       }
-      const v = u.searchParams.get("v");
-      if (v) {
-        return `https://www.youtube.com/embed/${v}`;
+
+      // youtube.com/watch?v=<id>
+      if (u.hostname.includes("youtube.com")) {
+        const v = u.searchParams.get("v");
+        if (v) {
+          return `https://www.youtube.com/embed/${v}`;
+        }
+      }
+
+      // vimeo.com/<id>
+      if (u.hostname === "vimeo.com") {
+        const id = u.pathname.split("/").filter(Boolean)[0];
+        return id ? `https://player.vimeo.com/video/${id}` : "";
+      }
+
+      // player.vimeo.com/video/<id>
+      if (u.hostname === "player.vimeo.com" && u.pathname.startsWith("/video/")) {
+        return url;
       }
       return "";
     } catch {

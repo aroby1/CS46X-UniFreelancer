@@ -1,8 +1,10 @@
 /* global process */
 import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Seminars.css";
 
 function Seminars() {
+  const navigate = useNavigate();
   const [seminars, setSeminars] = useState([]);
   const [filteredSeminars, setFilteredSeminars] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -239,7 +241,7 @@ function Seminars() {
                     </div>
 
                     <div className="seminar-footer">
-                      <button className="view-details-btn">
+                      <button className="view-details-btn" onClick={() => navigate(`/academy/seminars/${seminar._id}`)}>
                         View Details →
                       </button>
                     </div>

@@ -322,11 +322,27 @@ const handleSubmit = async () => {
   };
 
   // If camera is open and we switch cameras, restart stream
-  useEffect(() => {
-    if (!cameraOpen) return;
-    stopCamera();
-    startCamera();
-  }, [facingMode]);
+useEffect(() => {
+  if (!cameraOpen) return;
+  if (!cameraStream) return;
+  if (!videoRef.current) return;
+
+  const video = videoRef.current;
+  video.srcObject = cameraStream;
+
+  const playVideo = async () => {
+    try {
+      await video.play();
+    } catch (err) {
+      console.warn('Video play error:', err);
+    }
+  };
+
+  video.onloadedmetadata = playVideo;
+  playVideo();
+
+}, [cameraOpen, cameraStream]);
+
 
   // Cleanup on unmount
   useEffect(() => {
@@ -508,9 +524,18 @@ const handleSubmit = async () => {
                 <div style={{ marginTop: 12 }}>
                   <video
                     ref={videoRef}
+                    autoPlay
+                    muted
                     playsInline
-                    style={{ width: '100%', maxWidth: 420, borderRadius: 12 }}
+                    style={{
+                      width: '100%',
+                      maxWidth: 420,
+                      height: 260,
+                      background: '#000',
+                      borderRadius: 12
+                    }}
                   />
+                  <canvas ref={canvasRef} style={{ display: 'none' }} />
                   <canvas ref={canvasRef} style={{ display: 'none' }} />
                 </div>
               )}

@@ -28,6 +28,7 @@ Before starting, make sure you have the following installed:
 - npm (comes with Node.js) or yarn
 - MongoDB Atlas or a local MongoDB instance
 - Stripe API key (for payment processing)
+- Zoom API key (for Zoom embedding)
 - Git for version control
 
 **Project Setup:**
@@ -47,6 +48,8 @@ npm install
 MONGODB_URI=your_mongodb_connection_string
 
 STRIPE_SECRET_KEY=your_stripe_secret_key
+
+ZOOM_MEETING_SDK_SECRET =your_zoom_sdk_secret
 
 PORT=3000
 

@@ -6,14 +6,6 @@ function VideoLesson({ lesson, onComplete, isCompleted }) {
 
   const toYouTubeEmbedUrl = (url) => {
     if (!url) return "";
-
-    let trimUrl = String(url).trim();
-    if (!trimUrl) return "";
-
-    if (trimUrl.startsWith("//")) trimUrl = "https:" + trimUrl;
-    if (!trimUrl.startsWith("http://") && !trimUrl.startsWith("https://")) {
-      trimUrl = "https://" + trimUrl;
-    }
     try {
       const u = new URL(url);
       if (u.hostname.includes("youtube.com") && u.pathname.startsWith("/embed/")) {
@@ -34,23 +26,27 @@ function VideoLesson({ lesson, onComplete, isCompleted }) {
         }
       }
 
+      /* -------------------- VIMEO -------------------- */
+
       // vimeo.com/<id>
-      if (u.hostname === "player.vimeo.com" && u.pathname.startsWith("/video/")) {
+      if (u.hostname.includes("vimeo.com") && !u.hostname.includes("player.vimeo.com")) {
+        const parts = u.pathname.split("/").filter(Boolean);
+        const id = [...parts].reverse().find(p => /^\d+$/.test(p));
+        return id ? `https://player.vimeo.com/video/${id}` : "";
+      }
+
+      // player.vimeo.com/video/<id>
+      if (u.hostname.includes("player.vimeo.com") && u.pathname.startsWith("/video/")) {
         return url;
       }
 
-      if (u.hostname.endsWith("vimeo.com")) {
-        // handles /12345678 or /channels/staffpicks/12345678 etc.
-        const parts = u.pathname.split("/").filter(Boolean);
-        const id = parts.find((p) => /^\d+$/.test(p));
-        return id ? `https://player.vimeo.com/video/${id}` : "";
-      }
-      
       return "";
     } catch {
       return "";
     }
   };
+
+  console.log("raw:", lesson.videoUrl, "host:", lesson.videoUrl && new URL(lesson.videoUrl).hostname);
 
   const embedUrl = toYouTubeEmbedUrl(lesson.videoUrl);
 
@@ -68,8 +64,9 @@ function VideoLesson({ lesson, onComplete, isCompleted }) {
           <iframe
             src={embedUrl}
             title={lesson.title}
-            allowFullScreen
             className="video-player"
+            allow="autoplay; fullscreen; picture-in-picture"
+            allowFullScreen
           />
         ) : (
           <div className="video-placeholder">

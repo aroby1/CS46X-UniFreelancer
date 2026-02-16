@@ -6,6 +6,14 @@ function VideoLesson({ lesson, onComplete, isCompleted }) {
 
   const toYouTubeEmbedUrl = (url) => {
     if (!url) return "";
+
+    let trimUrl = String(url).trim();
+    if (!trimUrl) return "";
+
+    if (trimUrl.startsWith("//")) trimUrl = "https:" + trimUrl;
+    if (!trimUrl.startsWith("http://") && !trimUrl.startsWith("https://")) {
+      trimUrl = "https://" + trimUrl;
+    }
     try {
       const u = new URL(url);
       if (u.hostname.includes("youtube.com") && u.pathname.startsWith("/embed/")) {
@@ -27,15 +35,17 @@ function VideoLesson({ lesson, onComplete, isCompleted }) {
       }
 
       // vimeo.com/<id>
-      if (u.hostname === "vimeo.com") {
-        const id = u.pathname.split("/").filter(Boolean)[0];
-        return id ? `https://player.vimeo.com/video/${id}` : "";
-      }
-
-      // player.vimeo.com/video/<id>
       if (u.hostname === "player.vimeo.com" && u.pathname.startsWith("/video/")) {
         return url;
       }
+
+      if (u.hostname.endsWith("vimeo.com")) {
+        // handles /12345678 or /channels/staffpicks/12345678 etc.
+        const parts = u.pathname.split("/").filter(Boolean);
+        const id = parts.find((p) => /^\d+$/.test(p));
+        return id ? `https://player.vimeo.com/video/${id}` : "";
+      }
+      
       return "";
     } catch {
       return "";

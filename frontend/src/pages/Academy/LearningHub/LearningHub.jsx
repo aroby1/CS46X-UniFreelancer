@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import './LearningHub.css';
+import { FiArrowLeft, FiArrowRight } from 'react-icons/fi';
 
 
 function LearningHub() {
@@ -307,44 +307,47 @@ function LearningHub() {
   };
 
   return (
-    <div className="learning-hub-page">
-      <div className="learning-hub-container">
-        <button className="back-link" onClick={handleBackToAcademy}>
-          ← Back to Academy
+    <div className="min-h-screen bg-main-bg pb-16">
+      <div className="max-w-page mx-auto pt-24 px-10 md:px-5">
+        <button
+          className="bg-transparent border-none text-dark-primary text-base cursor-pointer mb-8 py-2 inline-flex items-center transition-colors duration-300 hover:text-dark-secondary"
+          onClick={handleBackToAcademy}
+        >
+          <FiArrowLeft className="inline mr-1" /> Back to Academy
         </button>
 
         {/* My Learning Section */}
-        <div className="my-learning-section">
-          <h2 className="section-title">My Learning</h2>
-          <p className="section-subtitle">Track your progress and continue your learning journey</p>
+        <div className="bg-light-tertiary rounded-md p-10 mb-10 shadow-sm md:p-6">
+          <h2 className="text-4xl font-bold text-dark-primary mb-2">My Learning</h2>
+          <p className="text-base text-dark-secondary mb-8">Track your progress and continue your learning journey</p>
 
-          <div className="stats-grid">
-            <div className="stat-card">
-              <span className="stat-icon">📖</span>
-              <div className="stat-content">
-                <div className="stat-value">{stats.enrolledCount}</div>
-                <div className="stat-label">Enrolled Courses</div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+            <div className="flex items-center gap-4 p-5 bg-light-secondary rounded-[10px] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
+              <span className="text-4xl w-[50px] h-[50px] flex items-center justify-center bg-light-secondary rounded-[10px]">📖</span>
+              <div className="flex-1">
+                <div className="text-[28px] font-bold text-body leading-none mb-1">{stats.enrolledCount}</div>
+                <div className="text-sm text-[#666]">Enrolled Courses</div>
               </div>
             </div>
-            <div className="stat-card">
-              <span className="stat-icon">🎓</span>
-              <div className="stat-content">
-                <div className="stat-value">{stats.completedCount}</div>
-                <div className="stat-label">Completed</div>
+            <div className="flex items-center gap-4 p-5 bg-light-secondary rounded-[10px] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
+              <span className="text-4xl w-[50px] h-[50px] flex items-center justify-center bg-light-secondary rounded-[10px]">🎓</span>
+              <div className="flex-1">
+                <div className="text-[28px] font-bold text-body leading-none mb-1">{stats.completedCount}</div>
+                <div className="text-sm text-[#666]">Completed</div>
               </div>
             </div>
-            <div className="stat-card">
-              <span className="stat-icon">🕐</span>
-              <div className="stat-content">
-                <div className="stat-value">{stats.learningHours}</div>
-                <div className="stat-label">Learning Hours</div>
+            <div className="flex items-center gap-4 p-5 bg-light-secondary rounded-[10px] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
+              <span className="text-4xl w-[50px] h-[50px] flex items-center justify-center bg-light-secondary rounded-[10px]">🕐</span>
+              <div className="flex-1">
+                <div className="text-[28px] font-bold text-body leading-none mb-1">{stats.learningHours}</div>
+                <div className="text-sm text-[#666]">Learning Hours</div>
               </div>
             </div>
           </div>
 
-          <div className="learning-tabs">
+          <div className="flex border-b-2 border-border">
             <button
-              className={`tab ${activeTab === 'continue-learning' ? 'active' : ''}`}
+              className={`py-3 px-6 bg-transparent border-none border-b-[3px] border-transparent text-[#666] text-md font-medium cursor-pointer transition-all duration-300 -mb-[2px] hover:text-body ${activeTab === 'continue-learning' ? '!text-body !border-b-body' : ''}`}
               onClick={() => {
                 setActiveTab('continue-learning');
                 setSearchTerm('');
@@ -354,7 +357,7 @@ function LearningHub() {
               Continue Learning
             </button>
             <button
-              className={`tab ${activeTab === 'courses' ? 'active' : ''}`}
+              className={`py-3 px-6 bg-transparent border-none border-b-[3px] border-transparent text-[#666] text-md font-medium cursor-pointer transition-all duration-300 -mb-[2px] hover:text-body ${activeTab === 'courses' ? '!text-body !border-b-body' : ''}`}
               onClick={() => {
                 setActiveTab('courses');
                 setSearchTerm('');
@@ -364,7 +367,7 @@ function LearningHub() {
               Courses
             </button>
             <button
-              className={`tab ${activeTab === 'seminars' ? 'active' : ''}`}
+              className={`py-3 px-6 bg-transparent border-none border-b-[3px] border-transparent text-[#666] text-md font-medium cursor-pointer transition-all duration-300 -mb-[2px] hover:text-body ${activeTab === 'seminars' ? '!text-body !border-b-body' : ''}`}
               onClick={() => {
                 setActiveTab('seminars');
                 setSearchTerm('');
@@ -374,7 +377,7 @@ function LearningHub() {
               Seminars
             </button>
             <button
-              className={`tab ${activeTab === 'tutorials' ? 'active' : ''}`}
+              className={`py-3 px-6 bg-transparent border-none border-b-[3px] border-transparent text-[#666] text-md font-medium cursor-pointer transition-all duration-300 -mb-[2px] hover:text-body ${activeTab === 'tutorials' ? '!text-body !border-b-body' : ''}`}
               onClick={() => {
                 setActiveTab('tutorials');
                 setSearchTerm('');
@@ -387,25 +390,26 @@ function LearningHub() {
         </div>
 
         {/* Content Section */}
-        <div className="content-section">
-          <h2 className="section-title">
+        <div className="bg-main-bg rounded-md p-10 shadow-sm mt-10 md:p-6">
+          <h2 className="text-4xl font-bold text-dark-primary mb-2">
             {activeTab === 'continue-learning' ? 'Continue Learning' :
               activeTab === 'courses' ? 'Courses' :
                 activeTab === 'seminars' ? 'Seminars & Events' :
                   'Tutorials'}
           </h2>
-          <p className="section-subtitle">
+          <p className="text-base text-dark-secondary mb-8">
             {activeTab === 'continue-learning' ? 'Continue your learning journey with enrolled courses' :
               activeTab === 'courses' ? 'Structured learning programs to master freelancing disciplines' :
                 activeTab === 'seminars' ? 'Interactive live sessions and expert workshops' :
                   'Quick, focused lessons to learn specific skills'}
           </p>
 
-          <div className="search-bar-container">
-            <div className="search-bar">
-              <span className="search-icon">🔍</span>
+          <div className="flex gap-4 mb-8 md:flex-col">
+            <div className="flex-1 relative flex items-center">
+              <span className="absolute left-[15px] text-lg text-muted">🔍</span>
               <input
                 type="text"
+                className="w-full py-3 pr-4 pl-[45px] border border-[#ddd] rounded focus:outline-none focus:border-body text-md transition-colors duration-300"
                 placeholder={
                   activeTab === 'continue-learning' || activeTab === 'courses' ? 'Search courses...' :
                     activeTab === 'seminars' ? 'Search seminars...' :
@@ -415,7 +419,7 @@ function LearningHub() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <select className="sort-dropdown">
+            <select className="py-3 px-5 border border-[#ddd] rounded text-md bg-white cursor-pointer min-w-[150px] focus:outline-none focus:border-body md:w-full">
               {activeTab === 'continue-learning' || activeTab === 'courses' ? (
                 <>
                   <option>All Courses</option>
@@ -440,20 +444,21 @@ function LearningHub() {
             </select>
           </div>
 
-          <div className="content-area">
+          <div className="flex gap-8 max-md:flex-col">
             {/* Filters Sidebar */}
-            <div className="filters-sidebar">
-              <h3 className="filters-title">Filter By</h3>
+            <div className="w-[250px] shrink-0 bg-light-tertiary rounded-[14px] p-4 px-5 sticky top-20 h-fit max-md:w-full max-md:relative max-md:top-0">
+              <h3 className="text-lg font-bold text-body mb-5">Filter By</h3>
 
               {(activeTab === 'courses' || activeTab === 'continue-learning') ? (
                 <>
                   {/* Level Filter */}
-                  <div className="filter-section">
-                    <h4 className="filter-heading">Level</h4>
+                  <div className="mb-8 pb-5 border-b border-border last:border-b-0 max-md:inline-block max-md:w-auto max-md:mr-[30px] max-md:align-top">
+                    <h4 className="text-md font-semibold text-body mb-3">Level</h4>
                     {['Beginner', 'Intermediate', 'Advanced'].map(level => (
-                      <label key={level} className="filter-option">
+                      <label key={level} className="flex items-center gap-3 py-2 cursor-pointer text-base text-[#555] hover:[&>span]:text-body">
                         <input
                           type="checkbox"
+                          className="w-[18px] h-[18px] cursor-pointer"
                           checked={courseFilters.level.includes(level)}
                           onChange={() => handleCourseFilterChange('level', level)}
                         />
@@ -463,12 +468,13 @@ function LearningHub() {
                   </div>
 
                   {/* Duration Filter */}
-                  <div className="filter-section">
-                    <h4 className="filter-heading">Duration</h4>
+                  <div className="mb-8 pb-5 border-b border-border last:border-b-0 max-md:inline-block max-md:w-auto max-md:mr-[30px] max-md:align-top">
+                    <h4 className="text-md font-semibold text-body mb-3">Duration</h4>
                     {['less-4', '4-8', '8-12', 'more-12'].map(range => (
-                      <label key={range} className="filter-option">
+                      <label key={range} className="flex items-center gap-3 py-2 cursor-pointer text-base text-[#555] hover:[&>span]:text-body">
                         <input
                           type="checkbox"
+                          className="w-[18px] h-[18px] cursor-pointer"
                           checked={courseFilters.duration.includes(range)}
                           onChange={() => handleCourseFilterChange('duration', range)}
                         />
@@ -483,12 +489,13 @@ function LearningHub() {
                   </div>
 
                   {/* Price Filter */}
-                  <div className="filter-section">
-                    <h4 className="filter-heading">Price</h4>
+                  <div className="mb-8 pb-5 border-b border-border last:border-b-0 max-md:inline-block max-md:w-auto max-md:mr-[30px] max-md:align-top">
+                    <h4 className="text-md font-semibold text-body mb-3">Price</h4>
                     {['free', 'under-300', '300-600', 'over-600'].map(range => (
-                      <label key={range} className="filter-option">
+                      <label key={range} className="flex items-center gap-3 py-2 cursor-pointer text-base text-[#555] hover:[&>span]:text-body">
                         <input
                           type="checkbox"
+                          className="w-[18px] h-[18px] cursor-pointer"
                           checked={courseFilters.price.includes(range)}
                           onChange={() => handleCourseFilterChange('price', range)}
                         />
@@ -505,12 +512,13 @@ function LearningHub() {
               ) : activeTab === 'seminars' ? (
                 <>
                   {/* Type Filter */}
-                  <div className="filter-section">
-                    <h4 className="filter-heading">Type</h4>
+                  <div className="mb-8 pb-5 border-b border-border last:border-b-0 max-md:inline-block max-md:w-auto max-md:mr-[30px] max-md:align-top">
+                    <h4 className="text-md font-semibold text-body mb-3">Type</h4>
                     {['Live', 'Recorded', 'Podcast'].map(type => (
-                      <label key={type} className="filter-option">
+                      <label key={type} className="flex items-center gap-3 py-2 cursor-pointer text-base text-[#555] hover:[&>span]:text-body">
                         <input
                           type="checkbox"
+                          className="w-[18px] h-[18px] cursor-pointer"
                           checked={seminarFilters.type.includes(type)}
                           onChange={() => handleSeminarFilterChange('type', type)}
                         />
@@ -520,12 +528,13 @@ function LearningHub() {
                   </div>
 
                   {/* Duration Filter */}
-                  <div className="filter-section">
-                    <h4 className="filter-heading">Duration</h4>
+                  <div className="mb-8 pb-5 border-b border-border last:border-b-0 max-md:inline-block max-md:w-auto max-md:mr-[30px] max-md:align-top">
+                    <h4 className="text-md font-semibold text-body mb-3">Duration</h4>
                     {['less-60', '60-90', 'more-90'].map(range => (
-                      <label key={range} className="filter-option">
+                      <label key={range} className="flex items-center gap-3 py-2 cursor-pointer text-base text-[#555] hover:[&>span]:text-body">
                         <input
                           type="checkbox"
+                          className="w-[18px] h-[18px] cursor-pointer"
                           checked={seminarFilters.duration.includes(range)}
                           onChange={() => handleSeminarFilterChange('duration', range)}
                         />
@@ -539,12 +548,13 @@ function LearningHub() {
                   </div>
 
                   {/* Status Filter */}
-                  <div className="filter-section">
-                    <h4 className="filter-heading">Status</h4>
+                  <div className="mb-8 pb-5 border-b border-border last:border-b-0 max-md:inline-block max-md:w-auto max-md:mr-[30px] max-md:align-top">
+                    <h4 className="text-md font-semibold text-body mb-3">Status</h4>
                     {['Watched', 'Not Watched'].map(status => (
-                      <label key={status} className="filter-option">
+                      <label key={status} className="flex items-center gap-3 py-2 cursor-pointer text-base text-[#555] hover:[&>span]:text-body">
                         <input
                           type="checkbox"
+                          className="w-[18px] h-[18px] cursor-pointer"
                           checked={seminarFilters.status.includes(status)}
                           onChange={() => handleSeminarFilterChange('status', status)}
                         />
@@ -556,12 +566,13 @@ function LearningHub() {
               ) : (
                 <>
                   {/* Topic Filter */}
-                  <div className="filter-section">
-                    <h4 className="filter-heading">Topic</h4>
+                  <div className="mb-8 pb-5 border-b border-border last:border-b-0 max-md:inline-block max-md:w-auto max-md:mr-[30px] max-md:align-top">
+                    <h4 className="text-md font-semibold text-body mb-3">Topic</h4>
                     {['Design', 'Marketing', 'Development', 'Business'].map(topic => (
-                      <label key={topic} className="filter-option">
+                      <label key={topic} className="flex items-center gap-3 py-2 cursor-pointer text-base text-[#555] hover:[&>span]:text-body">
                         <input
                           type="checkbox"
+                          className="w-[18px] h-[18px] cursor-pointer"
                           checked={tutorialFilters.topic.includes(topic)}
                           onChange={() => handleTutorialFilterChange('topic', topic)}
                         />
@@ -571,12 +582,13 @@ function LearningHub() {
                   </div>
 
                   {/* Difficulty Filter */}
-                  <div className="filter-section">
-                    <h4 className="filter-heading">Difficulty</h4>
+                  <div className="mb-8 pb-5 border-b border-border last:border-b-0 max-md:inline-block max-md:w-auto max-md:mr-[30px] max-md:align-top">
+                    <h4 className="text-md font-semibold text-body mb-3">Difficulty</h4>
                     {['Beginner', 'Intermediate', 'Advanced'].map(difficulty => (
-                      <label key={difficulty} className="filter-option">
+                      <label key={difficulty} className="flex items-center gap-3 py-2 cursor-pointer text-base text-[#555] hover:[&>span]:text-body">
                         <input
                           type="checkbox"
+                          className="w-[18px] h-[18px] cursor-pointer"
                           checked={tutorialFilters.difficulty.includes(difficulty)}
                           onChange={() => handleTutorialFilterChange('difficulty', difficulty)}
                         />
@@ -586,12 +598,13 @@ function LearningHub() {
                   </div>
 
                   {/* Length Filter */}
-                  <div className="filter-section">
-                    <h4 className="filter-heading">Length</h4>
+                  <div className="mb-8 pb-5 border-b border-border last:border-b-0 max-md:inline-block max-md:w-auto max-md:mr-[30px] max-md:align-top">
+                    <h4 className="text-md font-semibold text-body mb-3">Length</h4>
                     {['Short', 'Medium', 'Long'].map(length => (
-                      <label key={length} className="filter-option">
+                      <label key={length} className="flex items-center gap-3 py-2 cursor-pointer text-base text-[#555] hover:[&>span]:text-body">
                         <input
                           type="checkbox"
+                          className="w-[18px] h-[18px] cursor-pointer"
                           checked={tutorialFilters.length.includes(length)}
                           onChange={() => handleTutorialFilterChange('length', length)}
                         />
@@ -604,24 +617,27 @@ function LearningHub() {
             </div>
 
             {/* Content Grid */}
-            <div className="content-grid">
+            <div className="flex-1 grid grid-cols-3 auto-rows-[1fr] gap-6 max-md:grid-cols-1">
               {loading ? (
-                <div className="loading-message">
+                <div className="col-span-full text-center py-16 px-5 text-[#666] text-base">
                   Loading {activeTab === 'courses' || activeTab === 'continue-learning' ? 'courses' : activeTab === 'seminars' ? 'seminars' : 'tutorials'}...
                 </div>
               ) : (activeTab === 'courses' || activeTab === 'continue-learning' ? filteredCourses : activeTab === 'seminars' ? filteredSeminars : activeTab === 'tutorials' ? filteredTutorials : []).length === 0 ? (
-                <div className="no-results">
-                  <p>No {activeTab === 'courses' || activeTab === 'continue-learning' ? 'courses' : activeTab === 'seminars' ? 'seminars' : 'tutorials'} found matching your criteria.</p>
-                  <button onClick={() => {
-                    setSearchTerm('');
-                    if (activeTab === 'courses' || activeTab === 'continue-learning') {
-                      setCourseFilters({ level: [], language: [], duration: [], price: [] });
-                    } else if (activeTab === 'seminars') {
-                      setSeminarFilters({ type: [], duration: [], status: [] });
-                    } else if (activeTab === 'tutorials') {
-                      setTutorialFilters({ topic: [], difficulty: [], length: [] });
-                    }
-                  }}>
+                <div className="col-span-full text-center py-16 px-5 text-[#666] text-base">
+                  <p className="mb-5">No {activeTab === 'courses' || activeTab === 'continue-learning' ? 'courses' : activeTab === 'seminars' ? 'seminars' : 'tutorials'} found matching your criteria.</p>
+                  <button
+                    className="py-3 px-5 bg-body text-white border-none rounded-sm text-base cursor-pointer hover:bg-[#1a252f]"
+                    onClick={() => {
+                      setSearchTerm('');
+                      if (activeTab === 'courses' || activeTab === 'continue-learning') {
+                        setCourseFilters({ level: [], language: [], duration: [], price: [] });
+                      } else if (activeTab === 'seminars') {
+                        setSeminarFilters({ type: [], duration: [], status: [] });
+                      } else if (activeTab === 'tutorials') {
+                        setTutorialFilters({ topic: [], difficulty: [], length: [] });
+                      }
+                    }}
+                  >
                     Clear Filters
                   </button>
                 </div>
@@ -629,49 +645,49 @@ function LearningHub() {
                 filteredCourses.map(course => (
                   <div
                     key={course.id || course._id}
-                    className="course-card"
+                    className="bg-light-tertiary border border-border rounded-[14px] overflow-hidden shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover flex flex-col"
                     onClick={() => navigate(`/academy/courses/${course._id || course.id}`)}
                     style={{ cursor: 'pointer' }}
                   >
-                    <div className="course-image">
+                    <div className="w-full h-[180px] overflow-hidden bg-[#f5f5f5]">
                       {course.thumbnail ? (
-                        <img src={course.thumbnail} alt={course.title} />
+                        <img className="w-full h-full object-cover" src={course.thumbnail} alt={course.title} />
                       ) : (
-                        <div className="placeholder-image">📚</div>
+                        <div className="w-full h-full flex items-center justify-center text-6xl bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white">📚</div>
                       )}
                     </div>
-                    <div className="course-content">
-                      <div className="course-header">
-                        <h3 className="course-title">{course.title}</h3>
-                        {course.isLiteVersion && <span className="lite-badge">Lite</span>}
+                    <div className="p-5 flex-1 flex flex-col">
+                      <div className="flex items-center gap-3 mb-3">
+                        <h3 className="text-lg font-semibold text-dark-primary flex-1">{course.title}</h3>
+                        {course.isLiteVersion && <span className="py-1 px-3 bg-[#e8e8e8] text-[#666] text-xs font-medium rounded-md">Lite</span>}
                       </div>
-                      <p className="course-description">
+                      <p className="text-base text-dark-secondary leading-relaxed mb-4">
                         {course.description?.substring(0, 80)}...
                       </p>
-                      <div className="course-details">
-                        <div className="course-detail">
-                          <span className="detail-icon">🕐</span>
+                      <div className="flex flex-col gap-2 mb-4 pb-4 border-b border-border-light mt-auto">
+                        <div className="flex items-center gap-2 text-sm text-[#666]">
+                          <span className="text-base">🕐</span>
                           <span>{getCourseDuration(course.duration)}</span>
                         </div>
-                        <div className="course-detail">
-                          <span className="detail-icon">🏷️</span>
+                        <div className="flex items-center gap-2 text-sm text-[#666]">
+                          <span className="text-base">🏷️</span>
                           <span>{course.category || 'General'}</span>
                         </div>
-                        <div className="course-detail">
-                          <span className="detail-icon">📊</span>
+                        <div className="flex items-center gap-2 text-sm text-[#666]">
+                          <span className="text-base">📊</span>
                           <span>{course.difficulty}</span>
                         </div>
                       </div>
-                      <div className="course-footer">
-                        <div className="course-price">{getCoursePrice(course)}</div>
+                      <div className="flex items-center justify-between">
+                        <div className="text-xl font-bold text-body">{getCoursePrice(course)}</div>
                         <button
-                          className="view-details-btn"
+                          className="py-2 px-4 bg-accent text-white border-none rounded-sm text-base font-medium cursor-pointer transition-colors duration-300 hover:bg-accent-tertiary"
                           onClick={(e) => {
                             e.stopPropagation();
                             navigate(`/academy/courses/${course._id || course.id}`);
                           }}
                         >
-                          View Details →
+                          View Details <FiArrowRight className="inline ml-1" />
                         </button>
                       </div>
                     </div>
@@ -679,35 +695,35 @@ function LearningHub() {
                 ))
               ) : activeTab === 'seminars' ? (
                 filteredSeminars.map(seminar => (
-                  <div key={seminar._id} className="seminar-card">
-                    <div className="seminar-image">
+                  <div key={seminar._id} className="bg-light-tertiary border border-border rounded-[14px] overflow-hidden shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover">
+                    <div className="w-full h-[180px] overflow-hidden bg-[#f5f5f5]">
                       {seminar.thumbnail ? (
-                        <img src={seminar.thumbnail} alt={seminar.title} />
+                        <img className="w-full h-full object-cover" src={seminar.thumbnail} alt={seminar.title} />
                       ) : (
-                        <div className="placeholder-image">🎤</div>
+                        <div className="w-full h-full flex items-center justify-center text-6xl bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white">🎤</div>
                       )}
                     </div>
-                    <div className="seminar-content">
-                      <h3 className="seminar-title">{seminar.title}</h3>
-                      <p className="seminar-description">
+                    <div className="p-5">
+                      <h3 className="text-lg font-semibold text-dark-primary mb-2.5">{seminar.title}</h3>
+                      <p className="text-base text-dark-secondary leading-relaxed mb-4">
                         {seminar.description?.substring(0, 80)}...
                       </p>
-                      <div className="seminar-details">
-                        <div className="seminar-detail">
-                          <span className="detail-icon">🗣️</span>
+                      <div className="flex flex-col gap-2 mb-4 pb-4 border-b border-border-light">
+                        <div className="flex items-center gap-2 text-sm text-[#666]">
+                          <span className="text-base">🗣️</span>
                           <span>{seminar.speaker?.name || 'Unknown Speaker'}</span>
                         </div>
-                        <div className="seminar-detail">
-                          <span className="detail-icon">📅</span>
+                        <div className="flex items-center gap-2 text-sm text-[#666]">
+                          <span className="text-base">📅</span>
                           <span>{seminar.schedule?.date || 'TBD'}</span>
                         </div>
-                        <div className="seminar-detail">
-                          <span className="detail-icon">🎧</span>
+                        <div className="flex items-center gap-2 text-sm text-[#666]">
+                          <span className="text-base">🎧</span>
                           <span>{seminar.type}</span>
                         </div>
                       </div>
-                      <div className="seminar-footer">
-                        <button className="view-details-btn" onClick={() => navigate(`/academy/seminars/${seminar._id}`)}>View Details →</button>
+                      <div className="flex justify-end">
+                        <button className="py-2 px-4 bg-accent text-white border-none rounded-sm text-base font-medium cursor-pointer transition-colors duration-300 hover:bg-accent-tertiary" onClick={() => navigate(`/academy/seminars/${seminar._id}`)}>View Details <FiArrowRight className="inline ml-1" /></button>
                       </div>
                     </div>
                   </div>
@@ -723,45 +739,45 @@ function LearningHub() {
                   return (
                     <div
                       key={tutorialId || tutorial.title}
-                      className="tutorial-card"
+                      className="bg-light-tertiary border border-border rounded-[14px] overflow-hidden shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover"
                       onClick={goToTutorial}
                       style={{ cursor: tutorialId ? "pointer" : "default" }}
                     >
-                      <div className="tutorial-image">
+                      <div className="w-full h-[180px] overflow-hidden bg-[#f5f5f5]">
                         {tutorial.thumbnail ? (
-                          <img src={tutorial.thumbnail} alt={tutorial.title} />
+                          <img className="w-full h-full object-cover" src={tutorial.thumbnail} alt={tutorial.title} />
                         ) : (
-                          <div className="placeholder-image">📘</div>
+                          <div className="w-full h-full flex items-center justify-center text-6xl bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white">📘</div>
                         )}
                       </div>
-                      <div className="tutorial-content">
-                        <h3 className="tutorial-title">{tutorial.title}</h3>
-                        <p className="tutorial-description">
+                      <div className="p-5">
+                        <h3 className="text-lg font-semibold text-dark-primary mb-2.5">{tutorial.title}</h3>
+                        <p className="text-base text-dark-secondary leading-relaxed mb-4">
                           {tutorial.description?.substring(0, 90)}...
                         </p>
-                        <div className="tutorial-details">
-                          <div className="tutorial-detail">
-                            <span className="detail-icon">📚</span>
+                        <div className="flex flex-col gap-2 mb-4 pb-4 border-b border-border-light">
+                          <div className="flex items-center gap-2 text-sm text-[#666]">
+                            <span className="text-base">📚</span>
                             <span>{tutorial.topic}</span>
                           </div>
-                          <div className="tutorial-detail">
-                            <span className="detail-icon">🎯</span>
+                          <div className="flex items-center gap-2 text-sm text-[#666]">
+                            <span className="text-base">🎯</span>
                             <span>{tutorial.difficulty}</span>
                           </div>
-                          <div className="tutorial-detail">
-                            <span className="detail-icon">⏱️</span>
+                          <div className="flex items-center gap-2 text-sm text-[#666]">
+                            <span className="text-base">⏱️</span>
                             <span>{tutorial.lengthCategory}</span>
                           </div>
                         </div>
-                        <div className="tutorial-footer">
+                        <div className="flex justify-end">
                           <button
-                            className="view-details-btn"
+                            className="py-2 px-4 bg-accent text-white border-none rounded-sm text-base font-medium cursor-pointer transition-colors duration-300 hover:bg-accent-tertiary"
                             onClick={(e) => {
                               e.stopPropagation();
                               goToTutorial();
                             }}
                           >
-                            View Tutorial →
+                            View Tutorial <FiArrowRight className="inline ml-1" />
                           </button>
                         </div>
                       </div>

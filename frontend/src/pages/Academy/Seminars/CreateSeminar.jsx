@@ -1,7 +1,7 @@
 /* global process */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './CreateSeminar.css';
+import { FiArrowLeft } from 'react-icons/fi';
 
 function CreateSeminar() {
   const navigate = useNavigate();
@@ -84,23 +84,23 @@ function CreateSeminar() {
   ];
 
   return (
-    <div className="create-seminar-page">
-      <div className="create-seminar-container">
+    <div className="min-h-screen bg-main-bg pt-10 px-6">
+      <div className="max-w-narrow mx-auto">
 
-        <button className="back-button" onClick={handleBack}>
-          ← Back
+        <button className="bg-transparent border-none text-dark text-base cursor-pointer mb-5 py-2 inline-flex items-center hover:text-dark-secondary transition-colors" onClick={handleBack}>
+          <FiArrowLeft className="inline mr-1" /> Back
         </button>
 
-        <h1 className="create-seminar-title">Create New Seminar</h1>
-        <p className="create-seminar-subtitle">
+        <h1 className="text-5xl font-bold text-dark mb-3">Create New Seminar</h1>
+        <p className="text-base text-dark-secondary mb-8">
           Fill in the details to create a new seminar or webinar
         </p>
 
-        <div className="step-navigation">
+        <div className="flex flex-wrap">
           {steps.map((step) => (
             <button
               key={step.id}
-              className={`step-button ${currentStep === step.id ? 'active' : ''}`}
+              className={`py-3 px-5 text-base font-semibold cursor-pointer border-none transition-colors ${currentStep === step.id ? 'bg-light-tertiary text-dark' : 'bg-light-primary text-dark-tertiary hover:bg-light-secondary'}`}
               onClick={() => setCurrentStep(step.id)}
             >
               {step.label}
@@ -109,52 +109,52 @@ function CreateSeminar() {
         </div>
 
         {currentStep === 'basic-info' && (
-          <div className="form-section">
-            <h2 className="section-title">Seminar Information</h2>
-            <p className="section-subtitle">Basic details about your seminar</p>
+          <div className="bg-light-tertiary p-8 mb-3 rounded">
+            <h2 className="text-2xl font-semibold text-dark mb-2">Seminar Information</h2>
+            <p className="text-md text-dark-secondary mb-8">Basic details about your seminar</p>
 
-            <div className="form-group">
-              <label className="form-label">Seminar Title *</label>
+            <div className="mb-6">
+              <label className="block text-base font-semibold text-dark mb-2">Seminar Title *</label>
               <input
                 type="text"
                 name="title"
-                className="form-input"
+                className="w-full px-4 py-3 rounded-md border border-border focus:outline-none focus:border-accent text-base text-dark font-sans transition-colors"
                 placeholder="e.g., Building Your Freelance Brand"
                 value={seminarData.title}
                 onChange={handleInputChange}
               />
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Description *</label>
+            <div className="mb-6">
+              <label className="block text-base font-semibold text-dark mb-2">Description *</label>
               <textarea
                 name="description"
                 rows="5"
-                className="form-textarea"
+                className="w-full px-4 py-3 rounded-md border border-border focus:outline-none focus:border-accent text-base text-dark font-sans transition-colors resize-y min-h-[120px]"
                 placeholder="Describe what attendees will learn in this seminar..."
                 value={seminarData.description}
                 onChange={handleInputChange}
               />
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label className="form-label">Duration</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="mb-6">
+                <label className="block text-base font-semibold text-dark mb-2">Duration</label>
                 <input
                   type="text"
                   name="duration"
-                  className="form-input"
+                  className="w-full px-4 py-3 rounded-md border border-border focus:outline-none focus:border-accent text-base text-dark font-sans transition-colors"
                   placeholder="e.g., 1.5 hours"
                   value={seminarData.duration}
                   onChange={handleInputChange}
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Seminar Type</label>
+              <div className="mb-6">
+                <label className="block text-base font-semibold text-dark mb-2">Seminar Type</label>
                 <select
                   name="type"
-                  className="form-select"
+                  className="w-full px-4 py-3 rounded-md border border-border focus:outline-none focus:border-accent text-base text-dark font-sans transition-colors cursor-pointer bg-white"
                   value={seminarData.type}
                   onChange={handleInputChange}
                 >
@@ -165,12 +165,12 @@ function CreateSeminar() {
               </div>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Thumbnail URL</label>
+            <div className="mb-6">
+              <label className="block text-base font-semibold text-dark mb-2">Thumbnail URL</label>
               <input
                 type="text"
                 name="thumbnail"
-                className="form-input"
+                className="w-full px-4 py-3 rounded-md border border-border focus:outline-none focus:border-accent text-base text-dark font-sans transition-colors"
                 placeholder="https://example.com/image.jpg"
                 value={seminarData.thumbnail}
                 onChange={handleInputChange}
@@ -180,40 +180,40 @@ function CreateSeminar() {
         )}
 
         {currentStep === 'speaker' && (
-          <div className="form-section">
-            <h2 className="section-title">Speaker Information</h2>
-            <p className="section-subtitle">Details about the seminar speaker</p>
+          <div className="bg-light-tertiary p-8 mb-3 rounded">
+            <h2 className="text-2xl font-semibold text-dark mb-2">Speaker Information</h2>
+            <p className="text-md text-dark-secondary mb-8">Details about the seminar speaker</p>
 
-            <div className="form-group">
-              <label className="form-label">Speaker Name *</label>
+            <div className="mb-6">
+              <label className="block text-base font-semibold text-dark mb-2">Speaker Name *</label>
               <input
                 type="text"
                 name="speakerName"
-                className="form-input"
+                className="w-full px-4 py-3 rounded-md border border-border focus:outline-none focus:border-accent text-base text-dark font-sans transition-colors"
                 placeholder="e.g., John Smith"
                 value={seminarData.speakerName}
                 onChange={handleInputChange}
               />
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Speaker Bio</label>
+            <div className="mb-6">
+              <label className="block text-base font-semibold text-dark mb-2">Speaker Bio</label>
               <textarea
                 name="speakerBio"
                 rows="4"
-                className="form-textarea"
+                className="w-full px-4 py-3 rounded-md border border-border focus:outline-none focus:border-accent text-base text-dark font-sans transition-colors resize-y min-h-[120px]"
                 placeholder="Brief biography of the speaker..."
                 value={seminarData.speakerBio}
                 onChange={handleInputChange}
               />
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Speaker Avatar URL</label>
+            <div className="mb-6">
+              <label className="block text-base font-semibold text-dark mb-2">Speaker Avatar URL</label>
               <input
                 type="text"
                 name="speakerAvatar"
-                className="form-input"
+                className="w-full px-4 py-3 rounded-md border border-border focus:outline-none focus:border-accent text-base text-dark font-sans transition-colors"
                 placeholder="https://example.com/avatar.jpg"
                 value={seminarData.speakerAvatar}
                 onChange={handleInputChange}
@@ -223,40 +223,40 @@ function CreateSeminar() {
         )}
 
         {currentStep === 'schedule' && (
-          <div className="form-section">
-            <h2 className="section-title">Schedule</h2>
-            <p className="section-subtitle">When will this seminar take place?</p>
+          <div className="bg-light-tertiary p-8 mb-3 rounded">
+            <h2 className="text-2xl font-semibold text-dark mb-2">Schedule</h2>
+            <p className="text-md text-dark-secondary mb-8">When will this seminar take place?</p>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label className="form-label">Date</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="mb-6">
+                <label className="block text-base font-semibold text-dark mb-2">Date</label>
                 <input
                   type="date"
                   name="date"
-                  className="form-input"
+                  className="w-full px-4 py-3 rounded-md border border-border focus:outline-none focus:border-accent text-base text-dark font-sans transition-colors"
                   value={seminarData.date}
                   onChange={handleInputChange}
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Time</label>
+              <div className="mb-6">
+                <label className="block text-base font-semibold text-dark mb-2">Time</label>
                 <input
                   type="time"
                   name="time"
-                  className="form-input"
+                  className="w-full px-4 py-3 rounded-md border border-border focus:outline-none focus:border-accent text-base text-dark font-sans transition-colors"
                   value={seminarData.time}
                   onChange={handleInputChange}
                 />
               </div>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Join URL</label>
+            <div className="mb-6">
+              <label className="block text-base font-semibold text-dark mb-2">Join URL</label>
               <input
                 type="text"
                 name="joinUrl"
-                className="form-input"
+                className="w-full px-4 py-3 rounded-md border border-border focus:outline-none focus:border-accent text-base text-dark font-sans transition-colors"
                 placeholder="https://zoom.us/..."
                 value={seminarData.joinUrl}
                 onChange={handleInputChange}
@@ -266,11 +266,11 @@ function CreateSeminar() {
         )}
 
         {/* Buttons */}
-        <div className="form-actions">
-          <button className="cancel-button" onClick={handleCancel}>
+        <div className="flex justify-end gap-4 pt-5">
+          <button className="py-3 px-8 bg-transparent text-dark-secondary border-none rounded-sm text-md font-medium cursor-pointer hover:text-dark transition-colors" onClick={handleCancel}>
             Cancel
           </button>
-          <button className="submit-button" onClick={handleCreateSeminar}>
+          <button className="py-3 px-8 bg-accent text-white font-semibold rounded-md hover:bg-accent-secondary transition-colors cursor-pointer text-md inline-flex items-center gap-2" onClick={handleCreateSeminar}>
             Create Seminar
           </button>
         </div>

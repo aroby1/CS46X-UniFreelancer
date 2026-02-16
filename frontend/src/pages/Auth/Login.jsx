@@ -1,7 +1,6 @@
 /* global process */
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import './Login.css';
 
 const Login = () => {
     //const navigate = useNavigate();
@@ -53,14 +52,14 @@ const Login = () => {
     };
 
     return (
-        <div className="auth-container">
-            <div className="auth-card">
-                <h2>Welcome Back</h2>
-                <p className="auth-subtitle">Please enter your details to sign in.</p>
+        <div className="flex justify-center items-center min-h-[calc(100vh-80px)] bg-gradient-to-br from-[#f5f7fa] to-[#c3cfe2] p-5 md:p-5 sm:min-h-[calc(100vh-60px)]">
+            <div className="bg-white/90 backdrop-blur-[10px] rounded-xl shadow-glass border border-white/20 p-10 w-full max-w-auth text-center md:p-8 md:px-6 md:rounded-[15px] sm:p-6 sm:px-5 sm:rounded-md">
+                <h2 className="mb-3 text-dark font-bold text-4xl md:text-2xl sm:text-[1.3rem]">Welcome Back</h2>
+                <p className="text-[#666] mb-8 text-md md:text-sm">Please enter your details to sign in.</p>
 
-                <form className="auth-form" onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label htmlFor="email">Email Address</label>
+                <form className="flex flex-col gap-5 sm:gap-[15px]" onSubmit={handleSubmit}>
+                    <div className="text-left">
+                        <label htmlFor="email" className="block mb-2 text-dark-secondary font-medium text-sm md:text-sm">Email Address</label>
                         <input
                             type="email"
                             id="email"
@@ -69,12 +68,13 @@ const Login = () => {
                             value={formData.email}
                             onChange={handleChange}
                             required
+                            className="w-full px-4 py-3 rounded border border-[#ddd] bg-[#f9f9f9] text-base transition-all duration-300 focus:outline-none focus:border-accent focus:ring-[3px] focus:ring-accent/10 focus:bg-white md:text-md md:py-3 md:px-3"
                         />
                     </div>
 
-                    <div className="form-group">
-                        <label htmlFor="password">Password</label>
-                        <div className="password-input-wrapper">
+                    <div className="text-left">
+                        <label htmlFor="password" className="block mb-2 text-dark-secondary font-medium text-sm md:text-sm">Password</label>
+                        <div className="relative flex items-center">
                             <input
                                 type={showPassword ? "text" : "password"}
                                 id="password"
@@ -83,10 +83,11 @@ const Login = () => {
                                 value={formData.password}
                                 onChange={handleChange}
                                 required
+                                className="w-full px-4 py-3 pr-11 rounded border border-[#ddd] bg-[#f9f9f9] text-base transition-all duration-300 focus:outline-none focus:border-accent focus:ring-[3px] focus:ring-accent/10 focus:bg-white md:text-md md:py-3 md:pr-10"
                             />
                             <button
                                 type="button"
-                                className="password-toggle"
+                                className="absolute right-2.5 bg-transparent border-none cursor-pointer text-[#888] flex items-center justify-center p-1 transition-colors duration-200 hover:text-accent"
                                 onClick={() => setShowPassword(!showPassword)}
                             >
                                 {showPassword ? (
@@ -104,12 +105,12 @@ const Login = () => {
                         </div>
                     </div>
 
-                    <button type="submit" className="auth-btn">Sign In</button>
+                    <button type="submit" className="mt-3 py-4 rounded border-none bg-accent text-white text-base font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg md:py-3 md:text-md">Sign In</button>
                 </form>
 
-                <div className="auth-footer">
-                    Don't have an account?
-                    <Link to={`/signup${location.search || ''}`} className="auth-link">Sign up</Link>
+                <div className="mt-6 text-sm text-[#666] md:text-sm">
+                    Don&apos;t have an account?
+                    <Link to={`/signup${location.search || ''}`} className="text-accent no-underline font-semibold ml-1 transition-colors duration-200 hover:text-accent-secondary hover:underline">Sign up</Link>
                 </div>
             </div>
         </div>

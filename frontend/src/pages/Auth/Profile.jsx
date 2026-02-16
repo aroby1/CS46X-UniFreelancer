@@ -2,10 +2,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
-import './Profile.css';
 
 const COLLAPSED_VISIBLE_ITEMS = 2;
-// Keep this in sync with `.item-list li { height: ... }` in Profile.css
+// Row height kept at 44px — matches h-[44px] on each <li>
 const COLLAPSED_ROW_HEIGHT = 44;
 const COLLAPSED_LIST_MAX_HEIGHT = COLLAPSED_VISIBLE_ITEMS * COLLAPSED_ROW_HEIGHT;
 
@@ -49,44 +48,44 @@ function CollapsibleListSection({
     const showToggle = safeItems.length > COLLAPSED_VISIBLE_ITEMS;
 
     return (
-        <div className="profile-section">
-            <div className="profile-section-header">
-                <h3>{title}</h3>
+        <div className="bg-white/80 backdrop-blur-[10px] rounded-[15px] p-6 shadow-[0_4px_16px_0_rgba(31,38,135,0.1)] border border-white/20 md:p-5 sm:p-4 sm:rounded-md">
+            <div className="flex items-center justify-between gap-3 mb-4 pb-3 border-b-2 border-black/5">
+                <h3 className="text-dark m-0 md:text-lg sm:text-base">{title}</h3>
                 {showToggle && (
                     <button
                         type="button"
-                        className="profile-section-toggle"
+                        className="appearance-none bg-transparent border-none p-2 rounded-[10px] cursor-pointer leading-[0] inline-flex items-center justify-center text-dark-secondary transition-colors duration-200 hover:bg-black/[0.04] focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
                         onClick={() => setExpanded(prev => !prev)}
                         aria-expanded={expanded}
                         aria-label={expanded ? `Collapse ${title}` : `Expand ${title}`}
                     >
-                        <span className={`profile-chevron ${expanded ? 'is-expanded' : ''}`} />
+                        <span className={`w-2.5 h-2.5 border-r-2 border-b-2 border-current transition-transform duration-[250ms] ease-in-out ${expanded ? '-rotate-[135deg]' : 'rotate-45'}`} />
                     </button>
                 )}
             </div>
 
             {safeItems.length > 0 ? (
                 <div
-                    className="profile-collapsible"
+                    className="overflow-hidden transition-[max-height] duration-[320ms] ease-in-out will-change-[max-height]"
                     style={{ maxHeight: `${maxHeightPx}px`, minHeight: `${minHeightPx}px` }}
                 >
-                    <ul ref={listRef} className="item-list">
+                    <ul ref={listRef} className="list-none p-0 m-0">
                         {safeItems.map((item) => {
                             const key = itemToKey(item);
                             const label = itemToLabel(item);
                             const clickable = typeof onItemClick === 'function';
                             return (
-                                <li key={key}>
+                                <li key={key} className="box-border h-[44px] p-0 border-b border-black/5 text-dark-secondary flex items-center last:border-b-0 sm:text-sm sm:py-2">
                                     {clickable ? (
                                         <button
                                             type="button"
-                                            className="profile-item-link"
+                                            className="w-full text-left bg-transparent border-none p-0 text-dark-secondary cursor-pointer font-[inherit] flex items-center h-full whitespace-nowrap overflow-hidden text-ellipsis hover:text-dark hover:underline focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 focus-visible:rounded-sm"
                                             onClick={() => onItemClick(item)}
                                         >
                                             {label}
                                         </button>
                                     ) : (
-                                        <span className="profile-item-text">{label}</span>
+                                        <span className="w-full h-full flex items-center whitespace-nowrap overflow-hidden text-ellipsis">{label}</span>
                                     )}
                                 </li>
                             );
@@ -94,8 +93,8 @@ function CollapsibleListSection({
                     </ul>
                 </div>
             ) : (
-                <div className="profile-empty" style={{ height: `${bodyMinHeightPx}px` }}>
-                    <p className="empty-state">{emptyText}</p>
+                <div className="flex items-center overflow-hidden" style={{ height: `${bodyMinHeightPx}px` }}>
+                    <p className="text-muted italic m-0 w-full whitespace-nowrap overflow-hidden text-ellipsis">{emptyText}</p>
                 </div>
             )}
         </div>
@@ -159,26 +158,26 @@ const Profile = () => {
     };
 
     if (loading) {
-        return <div className="profile-container">Loading...</div>;
+        return <div className="max-w-[1000px] mx-auto mt-10 p-5 md:mt-5 md:p-4 sm:mt-4 sm:p-3">Loading...</div>;
     }
 
     if (!user) {
-        return <div className="profile-container">User not found</div>;
+        return <div className="max-w-[1000px] mx-auto mt-10 p-5 md:mt-5 md:p-4 sm:mt-4 sm:p-3">User not found</div>;
     }
 
     return (
-        <div className="profile-container">
-            <div className="profile-header">
-                <div className="profile-avatar">
+        <div className="max-w-[1000px] mx-auto mt-10 p-5 md:mt-5 md:p-4 sm:mt-4 sm:p-3">
+            <div className="bg-white/90 backdrop-blur-[10px] rounded-xl p-10 text-center shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] border border-white/20 mb-10 flex flex-col items-center md:p-8 md:px-5 md:mb-8 md:rounded-[15px] sm:p-6 sm:px-4 sm:rounded-md">
+                <div className="w-[100px] h-[100px] bg-gradient-to-br from-accent to-accent-secondary rounded-full flex items-center justify-center text-5xl text-white font-bold mb-5 shadow-[0_4px_15px_rgba(0,0,0,0.1)] md:w-20 md:h-20 md:text-[2.5rem] sm:w-[70px] sm:h-[70px] sm:text-4xl">
                     {user.firstName && user.firstName.charAt(0).toUpperCase()}
                 </div>
-                <h2>{user.firstName} {user.lastName}</h2>
-                <p className="profile-username">@{user.username}</p>
-                <p className="profile-email">{user.email}</p>
-                <button onClick={handleSignOut} className="sign-out-btn">Sign Out</button>
+                <h2 className="m-0 mb-2.5 text-dark text-4xl md:text-2xl sm:text-[1.3rem]">{user.firstName} {user.lastName}</h2>
+                <p className="text-accent font-semibold text-base m-0 my-[5px]">@{user.username}</p>
+                <p className="text-dark-tertiary text-md m-0 mt-[5px] mb-5 md:text-base sm:text-sm">{user.email}</p>
+                <button onClick={handleSignOut} className="py-2.5 px-6 bg-transparent border-2 border-accent text-accent rounded font-semibold cursor-pointer transition-all duration-300 hover:bg-accent hover:text-white md:py-2 md:px-5 md:text-sm">Sign Out</button>
             </div>
 
-            <div className="profile-content">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-8 items-start md:grid-cols-1 md:gap-5">
                 <CollapsibleListSection
                     title="Enrolled Courses"
                     items={user.enrolledCourses}

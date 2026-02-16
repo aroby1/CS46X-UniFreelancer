@@ -1,7 +1,7 @@
 /* global process */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './CreateCourse.css';
+import { FiArrowLeft } from 'react-icons/fi';
 
 function CreateCourse() {
   const navigate = useNavigate();
@@ -229,20 +229,20 @@ function CreateCourse() {
   ];
 
   return (
-    <div className="create-course-page">
-      <div className="create-course-container">
-        <button className="back-button" onClick={handleBack}>
-          ← Back
+    <div className="min-h-screen bg-main-bg pt-8 px-10 max-md:px-5">
+      <div className="max-w-narrow mx-auto">
+        <button className="bg-transparent border-none text-dark-primary text-base cursor-pointer mb-5 py-2 inline-flex items-center transition-colors duration-300 hover:text-dark-secondary" onClick={handleBack}>
+          <FiArrowLeft className="inline mr-1" /> Back
         </button>
 
-        <h1 className="create-course-title">Create New Course</h1>
-        <p className="create-course-subtitle">Fill in the details to create a new course</p>
+        <h1 className="text-5xl font-bold text-dark-primary mb-3">Create New Course</h1>
+        <p className="text-base text-dark-secondary mb-8">Fill in the details to create a new course</p>
 
-        <div className="step-navigation">
+        <div className="flex flex-wrap max-md:overflow-x-auto max-md:flex-nowrap">
           {steps.map((step) => (
             <button
               key={step.id}
-              className={`step-button ${currentStep === step.id ? 'active' : ''}`}
+              className={`py-3 px-5 text-base font-semibold cursor-pointer border-none transition-colors duration-300 max-md:whitespace-nowrap ${currentStep === step.id ? 'bg-light-tertiary text-dark-primary' : 'bg-light-primary text-dark-tertiary hover:bg-light-secondary'}`}
               onClick={() => setCurrentStep(step.id)}
             >
               {step.label}
@@ -251,18 +251,18 @@ function CreateCourse() {
         </div>
 
         {currentStep === 'basic-info' && (
-          <div className="form-section">
-            <h2 className="section-title">Course Information</h2>
-            <p className="section-subtitle">Basic details about your course</p>
+          <div className="bg-light-tertiary p-8 mb-3">
+            <h2 className="text-2xl font-semibold text-dark-primary mb-2">Course Information</h2>
+            <p className="text-md text-dark-secondary mb-8">Basic details about your course</p>
 
-            <div className="form-group">
-              <label className="form-label">
-                Course Title <span className="required">*</span>
+            <div className="mb-6">
+              <label className="block text-base font-semibold text-dark-primary mb-2">
+                Course Title <span className="text-accent">*</span>
               </label>
               <input
                 type="text"
                 name="title"
-                className="form-input"
+                className="w-full px-4 py-3 border border-light-secondary rounded-sm text-base text-dark-primary font-sans transition-colors duration-300 focus:outline-none focus:border-dark-primary placeholder:text-light-primary"
                 placeholder="e.g., Complete Digital Marketing Masterclass"
                 value={courseData.title}
                 onChange={handleInputChange}
@@ -270,13 +270,13 @@ function CreateCourse() {
               />
             </div>
 
-            <div className="form-group">
-              <label className="form-label">
-                Description <span className="required">*</span>
+            <div className="mb-6">
+              <label className="block text-base font-semibold text-dark-primary mb-2">
+                Description <span className="text-accent">*</span>
               </label>
               <textarea
                 name="description"
-                className="form-textarea"
+                className="w-full px-4 py-3 border border-light-secondary rounded-sm text-base text-dark-primary font-sans transition-colors duration-300 resize-y min-h-[120px] focus:outline-none focus:border-dark-primary placeholder:text-light-primary"
                 rows="5"
                 placeholder="Describe what students will learn in this course..."
                 value={courseData.description}
@@ -285,24 +285,24 @@ function CreateCourse() {
               />
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label className="form-label">Duration</label>
+            <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1">
+              <div className="mb-6">
+                <label className="block text-base font-semibold text-dark-primary mb-2">Duration</label>
                 <input
                   type="text"
                   name="duration"
-                  className="form-input"
+                  className="w-full px-4 py-3 border border-light-secondary rounded-sm text-base text-dark-primary font-sans transition-colors duration-300 focus:outline-none focus:border-dark-primary placeholder:text-light-primary"
                   placeholder="e.g., 12 weeks"
                   value={courseData.duration}
                   onChange={handleInputChange}
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Difficulty Level</label>
+              <div className="mb-6">
+                <label className="block text-base font-semibold text-dark-primary mb-2">Difficulty Level</label>
                 <select
                   name="difficulty"
-                  className="form-select"
+                  className="w-full px-4 py-3 border border-light-secondary rounded-sm text-base text-dark-primary font-sans cursor-pointer bg-white transition-colors duration-300 focus:outline-none focus:border-dark-primary"
                   value={courseData.difficulty}
                   onChange={handleInputChange}
                 >
@@ -313,40 +313,41 @@ function CreateCourse() {
               </div>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Category</label>
+            <div className="mb-6">
+              <label className="block text-base font-semibold text-dark-primary mb-2">Category</label>
               <input
                 type="text"
                 name="category"
-                className="form-input"
+                className="w-full px-4 py-3 border border-light-secondary rounded-sm text-base text-dark-primary font-sans transition-colors duration-300 focus:outline-none focus:border-dark-primary placeholder:text-light-primary"
                 placeholder="e.g., Digital Marketing"
                 value={courseData.category}
                 onChange={handleInputChange}
               />
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Thumbnail URL</label>
-              <div className="input-with-icon">
+            <div className="mb-6">
+              <label className="block text-base font-semibold text-dark-primary mb-2">Thumbnail URL</label>
+              <div className="relative">
                 <input
                   type="text"
                   name="thumbnail"
-                  className="form-input"
+                  className="w-full px-4 py-3 pr-[45px] border border-light-secondary rounded-sm text-base text-dark-primary font-sans transition-colors duration-300 focus:outline-none focus:border-dark-primary placeholder:text-light-primary"
                   placeholder="https://example.com/image.jpg"
                   value={courseData.thumbnail}
                   onChange={handleInputChange}
                 />
-                <span className="upload-icon">⬆</span>
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-lg text-dark-secondary cursor-pointer">⬆</span>
               </div>
             </div>
 
-            <div className="form-group">
-              <label className="checkbox-label">
+            <div className="mb-6">
+              <label className="flex items-center gap-2.5 cursor-pointer text-base text-dark-primary">
                 <input
                   type="checkbox"
                   name="isLiteVersion"
                   checked={courseData.isLiteVersion}
                   onChange={handleInputChange}
+                  className="w-[18px] h-[18px] cursor-pointer"
                 />
                 <span>This is a Lite version (free tier with limited content)</span>
               </label>
@@ -355,18 +356,18 @@ function CreateCourse() {
         )}
 
         {currentStep === 'instructor' && (
-          <div className="form-section">
-            <h2 className="section-title">Instructor Information</h2>
-            <p className="section-subtitle">Details about the course instructor</p>
+          <div className="bg-light-tertiary p-8 mb-3">
+            <h2 className="text-2xl font-semibold text-dark-primary mb-2">Instructor Information</h2>
+            <p className="text-md text-dark-secondary mb-8">Details about the course instructor</p>
 
-            <div className="form-group">
-              <label className="form-label">
-                Instructor Name <span className="required">*</span>
+            <div className="mb-6">
+              <label className="block text-base font-semibold text-dark-primary mb-2">
+                Instructor Name <span className="text-accent">*</span>
               </label>
               <input
                 type="text"
                 name="instructorName"
-                className="form-input"
+                className="w-full px-4 py-3 border border-light-secondary rounded-sm text-base text-dark-primary font-sans transition-colors duration-300 focus:outline-none focus:border-dark-primary placeholder:text-light-primary"
                 placeholder="e.g., Alina Padilla-Miller"
                 value={courseData.instructorName}
                 onChange={handleInputChange}
@@ -374,23 +375,23 @@ function CreateCourse() {
               />
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Instructor Title/Role</label>
+            <div className="mb-6">
+              <label className="block text-base font-semibold text-dark-primary mb-2">Instructor Title/Role</label>
               <input
                 type="text"
                 name="instructorTitle"
-                className="form-input"
+                className="w-full px-4 py-3 border border-light-secondary rounded-sm text-base text-dark-primary font-sans transition-colors duration-300 focus:outline-none focus:border-dark-primary placeholder:text-light-primary"
                 placeholder="e.g., Senior Freelance Designer"
                 value={courseData.instructorTitle}
                 onChange={handleInputChange}
               />
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Instructor Bio</label>
+            <div className="mb-6">
+              <label className="block text-base font-semibold text-dark-primary mb-2">Instructor Bio</label>
               <textarea
                 name="instructorBio"
-                className="form-textarea"
+                className="w-full px-4 py-3 border border-light-secondary rounded-sm text-base text-dark-primary font-sans transition-colors duration-300 resize-y min-h-[120px] focus:outline-none focus:border-dark-primary placeholder:text-light-primary"
                 rows="4"
                 placeholder="Short overview of the instructor's background..."
                 value={courseData.instructorBio}
@@ -398,12 +399,12 @@ function CreateCourse() {
               />
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Instructor Avatar URL</label>
+            <div className="mb-6">
+              <label className="block text-base font-semibold text-dark-primary mb-2">Instructor Avatar URL</label>
               <input
                 type="text"
                 name="instructorAvatar"
-                className="form-input"
+                className="w-full px-4 py-3 border border-light-secondary rounded-sm text-base text-dark-primary font-sans transition-colors duration-300 focus:outline-none focus:border-dark-primary placeholder:text-light-primary"
                 placeholder="https://example.com/avatar.png"
                 value={courseData.instructorAvatar}
                 onChange={handleInputChange}
@@ -413,30 +414,30 @@ function CreateCourse() {
         )}
 
         {currentStep === 'pricing' && (
-          <div className="form-section">
-            <h2 className="section-title">Pricing Details</h2>
-            <p className="section-subtitle">Set the price for your course. Leave blank for free courses</p>
+          <div className="bg-light-tertiary p-8 mb-3">
+            <h2 className="text-2xl font-semibold text-dark-primary mb-2">Pricing Details</h2>
+            <p className="text-md text-dark-secondary mb-8">Set the price for your course. Leave blank for free courses</p>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label className="form-label">Price Amount</label>
+            <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1">
+              <div className="mb-6">
+                <label className="block text-base font-semibold text-dark-primary mb-2">Price Amount</label>
                 <input
                   type="number"
                   min="0"
                   step="0.01"
                   name="priceAmount"
-                  className="form-input"
+                  className="w-full px-4 py-3 border border-light-secondary rounded-sm text-base text-dark-primary font-sans transition-colors duration-300 focus:outline-none focus:border-dark-primary placeholder:text-light-primary"
                   placeholder="e.g., 199"
                   value={courseData.priceAmount}
                   onChange={handleInputChange}
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Currency</label>
+              <div className="mb-6">
+                <label className="block text-base font-semibold text-dark-primary mb-2">Currency</label>
                 <select
                   name="priceCurrency"
-                  className="form-select"
+                  className="w-full px-4 py-3 border border-light-secondary rounded-sm text-base text-dark-primary font-sans cursor-pointer bg-white transition-colors duration-300 focus:outline-none focus:border-dark-primary"
                   value={courseData.priceCurrency}
                   onChange={handleInputChange}
                 >
@@ -447,11 +448,11 @@ function CreateCourse() {
               </div>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Pricing Type</label>
+            <div className="mb-6">
+              <label className="block text-base font-semibold text-dark-primary mb-2">Pricing Type</label>
               <select
                 name="pricingType"
-                className="form-select"
+                className="w-full px-4 py-3 border border-light-secondary rounded-sm text-base text-dark-primary font-sans cursor-pointer bg-white transition-colors duration-300 focus:outline-none focus:border-dark-primary"
                 value={courseData.pricingType}
                 onChange={handleInputChange}
               >
@@ -461,13 +462,13 @@ function CreateCourse() {
             </div>
 
             {courseData.pricingType === 'subscription' && (
-              <p className="section-subtitle" style={{ marginTop: '10px' }}>
+              <p className="text-md text-dark-secondary mt-2.5">
                 (You can extend this to monthly / yearly plans later.)
               </p>
             )}
 
             {courseData.isLiteVersion && (
-              <p className="section-subtitle" style={{ marginTop: '10px' }}>
+              <p className="text-md text-dark-secondary mt-2.5">
                 Note: this course is marked as "Lite", so it may be treated as
                 free in the course list.
               </p>
@@ -476,16 +477,16 @@ function CreateCourse() {
         )}
 
         {currentStep === 'content' && (
-          <div className="form-section">
-            <h2 className="section-title">Course Content</h2>
-            <p className="section-subtitle">Add key learning points for your course</p>
+          <div className="bg-light-tertiary p-8 mb-3">
+            <h2 className="text-2xl font-semibold text-dark-primary mb-2">Course Content</h2>
+            <p className="text-md text-dark-secondary mb-8">Add key learning points for your course</p>
 
-            <div className="form-group">
-              <label className="form-label">Learning Points</label>
-              <div className="learning-point-input">
+            <div className="mb-6">
+              <label className="block text-base font-semibold text-dark-primary mb-2">Learning Points</label>
+              <div className="flex gap-2.5 mb-5">
                 <input
                   type="text"
-                  className="form-input"
+                  className="flex-1 w-full px-4 py-3 border border-light-secondary rounded-sm text-base text-dark-primary font-sans transition-colors duration-300 focus:outline-none focus:border-dark-primary placeholder:text-light-primary"
                   placeholder="e.g., Master social media marketing strategies"
                   value={learningPoint}
                   onChange={(e) => setLearningPoint(e.target.value)}
@@ -498,7 +499,7 @@ function CreateCourse() {
                 />
                 <button
                   type="button"
-                  className="add-point-button"
+                  className="py-3 px-6 bg-accent text-white border-none rounded-sm text-base font-semibold cursor-pointer whitespace-nowrap transition-colors duration-300 hover:bg-accent-secondary"
                   onClick={handleAddLearningPoint}
                 >
                   Add Point
@@ -507,15 +508,15 @@ function CreateCourse() {
             </div>
 
             {courseData.learningPoints.length > 0 && (
-              <div className="learning-points-list">
-                <h3 className="list-title">Added Learning Points:</h3>
-                <ul className="points-list">
+              <div className="bg-white rounded p-5 mt-5">
+                <h3 className="text-base font-semibold text-dark-primary mb-4">Added Learning Points:</h3>
+                <ul className="list-none p-0 m-0">
                   {courseData.learningPoints.map((point, index) => (
-                    <li key={index} className="point-item">
-                      <span className="point-text">✓ {point}</span>
+                    <li key={index} className="flex justify-between items-center py-3 px-4 bg-light-tertiary rounded-sm mb-2.5 last:mb-0 transition-colors duration-200 hover:bg-light-secondary">
+                      <span className="flex-1 text-dark-primary text-base">✓ {point}</span>
                       <button
                         type="button"
-                        className="remove-point-button"
+                        className="bg-transparent border-none text-accent text-lg cursor-pointer px-2 py-1 transition-colors duration-200 hover:text-accent-secondary"
                         onClick={() => handleRemoveLearningPoint(index)}
                       >
                         ✕
@@ -527,38 +528,38 @@ function CreateCourse() {
             )}
 
             {courseData.learningPoints.length === 0 && (
-              <p className="empty-state">No learning points added yet. Add some to help students understand what they'll learn!</p>
+              <p className="text-center py-10 px-5 text-light-primary italic text-base">No learning points added yet. Add some to help students understand what they'll learn!</p>
             )}
           </div>
         )}
 
         {currentStep === 'modules' && (
-          <div className="form-section">
-            <h2 className="section-title">Course Modules</h2>
-            <p className="section-subtitle">Organize your course into structured modules with content</p>
+          <div className="bg-light-tertiary p-8 mb-3">
+            <h2 className="text-2xl font-semibold text-dark-primary mb-2">Course Modules</h2>
+            <p className="text-md text-dark-secondary mb-8">Organize your course into structured modules with content</p>
 
-            <div className="module-form">
-              <h3 className="subsection-title">Add New Module</h3>
+            <div className="rounded p-6 mb-8">
+              <h3 className="text-lg font-semibold text-dark-primary mb-5">Add New Module</h3>
 
-              <div className="form-group">
-                <label className="form-label">
-                  Module Title <span className="required">*</span>
+              <div className="mb-6">
+                <label className="block text-base font-semibold text-dark-primary mb-2">
+                  Module Title <span className="text-accent">*</span>
                 </label>
                 <input
                   type="text"
                   name="title"
-                  className="form-input"
+                  className="w-full px-4 py-3 border border-light-secondary rounded-sm text-base text-dark-primary font-sans transition-colors duration-300 focus:outline-none focus:border-dark-primary placeholder:text-light-primary"
                   placeholder="e.g., Introduction to Digital Marketing"
                   value={currentModule.title}
                   onChange={handleModuleInputChange}
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Module Description</label>
+              <div className="mb-6">
+                <label className="block text-base font-semibold text-dark-primary mb-2">Module Description</label>
                 <textarea
                   name="description"
-                  className="form-textarea"
+                  className="w-full px-4 py-3 border border-light-secondary rounded-sm text-base text-dark-primary font-sans transition-colors duration-300 resize-y min-h-[120px] focus:outline-none focus:border-dark-primary placeholder:text-light-primary"
                   rows="3"
                   placeholder="Brief description of what this module covers..."
                   value={currentModule.description}
@@ -566,26 +567,26 @@ function CreateCourse() {
                 />
               </div>
 
-              <div className="content-type-section">
-                <h4 className="content-label">Module Content</h4>
+              <div className="bg-light-tertiary p-5 rounded-sm my-5">
+                <h4 className="text-md font-semibold text-dark-primary mb-4">Module Content</h4>
 
-                <div className="form-group">
-                  <label className="form-label">Video URL</label>
+                <div className="mb-6">
+                  <label className="block text-base font-semibold text-dark-primary mb-2">Video URL</label>
                   <input
                     type="text"
                     name="videoUrl"
-                    className="form-input"
+                    className="w-full px-4 py-3 border border-light-secondary rounded-sm text-base text-dark-primary font-sans transition-colors duration-300 focus:outline-none focus:border-dark-primary placeholder:text-light-primary"
                     placeholder="https://youtube.com/watch?v=..."
                     value={currentModule.videoUrl}
                     onChange={handleModuleInputChange}
                   />
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Article Content</label>
+                <div className="mb-6">
+                  <label className="block text-base font-semibold text-dark-primary mb-2">Article Content</label>
                   <textarea
                     name="articleContent"
-                    className="form-textarea"
+                    className="w-full px-4 py-3 border border-light-secondary rounded-sm text-base text-dark-primary font-sans transition-colors duration-300 resize-y min-h-[120px] focus:outline-none focus:border-dark-primary placeholder:text-light-primary"
                     rows="5"
                     placeholder="Write your article content here..."
                     value={currentModule.articleContent}
@@ -593,12 +594,12 @@ function CreateCourse() {
                   />
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">PDF/Document URL</label>
+                <div className="mb-6">
+                  <label className="block text-base font-semibold text-dark-primary mb-2">PDF/Document URL</label>
                   <input
                     type="text"
                     name="pdfUrl"
-                    className="form-input"
+                    className="w-full px-4 py-3 border border-light-secondary rounded-sm text-base text-dark-primary font-sans transition-colors duration-300 focus:outline-none focus:border-dark-primary placeholder:text-light-primary"
                     placeholder="https://example.com/document.pdf"
                     value={currentModule.pdfUrl}
                     onChange={handleModuleInputChange}
@@ -606,25 +607,25 @@ function CreateCourse() {
                 </div>
               </div>
 
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">Duration</label>
+              <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1">
+                <div className="mb-6">
+                  <label className="block text-base font-semibold text-dark-primary mb-2">Duration</label>
                   <input
                     type="text"
                     name="duration"
-                    className="form-input"
+                    className="w-full px-4 py-3 border border-light-secondary rounded-sm text-base text-dark-primary font-sans transition-colors duration-300 focus:outline-none focus:border-dark-primary placeholder:text-light-primary"
                     placeholder="e.g., 45 minutes"
                     value={currentModule.duration}
                     onChange={handleModuleInputChange}
                   />
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Thumbnail URL</label>
+                <div className="mb-6">
+                  <label className="block text-base font-semibold text-dark-primary mb-2">Thumbnail URL</label>
                   <input
                     type="text"
                     name="thumbnail"
-                    className="form-input"
+                    className="w-full px-4 py-3 border border-light-secondary rounded-sm text-base text-dark-primary font-sans transition-colors duration-300 focus:outline-none focus:border-dark-primary placeholder:text-light-primary"
                     placeholder="https://example.com/thumb.jpg"
                     value={currentModule.thumbnail}
                     onChange={handleModuleInputChange}
@@ -632,12 +633,12 @@ function CreateCourse() {
                 </div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Module Learning Points</label>
-                <div className="learning-point-input">
+              <div className="mb-6">
+                <label className="block text-base font-semibold text-dark-primary mb-2">Module Learning Points</label>
+                <div className="flex gap-2.5 mb-5">
                   <input
                     type="text"
-                    className="form-input"
+                    className="flex-1 w-full px-4 py-3 border border-light-secondary rounded-sm text-base text-dark-primary font-sans transition-colors duration-300 focus:outline-none focus:border-dark-primary placeholder:text-light-primary"
                     placeholder="e.g., Understand key marketing concepts"
                     value={modulePoint}
                     onChange={(e) => setModulePoint(e.target.value)}
@@ -650,7 +651,7 @@ function CreateCourse() {
                   />
                   <button
                     type="button"
-                    className="add-point-button"
+                    className="py-3 px-6 bg-accent text-white border-none rounded-sm text-base font-semibold cursor-pointer whitespace-nowrap transition-colors duration-300 hover:bg-accent-secondary"
                     onClick={handleAddModulePoint}
                   >
                     Add Point
@@ -659,14 +660,14 @@ function CreateCourse() {
               </div>
 
               {currentModule.learningPoints.length > 0 && (
-                <div className="module-points-list">
-                  <ul className="points-list">
+                <div className="mt-4 mb-5">
+                  <ul className="list-none p-0 m-0">
                     {currentModule.learningPoints.map((point, index) => (
-                      <li key={index} className="point-item">
-                        <span className="point-text">✓ {point}</span>
+                      <li key={index} className="flex justify-between items-center py-3 px-4 bg-light-tertiary rounded-sm mb-2.5 last:mb-0 transition-colors duration-200 hover:bg-light-secondary">
+                        <span className="flex-1 text-dark-primary text-base">✓ {point}</span>
                         <button
                           type="button"
-                          className="remove-point-button"
+                          className="bg-transparent border-none text-accent text-lg cursor-pointer px-2 py-1 transition-colors duration-200 hover:text-accent-secondary"
                           onClick={() => handleRemoveModulePoint(index)}
                         >
                           ✕
@@ -679,7 +680,7 @@ function CreateCourse() {
 
               <button
                 type="button"
-                className="add-module-button"
+                className="w-full py-3.5 px-6 bg-dark-primary text-white border-none rounded-sm text-md font-semibold cursor-pointer transition-colors duration-300 mt-5 hover:bg-dark-secondary"
                 onClick={handleAddModule}
               >
                 + Add Module to Course
@@ -687,38 +688,38 @@ function CreateCourse() {
             </div>
 
             {courseData.modules.length > 0 && (
-              <div className="modules-list">
-                <h3 className="list-title">Course Modules ({courseData.modules.length})</h3>
+              <div className="mt-8">
+                <h3 className="text-base font-semibold text-dark-primary mb-4">Course Modules ({courseData.modules.length})</h3>
                 {courseData.modules.map((module, index) => (
-                  <div key={index} className="module-card">
-                    <div className="module-header">
-                      <div className="module-info">
-                        <span className="module-number">Module {index + 1}</span>
-                        <h4 className="module-title">{module.title}</h4>
-                        {module.duration && <span className="module-duration">⏱ {module.duration}</span>}
+                  <div key={index} className="bg-white rounded p-5 mb-4 border border-light-secondary transition-shadow duration-200 hover:shadow-md">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1">
+                        <span className="inline-block bg-accent text-white py-1 px-3 rounded text-xs font-semibold mb-2">Module {index + 1}</span>
+                        <h4 className="text-lg font-semibold text-dark-primary my-2">{module.title}</h4>
+                        {module.duration && <span className="text-sm text-dark-secondary ml-2.5">⏱ {module.duration}</span>}
                       </div>
                       <button
                         type="button"
-                        className="remove-module-button"
+                        className="bg-transparent text-accent border border-accent py-2 px-4 rounded text-sm font-semibold cursor-pointer transition-all duration-200 hover:bg-accent hover:text-white"
                         onClick={() => handleRemoveModule(index)}
                       >
                         ✕ Remove
                       </button>
                     </div>
                     {module.description && (
-                      <p className="module-description">{module.description}</p>
+                      <p className="text-dark-secondary text-base mb-3 leading-relaxed">{module.description}</p>
                     )}
-                    <div className="module-content-tags">
-                      {module.videoUrl && <span className="content-tag">📹 Video</span>}
-                      {module.articleContent && <span className="content-tag">📝 Article</span>}
-                      {module.pdfUrl && <span className="content-tag">📄 PDF</span>}
+                    <div className="flex gap-2 mb-3 flex-wrap">
+                      {module.videoUrl && <span className="bg-light-tertiary py-1.5 px-3 rounded text-sm text-dark-primary font-medium">📹 Video</span>}
+                      {module.articleContent && <span className="bg-light-tertiary py-1.5 px-3 rounded text-sm text-dark-primary font-medium">📝 Article</span>}
+                      {module.pdfUrl && <span className="bg-light-tertiary py-1.5 px-3 rounded text-sm text-dark-primary font-medium">📄 PDF</span>}
                     </div>
                     {module.learningPoints.length > 0 && (
-                      <div className="module-learning-points">
-                        <strong>Learning Points:</strong>
-                        <ul>
+                      <div className="mt-3 p-3 bg-light-tertiary rounded">
+                        <strong className="text-sm text-dark-primary block mb-2">Learning Points:</strong>
+                        <ul className="m-0 pl-5">
                           {module.learningPoints.map((point, idx) => (
-                            <li key={idx}>{point}</li>
+                            <li key={idx} className="text-sm text-dark-secondary mb-1">{point}</li>
                           ))}
                         </ul>
                       </div>
@@ -729,16 +730,16 @@ function CreateCourse() {
             )}
 
             {courseData.modules.length === 0 && (
-              <p className="empty-state">No modules added yet. Create your first module above!</p>
+              <p className="text-center py-10 px-5 text-light-primary italic text-base">No modules added yet. Create your first module above!</p>
             )}
           </div>
         )}
 
-        <div className="form-actions">
-          <button className="cancel-button" onClick={handleCancel}>
+        <div className="flex justify-end gap-4 pt-5">
+          <button className="py-3 px-8 bg-transparent text-dark-secondary border-none rounded-sm text-md font-medium cursor-pointer transition-colors duration-300 hover:text-dark-primary" onClick={handleCancel}>
             Cancel
           </button>
-          <button className="submit-button" onClick={handleCreateCourse}>
+          <button className="py-3 px-8 bg-accent text-white border-none rounded-sm text-md font-semibold cursor-pointer inline-flex items-center gap-2 transition-colors duration-300 hover:bg-accent-tertiary" onClick={handleCreateCourse}>
             Create Course
           </button>
         </div>

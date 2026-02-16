@@ -11,7 +11,6 @@ import {
   AcademySignals,
   AcademyTopPicksCarousel
 } from './components';
-import './Academy.css';
 
 function Academy() {
   const navigate = useNavigate();
@@ -117,12 +116,12 @@ function Academy() {
   }, []);
 
   return (
-    <div className="academy-page">
-      <div className="academy-ambient">
-        <span className="ambient-beam beam-one" />
-        <span className="ambient-beam beam-two" />
+    <div className="min-h-screen bg-main-bg pt-20 px-6 pb-24 relative overflow-hidden font-academy">
+      <div className="hidden">
+        <span className="absolute w-[42vw] min-w-[260px] h-[120vh] bg-[linear-gradient(180deg,rgba(244,102,62,0),rgba(244,102,62,0.06),rgba(244,102,62,0))] opacity-[0.18] rotate-[16deg] blur-[2px] top-[-24vh] left-[-8vw] animate-beam-sweep-left" />
+        <span className="absolute w-[42vw] min-w-[260px] h-[120vh] bg-[linear-gradient(180deg,rgba(243,245,248,0),rgba(243,245,248,0.3),rgba(243,245,248,0))] opacity-[0.18] -rotate-[14deg] blur-[2px] top-[-22vh] right-[-10vw] animate-beam-sweep-right" />
       </div>
-      <div className="academy-container">
+      <div className="max-w-academy mx-auto relative z-[3]">
         <AcademyHero
           onBrowseCourses={handleBrowseCourses}
           onCreateContent={handleCreateContent}
@@ -140,7 +139,7 @@ function Academy() {
         />
         <AcademyPlans />
         <AcademyBenefits />
-        <p className="academy-image-credit">Photography sourced from Unsplash.</p>
+        <p className="mt-4 text-right text-xs text-dark-secondary/65">Photography sourced from Unsplash.</p>
       </div>
     </div>
   );

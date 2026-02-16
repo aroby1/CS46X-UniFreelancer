@@ -1,7 +1,7 @@
 /* global process */
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import './SeminarDetail.css';
+import { FiArrowLeft } from 'react-icons/fi';
 
 function SeminarDetail() {
   const { id } = useParams();
@@ -42,18 +42,18 @@ function SeminarDetail() {
   };
 
   const getTypeBadgeClass = (type) => {
-    if (!type) return 'live';
+    if (!type) return 'bg-red-50 text-red-800';
     const t = type.toLowerCase();
-    if (t.includes('recorded')) return 'recorded';
-    if (t.includes('hybrid')) return 'hybrid';
-    return 'live';
+    if (t.includes('recorded')) return 'bg-blue-50 text-blue-700';
+    if (t.includes('hybrid')) return 'bg-orange-50 text-orange-800';
+    return 'bg-red-50 text-red-800';
   };
 
   if (loading) {
     return (
-      <div className="seminar-detail-page">
-        <div className="seminar-detail-container">
-          <div className="loading-message">Loading seminar...</div>
+      <div className="min-h-screen bg-main-bg px-5 py-10">
+        <div className="max-w-content mx-auto">
+          <div className="text-center py-16 text-dark-secondary">Loading seminar...</div>
         </div>
       </div>
     );
@@ -61,13 +61,13 @@ function SeminarDetail() {
 
   if (error || !seminar) {
     return (
-      <div className="seminar-detail-page">
-        <div className="seminar-detail-container">
-          <button className="back-button" onClick={handleBack}>
-            ← Back to Seminars
+      <div className="min-h-screen bg-main-bg px-5 py-10">
+        <div className="max-w-content mx-auto">
+          <button className="bg-transparent border-none text-dark text-base cursor-pointer mb-8 py-2 inline-flex items-center hover:text-dark-secondary transition-colors" onClick={handleBack}>
+            <FiArrowLeft className="inline mr-1" /> Back to Seminars
           </button>
-          <div className="error-message">
-            <h2>Seminar Not Found</h2>
+          <div className="text-center py-16 text-dark-secondary">
+            <h2 className="text-dark mb-2.5">Seminar Not Found</h2>
             <p>{error || 'The seminar you are looking for does not exist.'}</p>
           </div>
         </div>
@@ -84,43 +84,43 @@ function SeminarDetail() {
   const seminarType = seminar.type || 'Live Now';
 
   return (
-    <div className="seminar-detail-page">
-      <div className="seminar-detail-container">
-        <button className="back-button" onClick={handleBack}>
-          ← Back to Seminars
+    <div className="min-h-screen bg-main-bg px-5 py-10">
+      <div className="max-w-content mx-auto">
+        <button className="bg-transparent border-none text-dark text-base cursor-pointer mb-8 py-2 inline-flex items-center hover:text-dark-secondary transition-colors" onClick={handleBack}>
+          <FiArrowLeft className="inline mr-1" /> Back to Seminars
         </button>
 
         {/* Hero Section */}
-        <div className="seminar-hero">
-          <div className="seminar-hero-image">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr] gap-10 bg-light-tertiary rounded-lg p-10 shadow-card mb-12">
+          <div className="w-full h-[300px] md:h-[300px] rounded-md overflow-hidden bg-gray-100">
             {seminar.thumbnail ? (
-              <img src={seminar.thumbnail} alt={seminar.title} />
+              <img src={seminar.thumbnail} alt={seminar.title} className="w-full h-full object-cover" />
             ) : (
-              <div className="placeholder-hero-image">🎤</div>
+              <div className="w-full h-full flex items-center justify-center text-[100px] bg-gradient-to-br from-indigo-400 to-purple-500 text-white">🎤</div>
             )}
           </div>
-          <div className="seminar-hero-content">
-            <div className="seminar-badges">
-              <span className={`seminar-type-badge ${getTypeBadgeClass(seminarType)}`}>
+          <div className="flex flex-col justify-between">
+            <div className="flex gap-2.5 mb-5 flex-wrap">
+              <span className={`px-3.5 py-1.5 rounded-full text-sm font-semibold ${getTypeBadgeClass(seminarType)}`}>
                 {seminarType}
               </span>
             </div>
-            <h1 className="seminar-title">{seminar.title}</h1>
-            <p className="seminar-description">
+            <h1 className="text-5xl md:text-3xl font-bold text-dark mb-4 leading-tight">{seminar.title}</h1>
+            <p className="text-base leading-relaxed text-dark-secondary mb-5">
               {seminar.description?.substring(0, 200)}
               {seminar.description?.length > 200 ? '...' : ''}
             </p>
-            <div className="seminar-meta">
-              <div className="seminar-meta-item">
-                <span className="seminar-meta-icon">🗣️</span>
+            <div className="flex flex-col md:flex-row gap-4 md:gap-8 mt-auto">
+              <div className="flex items-center gap-2 text-base text-dark-secondary">
+                <span className="text-xl">🗣️</span>
                 <span>{speakerName}</span>
               </div>
-              <div className="seminar-meta-item">
-                <span className="seminar-meta-icon">📅</span>
+              <div className="flex items-center gap-2 text-base text-dark-secondary">
+                <span className="text-xl">📅</span>
                 <span>{scheduleDate || 'Date TBD'}</span>
               </div>
-              <div className="seminar-meta-item">
-                <span className="seminar-meta-icon">🕐</span>
+              <div className="flex items-center gap-2 text-base text-dark-secondary">
+                <span className="text-xl">🕐</span>
                 <span>{scheduleTime || 'Time TBD'}</span>
               </div>
             </div>
@@ -128,67 +128,67 @@ function SeminarDetail() {
         </div>
 
         {/* Live Session - Zoom Placeholder */}
-        <div className="seminar-section">
-          <h2 className="section-title">Live Session</h2>
-          <div className="zoom-placeholder">
-            <div className="zoom-placeholder-icon">🖥️</div>
-            <h3 className="zoom-placeholder-title">Zoom Integration Coming Soon</h3>
-            <p className="zoom-placeholder-text">
+        <div className="mb-12 bg-light-tertiary rounded-lg p-10 shadow-card">
+          <h2 className="text-3xl font-bold text-dark mb-6 pb-4 border-b-2 border-border">Live Session</h2>
+          <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border-2 border-dashed border-gray-400 rounded-[14px] px-8 py-10 text-center">
+            <div className="text-5xl mb-4">🖥️</div>
+            <h3 className="text-xl font-bold text-dark mb-2">Zoom Integration Coming Soon</h3>
+            <p className="text-base text-dark-secondary m-0">
               Live video sessions will be available directly on this page.
             </p>
           </div>
         </div>
 
         {/* About This Event */}
-        <div className="seminar-section">
-          <h2 className="section-title">About This Event</h2>
-          <p className="seminar-overview-text">
+        <div className="mb-12 bg-light-tertiary rounded-lg p-10 shadow-card">
+          <h2 className="text-3xl font-bold text-dark mb-6 pb-4 border-b-2 border-border">About This Event</h2>
+          <p className="text-base leading-loose text-dark-secondary m-0">
             {seminar.description || 'No description available for this seminar.'}
           </p>
         </div>
 
         {/* Speaker Information */}
-        <div className="seminar-section">
-          <h2 className="section-title">Speaker</h2>
-          <div className="speaker-info">
-            <div className="speaker-avatar">
+        <div className="mb-12 bg-light-tertiary rounded-lg p-10 shadow-card">
+          <h2 className="text-3xl font-bold text-dark mb-6 pb-4 border-b-2 border-border">Speaker</h2>
+          <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-start">
+            <div className="w-[100px] h-[100px] rounded-full overflow-hidden shrink-0 bg-gray-100 flex items-center justify-center text-[40px] text-muted">
               {speakerAvatar ? (
-                <img src={speakerAvatar} alt={speakerName} />
+                <img src={speakerAvatar} alt={speakerName} className="w-full h-full object-cover" />
               ) : (
                 '👤'
               )}
             </div>
-            <div className="speaker-details">
-              <h3 className="speaker-name">{speakerName}</h3>
-              {speakerBio && <p className="speaker-bio">{speakerBio}</p>}
+            <div className="flex-1">
+              <h3 className="text-2xl font-semibold text-dark mb-2">{speakerName}</h3>
+              {speakerBio && <p className="text-md leading-relaxed text-dark-secondary m-0">{speakerBio}</p>}
             </div>
           </div>
         </div>
 
         {/* Schedule */}
-        <div className="seminar-section">
-          <h2 className="section-title">Schedule</h2>
-          <div className="schedule-cards">
-            <div className="schedule-card">
-              <span className="schedule-card-icon">📅</span>
-              <div className="schedule-card-content">
-                <span className="schedule-card-label">DATE</span>
-                <span className="schedule-card-value">{scheduleDate || 'Date TBD'}</span>
+        <div className="mb-12 bg-light-tertiary rounded-lg p-10 shadow-card">
+          <h2 className="text-3xl font-bold text-dark mb-6 pb-4 border-b-2 border-border">Schedule</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="flex items-center gap-3.5 bg-indigo-50 rounded-md px-5 py-4">
+              <span className="text-2xl">📅</span>
+              <div className="flex flex-col">
+                <span className="text-xs font-bold uppercase tracking-wide text-dark">DATE</span>
+                <span className="text-md text-dark-secondary mt-0.5">{scheduleDate || 'Date TBD'}</span>
               </div>
             </div>
-            <div className="schedule-card">
-              <span className="schedule-card-icon">🕐</span>
-              <div className="schedule-card-content">
-                <span className="schedule-card-label">TIME</span>
-                <span className="schedule-card-value">{scheduleTime || 'Time TBD'}</span>
+            <div className="flex items-center gap-3.5 bg-indigo-50 rounded-md px-5 py-4">
+              <span className="text-2xl">🕐</span>
+              <div className="flex flex-col">
+                <span className="text-xs font-bold uppercase tracking-wide text-dark">TIME</span>
+                <span className="text-md text-dark-secondary mt-0.5">{scheduleTime || 'Time TBD'}</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Register Button */}
-        <div className="seminar-actions">
-          <button className="register-button">Register for Event</button>
+        <div className="mt-12 pt-8 border-t-2 border-border flex justify-center">
+          <button className="bg-accent text-white font-semibold rounded-md px-12 py-4 text-lg hover:bg-accent-secondary hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer">Register for Event</button>
         </div>
       </div>
     </div>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import './App.css';
 import Academy from './pages/Academy/Academy';
 import LearningHub from './pages/Academy/LearningHub/LearningHub';
 import CreateContent from './pages/Academy/CreateContent/CreateContent';
@@ -46,7 +45,7 @@ function App() {
 
   return (
     <Router>
-      <div className="App">
+      <div className="min-h-screen">
         <Header user={user} setUser={setUser} />
         <Routes>
           <Route path="/" element={<Academy />} />
@@ -71,46 +70,68 @@ function App() {
   );
 }
 
+function NavLink({ to, isActive, children }) {
+  const active = isActive(to);
+  return (
+    <Link
+      to={to}
+      className={`relative pb-1 text-sm font-medium transition-colors duration-300 whitespace-nowrap
+        after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-accent after:transition-transform after:duration-300 after:origin-left
+        ${active
+          ? 'text-dark font-semibold after:scale-x-100'
+          : 'text-dark-tertiary hover:text-dark after:scale-x-0 hover:after:scale-x-100'
+        }`}
+    >
+      {children}
+    </Link>
+  );
+}
+
+NavLink.propTypes = {
+  to: PropTypes.string.isRequired,
+  isActive: PropTypes.func.isRequired,
+  children: PropTypes.node.isRequired,
+};
+
 function Header({ user }) {
   const location = useLocation();
 
-  // Function to check if link is active
   const isActive = (path) => {
-    return location.pathname === path ? 'active' : '';
+    return location.pathname === path;
   };
 
-
   return (
-    <header className="header">
-      <div className="header-content">
-        <div className="logo">
-          <Link to="/">
-            <h1>UniFreelancer</h1>
-            <p>FREELANCE PORTAL</p>
+    <header className="sticky top-0 z-50 bg-white border-b border-border shadow-sm">
+      <div className="max-w-page mx-auto px-8 flex items-center justify-between py-4 flex-wrap lg:flex-nowrap">
+        <div className="shrink-0">
+          <Link to="/" className="no-underline text-inherit">
+            <h1 className="text-[22px] font-bold text-body mb-0.5 tracking-wide">UniFreelancer</h1>
+            <p className="text-[10px] font-medium text-muted tracking-[1.5px] uppercase">FREELANCE PORTAL</p>
           </Link>
         </div>
-        <nav className="nav">
-          <Link to="/" className={isActive('/')}>Home</Link>
-          <Link to="/find-work" className={isActive('/find-work')}>Find Work</Link>
-          <Link to="/browse-freelancers" className={isActive('/browse-freelancers')}>Browse Freelancers</Link>
-          <Link to="/hire-talent" className={isActive('/hire-talent')}>Hire Talent</Link>
-          <Link to="/academy" className={isActive('/academy')}>UF Academy</Link>
-          <Link to="/social" className={isActive('/social')}>UF Social</Link>
-          <Link to="/about" className={isActive('/about')}>About Us</Link>
-          <Link to="/inbox" className={isActive('/inbox')}>Inbox</Link>
+
+        <nav className="flex items-center gap-8 grow justify-center order-3 w-full mt-4 overflow-x-auto lg:order-none lg:w-auto lg:mt-0 xl:gap-8">
+          <NavLink to="/" isActive={isActive}>Home</NavLink>
+          <NavLink to="/find-work" isActive={isActive}>Find Work</NavLink>
+          <NavLink to="/browse-freelancers" isActive={isActive}>Browse Freelancers</NavLink>
+          <NavLink to="/hire-talent" isActive={isActive}>Hire Talent</NavLink>
+          <NavLink to="/academy" isActive={isActive}>UF Academy</NavLink>
+          <NavLink to="/social" isActive={isActive}>UF Social</NavLink>
+          <NavLink to="/about" isActive={isActive}>About Us</NavLink>
+          <NavLink to="/inbox" isActive={isActive}>Inbox</NavLink>
 
           {user ? (
-            <div className="user-menu" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <Link to="/profile" className={`user-profile-link ${isActive('/profile')}`}>
-                <div className="nav-profile-avatar">
+            <div className="flex items-center gap-4">
+              <Link to="/profile" className="flex items-center">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-accent to-accent-secondary text-white flex items-center justify-center font-semibold text-sm cursor-pointer transition-all duration-300 shadow-accent hover:scale-110 hover:shadow-accent-hover">
                   {user.firstName && user.firstName.charAt(0).toUpperCase()}
                 </div>
               </Link>
             </div>
           ) : (
             <>
-              <Link to="/login" className={isActive('/login')}>Login</Link>
-              <Link to="/signup" className={isActive('/signup')}>Sign Up</Link>
+              <NavLink to="/login" isActive={isActive}>Login</NavLink>
+              <NavLink to="/signup" isActive={isActive}>Sign Up</NavLink>
             </>
           )}
         </nav>

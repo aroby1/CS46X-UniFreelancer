@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { FiArrowLeft, FiClock, FiVideo, FiLink } from "react-icons/fi";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
-import "./TutorialDetail.css";
 
 const getEmbedUrl = (url) => {
   if (!url) return null;
@@ -285,25 +284,29 @@ function TutorialDetail() {
     : null;
 
   return (
-    <div className="tutorial-detail-page">
-      <div className="tutorial-detail-container">
-        <button className="back-button" onClick={handleBack}>
+    <div className="min-h-screen bg-main-bg pt-[100px] px-[40px] max-sm:px-[15px] max-sm:pt-5">
+      <div className="max-w-content mx-auto">
+        <button className="bg-transparent border-none text-dark text-base cursor-pointer mb-8 py-2 inline-flex items-center transition-colors hover:text-dark-secondary" onClick={handleBack}>
           <FiArrowLeft size={18} /> Back to Tutorials
         </button>
 
         {loading ? (
-          <div className="loading-message">Loading tutorial...</div>
+          <div className="text-center py-[60px] px-5 text-dark-secondary">Loading tutorial...</div>
         ) : error || !tutorial ? (
-          <div className="tutorial-section tutorial-error">
-            <h2 className="section-title">Unable to load this tutorial</h2>
-            <p className="section-subtitle">{error || "Please try again."}</p>
+          <div className="mb-12 bg-light-tertiary rounded-lg p-10 shadow-card text-left max-md:p-[30px_25px]">
+            <h2 className="text-3xl font-bold text-dark mb-6 pb-4 border-b-2 border-border">Unable to load this tutorial</h2>
+            <p className="text-md text-dark-secondary">{error || "Please try again."}</p>
           </div>
         ) : (
           <>
-            <div className="tutorial-hero">
+            <div className="relative grid grid-cols-[1fr_1.5fr] gap-10 bg-light-tertiary rounded-lg p-10 shadow-card mb-12 max-md:grid-cols-1 max-md:gap-[30px] max-sm:p-[25px_20px]">
               <button
                 type="button"
-                className={`bookmark-button ${isBookmarked ? "is-active" : ""}`}
+                className={`absolute top-[22px] right-[22px] w-11 h-11 rounded-md border inline-flex items-center justify-center cursor-pointer z-[2] transition-all duration-fast max-md:top-4 max-md:right-4 ${
+                  isBookmarked
+                    ? "border-[rgba(123,31,162,0.35)] bg-[rgba(255,255,255,0.9)] [&>svg]:text-[#7b1fa2]"
+                    : "border-[rgba(0,0,0,0.08)] bg-[rgba(255,255,255,0.9)] [&>svg]:text-dark"
+                } hover:-translate-y-px hover:border-[rgba(0,0,0,0.14)] hover:bg-white disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none`}
                 onClick={() => setBookmark(!isBookmarked)}
                 disabled={isSaving}
                 title={
@@ -318,35 +321,35 @@ function TutorialDetail() {
                 {isBookmarked ? <BsBookmarkFill /> : <BsBookmark />}
               </button>
 
-              <div className="tutorial-hero-image">
+              <div className="w-full h-[300px] rounded-md overflow-hidden bg-[#f5f5f5] max-sm:h-[250px]">
                 {thumbnail ? (
-                  <img src={thumbnail} alt={tutorial.title} />
+                  <img src={thumbnail} alt={tutorial.title} className="w-full h-full object-cover" />
                 ) : (
-                  <div className="placeholder-hero-image">📘</div>
+                  <div className="w-full h-full flex items-center justify-center text-[100px] bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white">📘</div>
                 )}
               </div>
 
-              <div className="tutorial-hero-content">
-                <div className="tutorial-badges">
-                  <span className="tutorial-badge tutorial-badge-category">{category}</span>
+              <div className="flex flex-col justify-start">
+                <div className="flex gap-3 mb-5 flex-wrap">
+                  <span className="py-[6px] px-[14px] rounded-full text-sm font-semibold bg-[#f3e5f5] text-[#7b1fa2]">{category}</span>
                   {hasVideo && (
-                    <span className="tutorial-badge tutorial-badge-video">Video</span>
+                    <span className="py-[6px] px-[14px] rounded-full text-sm font-semibold bg-[#e3f2fd] text-[#1976d2]">Video</span>
                   )}
                   {hasArticle && (
-                    <span className="tutorial-badge tutorial-badge-article">Article</span>
+                    <span className="py-[6px] px-[14px] rounded-full text-sm font-semibold bg-[#e8f5e9] text-[#2e7d32]">Article</span>
                   )}
                 </div>
 
-                <h1 className="tutorial-title">{tutorial.title}</h1>
-                <p className="tutorial-description">{tutorial.description}</p>
+                <h1 className="text-5xl font-bold text-dark mb-4 leading-[1.2] max-md:text-3xl">{tutorial.title}</h1>
+                <p className="text-base text-dark-secondary leading-[1.8]">{tutorial.description}</p>
 
-                <div className="tutorial-hero-bottom">
-                  <div className="tutorial-meta">
-                    <div className="tutorial-meta-item">
-                      <FiClock className="tutorial-meta-icon" />
+                <div className="mt-auto">
+                  <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-3 mt-6">
+                    <div className="bg-white border border-border rounded-md p-4 flex gap-3 items-center">
+                      <FiClock className="text-xl text-accent" />
                       <div>
-                        <span className="tutorial-meta-label">Duration</span>
-                        <span className="tutorial-meta-value">
+                        <span className="block text-xs uppercase tracking-wider text-dark-tertiary">Duration</span>
+                        <span className="text-base font-semibold text-dark-secondary">
                           {tutorial.duration || "Self-paced"}
                         </span>
                       </div>
@@ -354,40 +357,40 @@ function TutorialDetail() {
                   </div>
 
                   {publishedDate && (
-                    <p className="published-date">Published {publishedDate}</p>
+                    <p className="mt-[30px] text-sm text-dark-tertiary text-right">Published {publishedDate}</p>
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="tutorial-section">
-              <h2 className="section-title">Overview</h2>
-              <div className="tutorial-overview-copy">
-                <p>{tutorial.description}</p>
+            <div className="mb-12 bg-light-tertiary rounded-lg p-10 shadow-card max-md:p-[30px_25px]">
+              <h2 className="text-3xl font-bold text-dark mb-6 pb-4 border-b-2 border-border max-sm:text-[22px]">Overview</h2>
+              <div>
+                <p className="m-0 text-base text-dark-secondary leading-[1.8]">{tutorial.description}</p>
               </div>
             </div>
 
             {tutorial.videoUrl && (
-              <div className="tutorial-section">
-                <h2 className="section-title">Watch the Tutorial</h2>
-                <div className="tutorial-video-wrapper">
+              <div className="mb-12 bg-light-tertiary rounded-lg p-10 shadow-card max-md:p-[30px_25px]">
+                <h2 className="text-3xl font-bold text-dark mb-6 pb-4 border-b-2 border-border max-sm:text-[22px]">Watch the Tutorial</h2>
+                <div className="relative pb-[56.25%] h-0 border border-border rounded-[14px] overflow-hidden bg-[#111]">
                   {embedUrl ? (
                     <iframe
                       src={embedUrl}
                       title={tutorial.title}
-                      className="tutorial-video-frame"
+                      className="absolute top-0 left-0 w-full h-full border-none"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                     />
                   ) : (
-                    <div className="tutorial-video-fallback">
-                      <FiVideo />
+                    <div className="flex flex-col items-start gap-3 p-[30px] bg-light-tertiary text-dark-secondary">
+                      <FiVideo className="text-[26px] text-accent" />
                       <p>
                         We couldn't embed this video, but you can watch it in a new
                         tab.
                       </p>
                       <a
-                        className="resource-link"
+                        className="py-[10px] px-[18px] bg-accent rounded-sm text-white no-underline text-base font-semibold transition-colors hover:bg-accent-tertiary"
                         href={tutorial.videoUrl}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -401,9 +404,9 @@ function TutorialDetail() {
             )}
 
             {paragraphs.length > 0 && (
-              <div className="tutorial-section">
-                <h2 className="section-title">Written Guide</h2>
-                <div className="tutorial-written-content">
+              <div className="mb-12 bg-light-tertiary rounded-lg p-10 shadow-card max-md:p-[30px_25px]">
+                <h2 className="text-3xl font-bold text-dark mb-6 pb-4 border-b-2 border-border max-sm:text-[22px]">Written Guide</h2>
+                <div className="flex flex-col gap-[14px] text-base leading-[1.8] text-dark-secondary [&>p]:m-0">
                   {paragraphs.map((paragraph, index) => (
                     <p key={`paragraph-${index}`}>{paragraph}</p>
                   ))}
@@ -411,21 +414,21 @@ function TutorialDetail() {
               </div>
             )}
 
-            <div className="tutorial-section">
-              <h2 className="section-title">Resources</h2>
+            <div className="mb-12 bg-light-tertiary rounded-lg p-10 shadow-card max-md:p-[30px_25px]">
+              <h2 className="text-3xl font-bold text-dark mb-6 pb-4 border-b-2 border-border max-sm:text-[22px]">Resources</h2>
               {resources.length > 0 ? (
-                <ul className="tutorial-resources-list">
+                <ul className="list-none flex flex-col gap-3 p-0 m-0">
                   {resources.map((resource, index) => (
                     <li
                       key={`${resource.label}-${index}`}
-                      className="tutorial-resource-item"
+                      className="border border-border rounded-md py-[14px] px-4 flex justify-between items-center gap-4 bg-white"
                     >
-                      <div className="tutorial-resource-info">
+                      <div className="flex items-center gap-[10px] text-base text-dark [&>svg]:text-accent">
                         <FiLink />
                         <span>{resource.label}</span>
                       </div>
                       <a
-                        className="resource-link"
+                        className="py-[10px] px-[18px] bg-accent rounded-sm text-white no-underline text-base font-semibold transition-colors hover:bg-accent-tertiary"
                         href={resource.url}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -436,16 +439,20 @@ function TutorialDetail() {
                   ))}
                 </ul>
               ) : (
-                <p className="tutorial-empty-state">
+                <p className="text-dark-secondary text-base">
                   No downloadable resources have been added yet.
                 </p>
               )}
             </div>
 
-            <div className="tutorial-actions">
+            <div className="mt-12 pt-8 border-t-2 border-border flex justify-center">
               <button
                 type="button"
-                className={`complete-button ${isCompleted ? "is-completed" : ""}`}
+                className={`border-none py-4 px-12 text-lg font-semibold rounded cursor-pointer transition-all duration-300 hover:-translate-y-[2px] active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none ${
+                  isCompleted
+                    ? "bg-[#2e7d32] text-white hover:bg-[#1f5d24]"
+                    : "bg-dark text-white hover:bg-dark-secondary"
+                }`}
                 onClick={() => setCompleted(!isCompleted)}
                 disabled={isSaving}
                 title={
@@ -462,20 +469,20 @@ function TutorialDetail() {
 
             {modal.open && (
               <div
-                className="tutorial-modal-overlay"
+                className="fixed inset-0 bg-[rgba(0,0,0,0.35)] flex items-center justify-center p-5 z-[1000]"
                 role="dialog"
                 aria-modal="true"
                 onClick={closeModal}
               >
                 <div
-                  className="tutorial-modal"
+                  className="w-full max-w-[420px] bg-white rounded-lg p-[22px] shadow-xl"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <h3 className="tutorial-modal-title">{modal.title}</h3>
-                  <p className="tutorial-modal-message">{modal.message}</p>
+                  <h3 className="m-0 mb-2 text-lg text-dark">{modal.title}</h3>
+                  <p className="m-0 mb-[18px] text-dark-secondary leading-normal">{modal.message}</p>
                   <button
                     type="button"
-                    className="tutorial-modal-close"
+                    className="w-full border border-[rgba(0,0,0,0.12)] bg-white rounded-[10px] py-[10px] px-[14px] cursor-pointer font-semibold text-dark hover:bg-[rgba(0,0,0,0.04)]"
                     onClick={closeModal}
                   >
                     Close

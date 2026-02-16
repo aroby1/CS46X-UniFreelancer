@@ -1,7 +1,6 @@
 /* global process */
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./CreateTutorial.css";
 import { FiArrowLeft, FiUpload } from "react-icons/fi";
 
 function CreateTutorial() {
@@ -39,7 +38,6 @@ function CreateTutorial() {
     setFormData({ ...formData, resources: updated });
   };
 
-  // 🔥 FIXED — Now actually submits to backend
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -74,24 +72,28 @@ function CreateTutorial() {
   ];
 
   return (
-    <div className="create-tutorial-page">
-      <div className="create-tutorial-container">
+    <div className="min-h-screen bg-main-bg pt-[100px] px-[40px] max-md:px-5">
+      <div className="max-w-narrow mx-auto">
 
         {/* Back Button */}
-        <button className="back-button" onClick={() => navigate(-1)}>
+        <button className="bg-transparent border-none text-dark text-base cursor-pointer mb-5 py-2 inline-flex items-center transition-colors hover:text-dark-secondary" onClick={() => navigate(-1)}>
           <FiArrowLeft size={18} /> Back
         </button>
 
-        <h1 className="create-tutorial-title">Create New Tutorial</h1>
-        <p className="create-tutorial-subtitle">
+        <h1 className="text-5xl font-bold text-dark mb-3">Create New Tutorial</h1>
+        <p className="text-base text-dark-secondary mb-8">
           Fill in the details to create a new tutorial
         </p>
 
-        <div className="step-navigation">
+        <div className="flex flex-wrap">
           {steps.map((step) => (
             <button
               key={step.id}
-              className={`step-button ${currentStep === step.id ? 'active' : ''}`}
+              className={`py-3 px-5 text-base font-semibold cursor-pointer border-none transition-colors ${
+                currentStep === step.id
+                  ? "bg-light-tertiary text-dark"
+                  : "bg-light-primary text-dark-tertiary hover:bg-light-secondary"
+              }`}
               onClick={() => setCurrentStep(step.id)}
             >
               {step.label}
@@ -100,56 +102,56 @@ function CreateTutorial() {
         </div>
 
         {currentStep === 'basic-info' && (
-          <div className="form-section">
-            <h2 className="section-title">Tutorial Information</h2>
-            <p className="section-subtitle">Basic details about your tutorial</p>
+          <div className="bg-light-tertiary p-8 mb-3 rounded">
+            <h2 className="text-2xl font-semibold text-dark mb-2">Tutorial Information</h2>
+            <p className="text-md text-dark-secondary mb-8">Basic details about your tutorial</p>
 
-            <div className="form-group">
-              <label className="form-label">
-                Tutorial Title <span className="required">*</span>
+            <div className="mb-6">
+              <label className="block text-base font-semibold text-dark mb-2">
+                Tutorial Title <span className="text-accent">*</span>
               </label>
               <input
                 type="text"
                 name="title"
-                className="form-input"
+                className="w-full px-4 py-3 rounded-sm border border-light-secondary text-base text-dark bg-white font-[inherit] transition-colors focus:outline-none focus:border-dark placeholder:text-light-primary"
                 placeholder="e.g., How to Create a Portfolio Website"
                 value={formData.title}
                 onChange={handleChange}
               />
             </div>
 
-            <div className="form-group">
-              <label className="form-label">
-                Description <span className="required">*</span>
+            <div className="mb-6">
+              <label className="block text-base font-semibold text-dark mb-2">
+                Description <span className="text-accent">*</span>
               </label>
               <textarea
                 name="description"
-                className="form-textarea"
+                className="w-full px-4 py-3 rounded-sm border border-light-secondary text-base text-dark bg-white font-[inherit] transition-colors resize-y min-h-[120px] focus:outline-none focus:border-dark placeholder:text-light-primary"
                 placeholder="Describe what students will learn..."
                 value={formData.description}
                 onChange={handleChange}
               />
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label className="form-label">Duration</label>
+            <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1">
+              <div className="mb-6">
+                <label className="block text-base font-semibold text-dark mb-2">Duration</label>
                 <input
                   type="text"
                   name="duration"
-                  className="form-input"
+                  className="w-full px-4 py-3 rounded-sm border border-light-secondary text-base text-dark bg-white font-[inherit] transition-colors focus:outline-none focus:border-dark placeholder:text-light-primary"
                   placeholder="e.g., 15 min"
                   value={formData.duration}
                   onChange={handleChange}
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Category *</label>
+              <div className="mb-6">
+                <label className="block text-base font-semibold text-dark mb-2">Category *</label>
                 <input
                   type="text"
                   name="category"
-                  className="form-input"
+                  className="w-full px-4 py-3 rounded-sm border border-light-secondary text-base text-dark bg-white font-[inherit] transition-colors focus:outline-none focus:border-dark placeholder:text-light-primary"
                   placeholder="e.g., Web Development"
                   value={formData.category}
                   onChange={handleChange}
@@ -158,43 +160,43 @@ function CreateTutorial() {
             </div>
 
             {/* Thumbnail */}
-            <div className="form-group input-with-icon">
-              <label className="form-label">Thumbnail URL</label>
+            <div className="mb-6 relative">
+              <label className="block text-base font-semibold text-dark mb-2">Thumbnail URL</label>
               <input
                 type="text"
                 name="thumbnailUrl"
-                className="form-input"
+                className="w-full px-4 py-3 rounded-sm border border-light-secondary text-base text-dark bg-white font-[inherit] transition-colors focus:outline-none focus:border-dark placeholder:text-light-primary"
                 placeholder="https://example.com/thumbnail.jpg"
                 value={formData.thumbnailUrl}
                 onChange={handleChange}
               />
-              <FiUpload className="upload-icon" />
+              <FiUpload className="absolute right-[15px] top-1/2 -translate-y-1/2 text-lg text-dark-secondary cursor-pointer" />
             </div>
           </div>
         )}
 
         {currentStep === 'content' && (
-          <div className="form-section">
-            <h2 className="section-title">Tutorial Content</h2>
-            <p className="section-subtitle">Video and written content</p>
+          <div className="bg-light-tertiary p-8 mb-3 rounded">
+            <h2 className="text-2xl font-semibold text-dark mb-2">Tutorial Content</h2>
+            <p className="text-md text-dark-secondary mb-8">Video and written content</p>
 
-            <div className="form-group">
-              <label className="form-label">Video URL</label>
+            <div className="mb-6">
+              <label className="block text-base font-semibold text-dark mb-2">Video URL</label>
               <input
                 type="text"
                 name="videoUrl"
-                className="form-input"
+                className="w-full px-4 py-3 rounded-sm border border-light-secondary text-base text-dark bg-white font-[inherit] transition-colors focus:outline-none focus:border-dark placeholder:text-light-primary"
                 placeholder="https://youtube.com/watch?v=..."
                 value={formData.videoUrl}
                 onChange={handleChange}
               />
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Written Content</label>
+            <div className="mb-6">
+              <label className="block text-base font-semibold text-dark mb-2">Written Content</label>
               <textarea
                 name="writtenContent"
-                className="form-textarea"
+                className="w-full px-4 py-3 rounded-sm border border-light-secondary text-base text-dark bg-white font-[inherit] transition-colors resize-y min-h-[120px] focus:outline-none focus:border-dark placeholder:text-light-primary"
                 placeholder="Step-by-step instructions..."
                 value={formData.writtenContent}
                 onChange={handleChange}
@@ -204,41 +206,40 @@ function CreateTutorial() {
         )}
 
         {currentStep === 'resources' && (
-          <div className="form-section">
-            <h2 className="section-title">Downloadable Resources</h2>
-            <p className="section-subtitle">Optional supporting materials</p>
+          <div className="bg-light-tertiary p-8 mb-3 rounded">
+            <h2 className="text-2xl font-semibold text-dark mb-2">Downloadable Resources</h2>
+            <p className="text-md text-dark-secondary mb-8">Optional supporting materials</p>
 
-            <div className="resource-list">
+            <div className="py-[10px] mb-[15px]">
               {formData.resources.length === 0 && (
-                <p className="coming-soon">No downloadable resources added yet.</p>
+                <p className="text-dark-secondary text-base">No downloadable resources added yet.</p>
               )}
 
               {formData.resources.map((res, index) => (
                 <input
                   key={index}
-                  className="form-input"
+                  className="w-full px-4 py-3 rounded-sm border border-light-secondary text-base text-dark bg-white font-[inherit] transition-colors focus:outline-none focus:border-dark placeholder:text-light-primary mb-[15px]"
                   placeholder="Resource URL..."
                   value={res}
                   onChange={(e) =>
                     handleResourceChange(index, e.target.value)
                   }
-                  style={{ marginBottom: "15px" }}
                 />
               ))}
             </div>
 
-            <button className="add-resource-btn" onClick={addResource}>
+            <button className="py-[10px] px-[15px] bg-white text-dark border border-[#ccc] rounded-sm text-base cursor-pointer transition-colors hover:bg-[#f3f3f3]" onClick={addResource}>
               + Add Downloadable Resource
             </button>
           </div>
         )}
 
         {/* ===================== ACTION BUTTONS ===================== */}
-        <div className="form-actions">
-          <button className="cancel-button" onClick={() => navigate(-1)}>
+        <div className="flex justify-end gap-4 pt-5">
+          <button className="py-3 px-8 bg-transparent text-dark-secondary border-none rounded-sm text-md font-medium cursor-pointer transition-colors hover:text-dark" onClick={() => navigate(-1)}>
             Cancel
           </button>
-          <button className="submit-button" onClick={handleSubmit}>
+          <button className="py-3 px-8 bg-accent text-white border-none rounded-sm text-md font-semibold cursor-pointer inline-flex items-center gap-2 transition-colors hover:bg-accent-tertiary" onClick={handleSubmit}>
             Create Tutorial
           </button>
         </div>

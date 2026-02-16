@@ -124,27 +124,27 @@ function AcademyFormatsCarousel() {
   };
 
   return (
-    <section className="academy-formats" aria-label="Learning format highlights">
-      <div className="formats-header">
-        <span className="showcase-kicker">Explore Formats</span>
-        <h3>Choose how you want to learn</h3>
+    <section className="my-6 mb-8 rounded-[30px] p-8 bg-academy-surface/95 border border-[rgba(31,31,36,0.07)] shadow-[0_18px_36px_rgba(17,22,30,0.07)] backdrop-blur-[8px] md:p-6" aria-label="Learning format highlights">
+      <div className="mb-5">
+        <span className="inline-block uppercase text-[11px] font-bold tracking-[2px] text-accent mb-1.5">Explore Formats</span>
+        <h3 className="text-[30px] text-academy-deep md:text-2xl">Choose how you want to learn</h3>
       </div>
 
       <div
-        className="formats-window"
+        className="overflow-hidden"
         ref={carouselWindowRef}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        <div className="formats-track" style={{ transform: `translateX(-${activeSlide * slideStep}px)` }}>
+        <div className="flex gap-4 transition-transform duration-700 ease-in-out" style={{ transform: `translateX(-${activeSlide * slideStep}px)` }}>
           {formatSlides.map((slide) => {
             const Icon = slide.icon;
 
             return (
               <article
-                className={`format-slide ${slide.route ? 'is-clickable' : 'is-disabled'}`}
+                className={`flex-[0_0_calc(100%-120px)] min-w-[calc(100%-120px)] rounded-2xl p-6 border border-[rgba(27,36,50,0.06)] bg-white md:flex-[0_0_calc(100%-24px)] md:min-w-[calc(100%-24px)] md:p-[22px] ${slide.route ? 'cursor-pointer transition-all duration-[250ms] ease-in-out hover:-translate-y-[3px] hover:border-accent/50 hover:shadow-[0_14px_28px_rgba(17,22,30,0.12)] focus-visible:-translate-y-[3px] focus-visible:border-accent/50 focus-visible:shadow-[0_14px_28px_rgba(17,22,30,0.12)] focus-visible:outline-none' : 'cursor-default'}`}
                 key={slide.title}
                 role={slide.route ? 'button' : undefined}
                 tabIndex={slide.route ? 0 : -1}
@@ -161,14 +161,14 @@ function AcademyFormatsCarousel() {
                 }}
                 aria-label={slide.route ? `Open ${slide.title}` : `${slide.title} coming soon`}
               >
-                <span className="format-icon" aria-hidden="true">
-                  <Icon />
+                <span className="w-11 h-11 rounded-md inline-flex items-center justify-center text-[#111] bg-academy-surface/[0.72] mb-3" aria-hidden="true">
+                  <Icon className="w-5 h-5" strokeWidth={2.1} />
                 </span>
-                <h4>{slide.title}</h4>
-                <p>{slide.description}</p>
-                <div className="format-points">
+                <h4 className="text-[26px] text-academy-deep mb-2">{slide.title}</h4>
+                <p className="text-md leading-[1.6] text-academy-deep-secondary mb-4">{slide.description}</p>
+                <div className="flex flex-wrap gap-2">
                   {slide.points.map((point) => (
-                    <span key={point} className="format-point">
+                    <span key={point} className="inline-flex py-1.5 px-[11px] rounded-full text-[11px] font-bold tracking-[0.4px] text-academy-deep-tertiary bg-white/[0.62] border border-[rgba(27,36,50,0.08)]">
                       {point}
                     </span>
                   ))}
@@ -179,24 +179,24 @@ function AcademyFormatsCarousel() {
         </div>
       </div>
 
-      <div className="carousel-footer" aria-label="Format carousel controls and indicators">
-        <button className="carousel-control" onClick={handlePrevSlide} aria-label="Previous format slide">
-          <svg className="carousel-control-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <div className="mt-4 flex items-center justify-center gap-4" aria-label="Format carousel controls and indicators">
+        <button className="w-[38px] h-[38px] inline-flex items-center justify-center border border-[rgba(27,36,50,0.1)] rounded-full bg-white/[0.66] text-academy-deep cursor-pointer transition-all duration-[250ms] ease-in-out hover:-translate-y-px hover:border-[rgba(27,36,50,0.32)]" onClick={handlePrevSlide} aria-label="Previous format slide">
+          <svg className="w-[18px] h-[18px] stroke-current" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
-        <div className="carousel-dots" aria-label="Format slide indicators">
+        <div className="flex gap-2 justify-center" aria-label="Format slide indicators">
           {formatSlides.map((slide, index) => (
             <button
               key={slide.title}
-              className={`carousel-dot ${activeSlide === index ? 'active' : ''}`}
+              className={`w-2.5 h-2.5 rounded-full border-none cursor-pointer transition-all duration-[250ms] ease-in-out ${activeSlide === index ? 'bg-accent scale-[1.2]' : 'bg-academy-deep/[0.28]'}`}
               onClick={() => setActiveSlide(index)}
               aria-label={`Go to format slide ${index + 1}`}
             />
           ))}
         </div>
-        <button className="carousel-control" onClick={handleNextSlide} aria-label="Next format slide">
-          <svg className="carousel-control-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <button className="w-[38px] h-[38px] inline-flex items-center justify-center border border-[rgba(27,36,50,0.1)] rounded-full bg-white/[0.66] text-academy-deep cursor-pointer transition-all duration-[250ms] ease-in-out hover:-translate-y-px hover:border-[rgba(27,36,50,0.32)]" onClick={handleNextSlide} aria-label="Next format slide">
+          <svg className="w-[18px] h-[18px] stroke-current" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <polyline points="9 18 15 12 9 6" />
           </svg>
         </button>

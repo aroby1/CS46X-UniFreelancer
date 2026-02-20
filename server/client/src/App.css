@@ -275,3 +275,21 @@ body {
 .mb-40 {
   margin-bottom: 40px;
 }
+/* Instructor Dashboard Link */
+.instructor-dashboard-link {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white !important;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.instructor-dashboard-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.instructor-dashboard-link.active {
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+}

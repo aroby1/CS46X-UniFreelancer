@@ -16,6 +16,8 @@ import Profile from './pages/Auth/Profile';
 import PaymentSuccess from './pages/Payment/PaymentSuccess';
 import MyCourses from './pages/Academy/Courses/MyCourses';
 import CourseLearning from './pages/Academy/Courses/CourseLearning';
+import InstructorDashboard from './pages/Instructor/InstructorDashboard';
+import GradingInterface from './pages/Instructor/GradingInterface';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -66,6 +68,8 @@ function App() {
           <Route path="/academy/create/tutorial" element={<CreateTutorial />} />
           <Route path="/academy/payment-success" element={<PaymentSuccess />} />
           <Route path="/academy/courses/:id/learn" element={<CourseLearning />} />
+          <Route path="/instructor/dashboard" element={<InstructorDashboard />} />
+          <Route path="/instructor/grade/:submissionId" element={<GradingInterface />} />
         </Routes>
       </div>
     </Router>

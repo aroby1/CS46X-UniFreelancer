@@ -1,6 +1,7 @@
 const express = require("express");
 const User = require("../models/UserModel");
 const Course = require("../models/CourseModel");
+const AssignmentSubmission = require("../models/AssignmentSubmission");
 const { protect } = require("../middleware/authMiddleware");
 
 const router = express.Router();
@@ -93,15 +94,80 @@ router.post("/:courseId/progress/lesson/:lessonId/complete", protect, async (req
 });
 
 // ============================================
-// SUBMIT assignment
+// SUBMIT assignment - UPDATED VERSION
 // ============================================
 router.post("/:courseId/progress/assignment/:lessonId/submit", protect, async (req, res) => {
   try {
     const { courseId, lessonId } = req.params;
-    const { textSubmission, fileUrl } = req.body;
+    const { textSubmission, fileUrl, partAnswers } = req.body;
 
     const user = await User.findById(req.user._id);
+    const course = await Course.findById(courseId);
 
+    if (!course) {
+      return res.status(404).json({ error: "Course not found" });
+    }
+
+    // Find the module and assignment
+    let assignmentData = null;
+    let moduleName = '';
+    let moduleId = null;
+
+    for (const module of course.modules) {
+      // Check if this module has an assignment and if the lessonId matches
+      if (module.assignment && `${module._id}-assignment` === lessonId) {
+        assignmentData = module.assignment;
+        moduleName = module.title;
+        moduleId = module._id;
+        break;
+      }
+    }
+
+    if (!assignmentData) {
+      return res.status(404).json({ error: "Assignment not found" });
+    }
+
+    // Calculate max score
+    const maxScore = assignmentData.gradingCriteria.reduce((sum, criteria) => sum + criteria.points, 0);
+
+    // Check if student already submitted this assignment
+    const existingSubmission = await AssignmentSubmission.findOne({
+      student: user._id,
+      course: courseId,
+      lessonId: lessonId
+    });
+
+    if (existingSubmission) {
+      return res.status(400).json({ 
+        error: "You have already submitted this assignment. It is pending grading." 
+      });
+    }
+
+    // Create new submission document
+    const submission = new AssignmentSubmission({
+      student: user._id,
+      studentName: user.name,
+      studentEmail: user.email,
+      course: courseId,
+      courseName: course.title,
+      module: moduleId,
+      moduleName: moduleName,
+      lessonId: lessonId,
+      assignmentTitle: assignmentData.title,
+      assignmentData: {
+        parts: assignmentData.parts,
+        gradingCriteria: assignmentData.gradingCriteria
+      },
+      partAnswers: partAnswers,
+      fileUrl: fileUrl || '',
+      maxScore: maxScore,
+      passingScore: 70, // Default passing score
+      instructor: course.instructor._id || course.instructor
+    });
+
+    await submission.save();
+
+    // Update user progress
     let progress = user.courseProgress.find(
       p => p.courseId.toString() === courseId
     );
@@ -117,22 +183,22 @@ router.post("/:courseId/progress/assignment/:lessonId/submit", protect, async (r
       user.courseProgress.push(progress);
     }
 
-    // Add or update assignment submission
-    const existingIndex = progress.assignmentSubmissions.findIndex(
-      sub => sub.lessonId.toString() === lessonId
-    );
-
-    const submission = {
+    // Add to assignmentSubmissions array (keep for backward compatibility)
+    const progressSubmission = {
       lessonId,
       textSubmission: textSubmission || "",
       fileUrl: fileUrl || "",
       submittedAt: new Date()
     };
 
+    const existingIndex = progress.assignmentSubmissions.findIndex(
+      sub => sub.lessonId.toString() === lessonId
+    );
+
     if (existingIndex >= 0) {
-      progress.assignmentSubmissions[existingIndex] = submission;
+      progress.assignmentSubmissions[existingIndex] = progressSubmission;
     } else {
-      progress.assignmentSubmissions.push(submission);
+      progress.assignmentSubmissions.push(progressSubmission);
     }
 
     // Mark lesson as complete
@@ -145,8 +211,9 @@ router.post("/:courseId/progress/assignment/:lessonId/submit", protect, async (r
     await user.save();
 
     res.json({
-      message: "Assignment submitted successfully",
-      submission: submission
+      message: "Assignment submitted successfully. Your instructor will grade it soon.",
+      submission: submission,
+      progress: progress
     });
 
   } catch (err) {

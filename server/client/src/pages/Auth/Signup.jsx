@@ -12,7 +12,8 @@ const Signup = () => {
         username: '',
         email: '',
         password: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        accountType: 'student'
     });
 
     const handleChange = (e) => {
@@ -56,9 +57,10 @@ const Signup = () => {
                     lastName: formData.lastName,
                     username: formData.username,
                     email: formData.email,
-                    password: formData.password
+                    password: formData.password,
+                    accountType: formData.accountType // ADD THIS
                 }),
-                credentials: 'include', // Important for cookies
+                credentials: 'include',
             });
 
             const data = await response.json();
@@ -139,6 +141,40 @@ const Signup = () => {
                             onChange={handleChange}
                             required
                         />
+                    </div>
+
+                    {/* ACCOUNT TYPE SELECTION - ADD THIS */}
+                    <div className="form-group">
+                        <label>Account Type</label>
+                        <div className="account-type-selection">
+                            <label className="radio-option">
+                                <input
+                                    type="radio"
+                                    name="accountType"
+                                    value="student"
+                                    checked={formData.accountType === 'student'}
+                                    onChange={handleChange}
+                                />
+                                <div className="radio-content">
+                                    <strong>👨‍🎓 Student</strong>
+                                    <span>Enroll in courses and learn</span>
+                                </div>
+                            </label>
+
+                            <label className="radio-option">
+                                <input
+                                    type="radio"
+                                    name="accountType"
+                                    value="instructor"
+                                    checked={formData.accountType === 'instructor'}
+                                    onChange={handleChange}
+                                />
+                                <div className="radio-content">
+                                    <strong>👨‍🏫 Instructor</strong>
+                                    <span>Create and teach courses</span>
+                                </div>
+                            </label>
+                        </div>
                     </div>
 
                     <div className="form-group">

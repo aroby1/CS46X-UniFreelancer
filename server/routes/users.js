@@ -16,6 +16,9 @@ const generateToken = (id) => {
 // -------------------------------
 // Create new user
 // -------------------------------
+// -------------------------------
+// Create new user
+// -------------------------------
 router.post("/register", async (req, res) => {
   try {
     const {
@@ -25,6 +28,7 @@ router.post("/register", async (req, res) => {
       email,
       password,
       role,
+      accountType, // ADD THIS
     } = req.body;
 
     // Basic required fields check
@@ -32,6 +36,11 @@ router.post("/register", async (req, res) => {
       return res
         .status(400)
         .json({ message: "Missing required fields for registration" });
+    }
+
+    // Validate accountType if provided
+    if (accountType && !['student', 'instructor'].includes(accountType)) {
+      return res.status(400).json({ message: "Invalid account type" });
     }
 
     // Check if email or username already exists
@@ -48,6 +57,7 @@ router.post("/register", async (req, res) => {
       email,
       password,   // <-- will be hashed by the pre-save hook
       role,
+      accountType: accountType || 'student', // ADD THIS - defaults to 'student'
     });
     await user.save();
 

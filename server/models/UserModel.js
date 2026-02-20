@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 
 const SALT_ROUNDS = Number(process.env.BCRYPT_SALT_ROUNDS || 10);
 
-// NEW: Assignment Submission Schema
+// Assignment Submission Schema
 const AssignmentSubmissionSchema = new mongoose.Schema({
   lessonId: { type: mongoose.Schema.Types.ObjectId, required: true },
   textSubmission: { type: String, default: "" },
@@ -13,7 +13,7 @@ const AssignmentSubmissionSchema = new mongoose.Schema({
   feedback: { type: String, default: "" }
 }, { _id: false });
 
-// NEW: Quiz Result Schema
+// Quiz Result Schema
 const QuizResultSchema = new mongoose.Schema({
   lessonId: { type: mongoose.Schema.Types.ObjectId, required: true },
   score: { type: Number, required: true }, // percentage
@@ -24,7 +24,7 @@ const QuizResultSchema = new mongoose.Schema({
   attemptedAt: { type: Date, default: Date.now }
 }, { _id: false });
 
-// NEW: Course Progress Schema
+// Course Progress Schema
 const CourseProgressSchema = new mongoose.Schema({
   courseId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -87,7 +87,7 @@ const UserSchema = new mongoose.Schema({
   password: { type: String, required: true },
 
   // User Permissions
-  role: {
+  accountType: {
     type: String,
     enum: ["student", "instructor", "admin"],
     default: "student",
@@ -102,7 +102,7 @@ const UserSchema = new mongoose.Schema({
     { type: mongoose.Schema.Types.ObjectId, ref: "Course" }
   ],
 
-  // NEW: Detailed course progress tracking
+  // Detailed course progress tracking
   courseProgress: [CourseProgressSchema],
 
   registeredSeminars: [
